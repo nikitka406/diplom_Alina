@@ -1,4 +1,4 @@
-from f import *
+from functions import *
 from math import *
 
 #километровый выигрыш
