@@ -86,7 +86,7 @@ def X_join_Y(x, y, K):
                 bufer1 += x[i][j][k]
                 bufer2 += x[j][i][k]
             if bufer1 != bufer2 or bufer2 != y[j][k] or bufer1 != y[j][k]:
-                print("1")
+                print("slomalos 1")
                 return 0
             bufer1 = 0
             bufer2 = 0
@@ -101,7 +101,7 @@ def V_jobs(s, K):
             for k in range(K):
                 bufer1 += s[i][k]
             if bufer1 != S[i]:
-                print("2")
+                print("slomalos 2")
                 return 0
             bufer1 = 0
     return 1
@@ -115,7 +115,7 @@ def TC_equal_KA(ka, y, K):
             for k in range(K):
                 bufer1 += y[i][k]
             if bufer1 > ka[i]:
-                print("3")
+                print(" slomalos 3")
                 return 0
             bufer1 = 0
     return 1
@@ -126,7 +126,7 @@ def ban_driling(s, y, K):
     for i in range(1, N):
         for k in range(K):
             if s[i][k] > S[i] * y[i][k]:
-                print("4")
+                print("slomalos 4")
                 return 0
     return 1
 
@@ -136,7 +136,7 @@ def window_time_down(a, y, K):
     for i in range(1, N):
         for k in range(K):
             if e[i] > a[i][k] and y[i][k] == 1:
-                print("5")#не работает это ограничение
+                print("slomalos 5")#не работает это ограничение
                 return 0
     return 1
 
@@ -146,7 +146,7 @@ def window_time_up(a, s, y, K):
     for i in range(1, N):
         for k in range(K):
             if a[i][k] + s[i][k] > l[i] and y[i][k] == 1:
-                print("6")
+                print("slomalos 6")
                 return 0
     return 1
 
@@ -157,7 +157,7 @@ def ban_cycle(a, x, s, y, K):
         for j in range(1, N):
             for k in range(K):
                 if a[i][k] - a[j][k] + x[i][j][k] * t[i][j] + s[i][k] > l[i] * (1 - x[i][j][k]) and y[i][k] == 1:
-                    print("7")
+                    print("slomalos 7")
                     return 0
     return 1
 
@@ -168,7 +168,7 @@ def positive_a_and_s(x, y, a, s, K):
         for j in range(N):
             for k in range(K):
                 if s[i][k] < 0 or a[i][k] < 0:
-                    print("8")
+                    print("slomalos 8")
                     return 0
                 if x[i][j][k] != 0 and x[i][j][k] != 1:
                     return 0
@@ -180,6 +180,9 @@ def positive_a_and_s(x, y, a, s, K):
 def VerificationOfBoundaryConditions(x, y, s, a):
     result = X_join_Y(x, y, K) * V_jobs(s, K) * TC_equal_KA(skvaj, y, K) * ban_driling(s, y, K) * window_time_down(a, y, K) * window_time_up(a, s, y, K) * ban_cycle(a, x, s, y, K) * positive_a_and_s(x, y, a, s, K)
     if result == 1:
-        return 1 # good
+        print("vse ogr rabotayut")  # good
+        return 1
+
     else:
+        print("ogr slomalis")
         return 0

@@ -1,4 +1,4 @@
-from functions import *
+from f import *
 from math import *
 
 #километровый выигрыш
@@ -105,6 +105,21 @@ for i in range(N):
     print("\n")
 print("\n")
 
+for i in range(N):
+    for k in range(K):
+        print(a[i][k], end = ' ')
+    print("\n")
+print("\n")
+
+for i in range(N):
+    for k in range(K):
+        print(s[i][k], end = ' ')
+    print("\n")
+print("\n")
+
+for i in range(N):
+    print(l[i], end = ' ')
+print("\n")
 assert VerificationOfBoundaryConditions(x, y, s, a) == 1
 
 
