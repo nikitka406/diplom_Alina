@@ -51,15 +51,16 @@ def Start_solution(bufer):
     #
 
     for k in range(K):
-        for i in range((N+1)*2):
+        for i in range(1, (N+1)*2):
             if bufer[k][i] != 0:
                 if bufer[k][i+1] == 0:
                     x[bufer[k][i]][0][k] = 1
-                    x[0][bufer[k][i]][k] = 1
+                    # x[0][bufer[k][i]][k] = 1
                 x[bufer[k][i-1]][bufer[k][i]][k] = 1  # туда
 
-                x[bufer[k][i]][bufer[k][i-1]][k] = 1  # обратно
+                # x[bufer[k][i]][bufer[k][i-1]][k] = 1  # обратно
 
+                y[bufer[k][i-1]][k] = 1
                 y[bufer[k][i]][k] = 1
 
                 s[bufer[k][i]][k] = S[bufer[k][i]]
