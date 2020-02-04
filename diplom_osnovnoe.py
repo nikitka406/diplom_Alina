@@ -1,6 +1,6 @@
 from functions import *
 from math import *
-
+# Hello world
 #километровый выигрыш
 km_win = [[0 for j in range(N)] for i in range(N)]
 for i in range(N):
