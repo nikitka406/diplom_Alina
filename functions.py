@@ -1,5 +1,59 @@
 from Input_data import *
 
+N = 13
+
+OX = [10, 17, 6, 13, 9, 19, 8, 4, 17, 12, 6, 19, 12]
+OY = [15, 15, 15, 3, 20, 7, 8, 14, 2, 22, 12, 17, 8]
+
+d = [[0 for j in range(N)] for i in range(N)]
+for i in range(N):
+    for j in range(N):
+        d[i][j] = sqrt(pow((OX[i] - OX[j]),2) + pow((OY[i] - OY[j]), 2))
+
+t = d
+for i in range(N):
+    for j in range(N):
+        t[i][j] = round(t[i][j] / 24)
+
+#красивая печать
+def BeautifulPrint(X, Y, Sresh, A):
+    for k in range(K):
+        print('Номер машины ', k)
+        for i in range(N):
+            for j in range(N):
+                print(X[i][j][k], end = ' ')
+            print("\n")
+
+        print("E = ", end=' ')
+        for i in range(N):
+            print(E[i], end=' ')
+        print("\n")
+
+        print("y = ", end=' ')
+        for  i in range(N):
+            print(Y[i][k], end=' ')
+        print("\n")
+
+        print("a = ", end=' ')
+        for  i in range(N):
+            print(A[i][k], end=' ')
+        print("\n")
+
+        print("s = ", end=' ')
+        for  i in range(N):
+            print(Sresh[i][k], end=' ')
+        print("\n")
+    for i in range(N):
+        for k in range (N):
+           print(t[i][k], end=' ')
+        print('\n')
+
+    # for i in range(N):
+    #     #     for k in range (N):
+    #     #         print(d[i][k], end=' ')
+    #     #     print('\n')
+
+
 def searchMax(km_win):
     km_win_max = 0
     for i in range(N):
@@ -37,6 +91,32 @@ def CalculationOfObjectiveFunction(x, target_function = 0):
                 target_function += d[i][j]*x[i][j][k]
     return target_function
 
+def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, car, nomer_sosed, l_p, sosed, kyda):
+    bufer[car][nomer_sosed] = new_client
+    Y[new_client][car] = 1
+    Ss[new_client][car] = S[new_client]
+    if E[new_client] >= l_p and kyda == "right":
+        A[new_client][car] = E[new_client]
+    elif E[new_client] < l_p and kyda == "right":
+        A[new_client][car] = l_p
+
+    if E[sosed] >= l_p and kyda == "left":
+        A[new_client][car] = E[new_client] - S[j] - t[j][bufer[car][nomer_sosed]]
+    elif E[new_client] < l_p and kyda == "left":
+        A[new_client][car] = E[new_client] - S[j] - t[j][bufer[car][nomer_sosed]]
+
+    X[sosed][new_client][car] = 1
+    if VerificationOfBoundaryConditions(X, Y, Ss, A) != 1:
+        X = x
+        Y = y
+        A = a
+        Ss = s
+    else:
+        x = X
+        y = Y
+        a = A
+        s = Ss
+        flag[new_client] = 1
 
 # Распределяем на каждую локацию по машине
 def Start_solution(bufer):
@@ -55,18 +135,17 @@ def Start_solution(bufer):
             if bufer[k][i] != 0:
                 if bufer[k][i+1] == 0:
                     x[bufer[k][i]][0][k] = 1
-                    # x[0][bufer[k][i]][k] = 1
-                x[bufer[k][i-1]][bufer[k][i]][k] = 1  # туда
 
-                # x[bufer[k][i]][bufer[k][i-1]][k] = 1  # обратно
+                x[bufer[k][i-1]][bufer[k][i]][k] = 1  # туда
+               # x[bufer[k][i]][bufer[k][i-1]][k] = 1  # обратно
 
                 y[bufer[k][i-1]][k] = 1
                 y[bufer[k][i]][k] = 1
 
                 s[bufer[k][i]][k] = S[bufer[k][i]]
 
-                if e[bufer[k][i]] > t[0][bufer[k][i]] / 24:
-                    a[bufer[k][i]][k] = e[bufer[k][i]]
+                if E[bufer[k][i]] > t[0][bufer[k][i]] / 24:
+                    a[bufer[k][i]][k] = E[bufer[k][i]]
                 else:
                     a[bufer[k][i]][k] = t[0][bufer[k][i]] / 24  # иначе начнет, когда приедет
                 # print(a[j][k], end=' ')
@@ -108,14 +187,14 @@ def V_jobs(s, K):
     return 1
 
 
-def TC_equal_KA(ka, y, K):
+def TC_equal_K(K, y):
     bufer1 =0
-    # Add constraint: sum (y[i][k])<=ka[i]
+    # Add constraint: sum (y[i][k])<=K[i]
     for i in range(1, N):
         if i != 0:
             for k in range(K):
                 bufer1 += y[i][k]
-            if bufer1 > ka[i]:
+            if bufer1 > skvaj[i]:
                 print(" slomalos 3")
                 return 0
             bufer1 = 0
@@ -136,7 +215,7 @@ def window_time_down(a, y, K):
     # Add constraint: e[i]<=a[i][k]
     for i in range(1, N):
         for k in range(K):
-            if e[i] > a[i][k] and y[i][k] == 1:
+            if E[i] > a[i][k] and y[i][k] == 1:
                 print("slomalos 5")#не работает это ограничение
                 return 0
     return 1
@@ -179,7 +258,7 @@ def positive_a_and_s(x, y, a, s, K):
 
 # проверка выполнения граничных условий
 def VerificationOfBoundaryConditions(x, y, s, a):
-    result = X_join_Y(x, y, K) * V_jobs(s, K) * TC_equal_KA(skvaj, y, K) * ban_driling(s, y, K) * window_time_down(a, y, K) * window_time_up(a, s, y, K) * ban_cycle(a, x, s, y, K) * positive_a_and_s(x, y, a, s, K)
+    result = X_join_Y(x, y, K) * V_jobs(s, K) * TC_equal_K(K, y) * ban_driling(s, y, K) * window_time_down(a, y, K) * window_time_up(a, s, y, K) * ban_cycle(a, x, s, y, K) * positive_a_and_s(x, y, a, s, K)
     if result == 1:
         print("vse ogr rabotayut")  # good
         return 1
@@ -187,3 +266,4 @@ def VerificationOfBoundaryConditions(x, y, s, a):
     else:
         print("ogr slomalis")
         return 0
+    
