@@ -15,6 +15,17 @@ for i in range(N):
     for j in range(N):
         t[i][j] = round(t[i][j] / 24)
 
+x = [[[0 for k in range(K)] for j in range(N)] for i in range(N)] # едет или нет ТС с номером К из города I в J
+y = [[0 for k in range(K)] for i in range(N)] # посещает или нет ТС с номером К объект i
+for k in range(K):
+    y[0][k] = 1
+
+bufer = [[0 for k in range((N + 1) * 2)]for i in range(K)] #сохраняет последовательное посещение городов для каждой машины
+flag = [0 for i in range(N)] # флажок, если посетила город
+                             # N так как с обеих сторон должны быть нули (выезжает из депо и возвращ в депо)
+s = [[0 for k in range(K)] for i in range(N)]  # время работы ТС c номером К на объекте i
+a = [[0 for k in range(K)] for i in range(N)]  # время прибытия ТС с номером К на объект i
+
 #красивая печать
 def BeautifulPrint(X, Y, Sresh, A):
     for k in range(K):
@@ -105,7 +116,15 @@ def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, ca
     elif E[new_client] < l_p and kyda == "left":
         A[new_client][car] = E[new_client] - S[j] - t[j][bufer[car][nomer_sosed]]
 
-    X[sosed][new_client][car] = 1
+    if kyda == "right":
+        X[sosed][new_client][car] = 1
+        X[sosed][0][car] = 0
+        X[new_client][0][car] = 1
+    elif kyda == "left":
+        X[new_client][sosed][car] = 1
+        X[0][sosed][car] = 0
+        X[0][new_client][car] = 1
+
     if VerificationOfBoundaryConditions(X, Y, Ss, A) != 1:
         X = x
         Y = y
@@ -266,4 +285,60 @@ def VerificationOfBoundaryConditions(x, y, s, a):
     else:
         print("ogr slomalis")
         return 0
-    
+
+
+def AddTwoCityInRoute(i, j, m, x, y, s, a, bufer):
+    X = x
+    Y = y
+    A = a
+    Ss = s
+    # print (10)
+    indicator = 0
+    while indicator != 1:
+        bufer[m][N] = j  # двойной массив, где первое - это номер машины, второе - это маршрут
+        bufer[m][N + 1] = i
+        Y[i][m] = 1
+        Y[j][m] = 1
+        Ss[i][m] = S[i]
+        Ss[j][m] = S[j]
+        if E[j] >= t[0][j]:
+            A[j][m] = E[j]
+            # print(100)
+        else:
+            A[j][m] = t[0][j]
+        A[i][m] = A[j][m] + Ss[j][m] + t[i][j]
+        X[0][j][m] = 1
+        X[j][i][m] = 1
+        X[i][0][m] = 1
+        # print(200)
+        # BeautifulPrint(X, Y, Ss, A)
+        if window_time_up(A, Ss, Y, K) != 1:
+            X = x
+            Y = y
+            A = a
+            Ss = s
+            bufer[m][N] = i  # двойной массив, где первое - это номер машины, второе - это маршрут
+            bufer[m][N + 1] = j
+            Y[i][m] = 1
+            Y[j][m] = 1
+            Ss[i][m] = S[i]
+            Ss[j][m] = S[j]
+            # print(300)
+            if E[i] >= t[0][i]:
+                A[i][m] = E[i]
+                # print(400)
+            else:
+                A[i][m] = t[0][i]
+                # print(500)
+            A[j][m] = A[i][m] + Ss[i][m] + t[i][j]
+            X[0][i][m] = 1
+            X[i][j][m] = 1
+            X[j][0][m] = 1
+            indicator = window_time_up(A, Ss, Y, K)
+        else:
+            x = X
+            y = Y
+            a = A
+            s = Ss
+            indicator = window_time_up(A, Ss, Y, K)
+            break

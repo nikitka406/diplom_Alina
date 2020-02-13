@@ -10,7 +10,7 @@ OY = [15, 15, 15, 3, 20, 7, 8, 14, 2, 22, 12, 17, 8]
 d = [[0 for j in range(N)] for i in range(N)]
 for i in range(N):
     for j in range(N):
-        d[i][j] = sqrt(pow((OX[i] - OX[j]),2) + pow((OY[i] - OY[j]), 2))
+        d[i][j] = sqrt(pow((OX[i] - OX[j]), 2) + pow((OY[i] - OY[j]), 2))
         if d[i][j] > g and i == 0:
             d[i][j] = -1
 
@@ -52,67 +52,75 @@ flag = [0 for i in range(N)] # флажок, если посетила горо�
                              # N так как с обеих сторон должны быть нули (выезжает из депо и возвращ в депо)
 s = [[0 for k in range(K)] for i in range(N)]  # время работы ТС c номером К на объекте i
 a = [[0 for k in range(K)] for i in range(N)]  # время прибытия ТС с номером К на объект i
+
+i, j = searchMax(km_win)
+print("i = ", i)
+print("j = ", j)
 X = x
 Y = y
 A = a
 Ss = s
-# print (10)
-indicator = 0
-while indicator != 1:
-    i, j = searchMax(km_win)
-    print("i = ", i)
-    print("j = ", j)
-
-    bufer[0][N] = j  # двойной массив, где первое - это номер машины, второе - это маршрут
-    bufer[0][N + 1] = i
-    Y[i][0] = 1
-    Y[j][0] = 1
-    Ss[i][0] = S[i]
-    Ss[j][0] = S[j]
-    if E[j] >= t[0][j]:
-        A[j][0] = E[j]
-        # print(100)
-    else:
-        A[j][0] = t[0][j]
-    A[i][0] = A[j][0] + Ss[j][0] + t[i][j]
-    X[0][j][0] = 1
-    X[j][i][0] = 1
-    X[i][0][0] = 1
-    # print(200)
-    # BeautifulPrint(X, Y, Ss, A)
-    if window_time_up(A, Ss, Y, K) != 1:
-        X = x
-        Y = y
-        A = a
-        Ss = s
-        bufer[0][N] = i  # двойной массив, где первое - это номер машины, второе - это маршрут
-        bufer[0][N + 1] = j
-        Y[i][0] = 1
-        Y[j][0] = 1
-        Ss[i][0] = S[i]
-        Ss[j][0] = S[j]
-        # print(300)
-        if E[i] >= t[0][i]:
-            A[i][0] = E[i]
-            # print(400)
-        else:
-            A[i][0] = t[0][i]
-            # print(500)
-        A[j][0] = A[i][0] + Ss[i][0] + t[i][j]
-        X[0][i][0] = 1
-        X[i][j][0] = 1
-        X[j][0][0] = 1
-        indicator = window_time_up(A, Ss, Y, K)
-    else:
-        x = X
-        y = Y
-        a = A
-        s = Ss
-        indicator = window_time_up(A, Ss, Y, K)
-        break
-    # flag[0] = 1
-    # flag[i] = 1
-    # flag[j] = 1
+AddTwoCityInRoute(i, j,0, x, y, s, a, bufer)
+# #####################3
+# X = x
+# Y = y
+# A = a
+# Ss = s
+# # print (10)
+# indicator = 0
+# while indicator != 1:
+#
+#     bufer[0][N] = j  # двойной массив, где первое - это номер машины, второе - это маршрут
+#     bufer[0][N + 1] = i
+#     Y[i][0] = 1
+#     Y[j][0] = 1
+#     Ss[i][0] = S[i]
+#     Ss[j][0] = S[j]
+#     if E[j] >= t[0][j]:
+#         A[j][0] = E[j]
+#         # print(100)
+#     else:
+#         A[j][0] = t[0][j]
+#     A[i][0] = A[j][0] + Ss[j][0] + t[i][j]
+#     X[0][j][0] = 1
+#     X[j][i][0] = 1
+#     X[i][0][0] = 1
+#     # print(200)
+#     # BeautifulPrint(X, Y, Ss, A)
+#     if window_time_up(A, Ss, Y, K) != 1:
+#         X = x
+#         Y = y
+#         A = a
+#         Ss = s
+#         bufer[0][N] = i  # двойной массив, где первое - это номер машины, второе - это маршрут
+#         bufer[0][N + 1] = j
+#         Y[i][0] = 1
+#         Y[j][0] = 1
+#         Ss[i][0] = S[i]
+#         Ss[j][0] = S[j]
+#         # print(300)
+#         if E[i] >= t[0][i]:
+#             A[i][0] = E[i]
+#             # print(400)
+#         else:
+#             A[i][0] = t[0][i]
+#             # print(500)
+#         A[j][0] = A[i][0] + Ss[i][0] + t[i][j]
+#         X[0][i][0] = 1
+#         X[i][j][0] = 1
+#         X[j][0][0] = 1
+#         indicator = window_time_up(A, Ss, Y, K)
+#     else:
+#         x = X
+#         y = Y
+#         a = A
+#         s = Ss
+#         indicator = window_time_up(A, Ss, Y, K)
+#         break
+        #####################
+flag[0] = 1
+flag[i] = 1
+flag[j] = 1
 
 # print (11)
 # for i in range(K):
@@ -128,15 +136,17 @@ while summa != N:
     print("i = ", i)
     print("j = ", j)
     print("\n")
+
     m, n = searchIndex(bufer, i) #если в маршруте нашли индекс i
-    # print(m, " ", n)
+    print(m, " ", n)
     p, r = searchIndex(bufer, j) #  p - номер маршрута, r - номер позиции в маршруте для другого города
+    print(p, " ", r)
     #смотрим есть ли один из новых индексов в маршруте, возвращает номер маршрута в котором находится  итый город
     # m - номер маршрута, n - номер позиции в маршруте
     if m != -1 and n != -1 and p != -1 and r != -1:
-        print(0)
+        print("Оба города есть, то ничего не делаем")
     else:
-        if m != -1 and n != -1:  # если не -1 то мы нашли
+        if m != -1 and n != -1 and p == -1 and r == -1:               # если не -1 то мы нашли индекс i
             if n > N and bufer[m][n+1] == 0:  # если больше половины и стоит 0, а не какое-то число, то вставляем в конец
                 # bufer[m][n + 1] = j
                 l_p = A[bufer[m][n]][m] + Ss[bufer[m][n]][m] + t[bufer[m][n]][j]#время приезда к соседу + время на работу + время от соседа до нового клиента
@@ -150,9 +160,10 @@ while summa != N:
                     l_p = t[0][j] + S[j] + t[j][bufer[m][n]]
                 Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, j, m, n - 1, l_p, i, "left")
                 print(3)
+        else: print("ничего не делаем")
 
         # print(p, " ", r)
-        if p != -1 and r != -1:
+        if m == -1 and n == -1 and p != -1 and r != -1: #если нашли индекс j
             if r > N and bufer[p][r+1] == 0:  # если больше половины, то вставляем в конец
                 # bufer[p][r + 1] = i
                 l_p = A[bufer[p][r]][p] + Ss[bufer[p][r]][p] + t[bufer[p][r]][i]
@@ -165,10 +176,18 @@ while summa != N:
                 print(4)
         # if (m != -1 and n == -1) or (n != -1 and m == 1):
         #     print(444)
+
         if m == -1 and n == -1 and p == -1 and r == -1:
             m = search_pustoy_marchrut(bufer)  # возвращает номер маршрута, который пустой
-            bufer[m][N] = j  # двойной массив, где первое - это номер машины, второе - это маршрут
-            bufer[m][N + 1] = i
+
+            # bufer[m][N] = j  # двойной массив, где первое - это номер машины, второе - это маршрут
+            # bufer[m][N + 1] = i
+            # i, j = searchMax(km_win)
+            # print("i = ", i)
+            # print("j = ", j)
+
+            AddTwoCityInRoute(i, j, m, x, y, s, a, bufer)
+
             flag[i] = 1
             flag[j] = 1
             print(5)
@@ -176,61 +195,68 @@ while summa != N:
                 for j in range((N + 1) * 2):
                     print(bufer[i][j], end=" ")
                 print("\n")
-            indicator2 = 0
-            while indicator2 != 1:
-                i, j = searchMax(km_win)
-                print("i = ", i)
-                print("j = ", j)
 
-                bufer[m+1][N] = j  # двойной массив, где первое - это номер машины, второе - это маршрут
-                bufer[m+1][N + 1] = i
-                Y[i][m+1] = 1
-                Y[j][m+1] = 1
-                Ss[i][m+1] = S[i]
-                Ss[j][m+1] = S[j]
-                if E[j] >= t[m+1][j]:
-                    A[j][m+1] = E[j]
-                    print(6)
-                else:
-                    A[j][m+1] = t[m+1][j]
-                A[i][m+1] = A[j][m+1] + Ss[j][m+1] + t[i][j]
-                x[0][j][m+1] = 1
-                X[i][j][m+1] = 1
-                x[i][0][m+1] = 1
-                print(7)
-                for i in range(K):
-                    for j in range((N + 1) * 2):
-                        print(bufer[i][j], end=" ")
-                    print("\n")
-                if VerificationOfBoundaryConditions(X, Y, Ss, A) != 1:
-                    X = x
-                    Y = y
-                    A = a
-                    Ss = s
-                    bufer[m+1][N] = i  # двойной массив, где первое - это номер машины, второе - это маршрут
-                    bufer[m+1][N + 1] = j
-                    Y[i][m+1] = 1
-                    Y[j][m+1] = 1
-                    Ss[i][m+1] = S[i]
-                    Ss[j][m+1] = S[j]
-                    if E[i] >= t[m+1][i]:
-                        A[i][m+1] = E[i]
-                        print(8)
-                    else:
-                        A[i][m+1] = t[m+1][i]
-                    A[j][m+1] = A[i][m+1] + Ss[i][m+1] + t[i][j]
-                    X[0][i][m+1] = 1
-                    X[i][j][m+1] = 1
-                    X[j][0][m+1] = 1
-                    indicator = VerificationOfBoundaryConditions(X, Y, Ss, A)
-                    print(9)
-                else:
-                    x = X
-                    y = Y
-                    a = A
-                    s = Ss
-                    indicator = VerificationOfBoundaryConditions(X, Y, Ss, A)
-                    break
+            # i, j = searchMax(km_win)
+            # print("i = ", i)
+            # print("j = ", j)
+
+            AddTwoCityInRoute(i, j, m+1, x, y, s, a, bufer)
+
+            # indicator2 = 0
+            # while indicator2 != 1:
+            #     i, j = searchMax(km_win)
+            #     print("i = ", i)
+            #     print("j = ", j)
+            #
+            #     bufer[m+1][N] = j  # двойной массив, где первое - это номер машины, второе - это маршрут
+            #     bufer[m+1][N + 1] = i
+            #     Y[i][m+1] = 1
+            #     Y[j][m+1] = 1
+            #     Ss[i][m+1] = S[i]
+            #     Ss[j][m+1] = S[j]
+            #     if E[j] >= t[m+1][j]:
+            #         A[j][m+1] = E[j]
+            #         print(6)
+            #     else:
+            #         A[j][m+1] = t[m+1][j]
+            #     A[i][m+1] = A[j][m+1] + Ss[j][m+1] + t[i][j]
+            #     x[0][j][m+1] = 1
+            #     X[i][j][m+1] = 1
+            #     x[i][0][m+1] = 1
+            #     print(7)
+            #     for i in range(K):
+            #         for j in range((N + 1) * 2):
+            #             print(bufer[i][j], end=" ")
+            #         print("\n")
+            #     if window_time_up(A, Ss, Y, K) != 1:
+            #         X = x
+            #         Y = y
+            #         A = a
+            #         Ss = s
+            #         bufer[m+1][N] = i  # двойной массив, где первое - это номер машины, второе - это маршрут
+            #         bufer[m+1][N + 1] = j
+            #         Y[i][m+1] = 1
+            #         Y[j][m+1] = 1
+            #         Ss[i][m+1] = S[i]
+            #         Ss[j][m+1] = S[j]
+            #         if E[i] >= t[m+1][i]:
+            #             A[i][m+1] = E[i]
+            #             print(8)
+            #         else:
+            #             A[i][m+1] = t[m+1][i]
+            #         A[j][m+1] = A[i][m+1] + Ss[i][m+1] + t[i][j]
+            #         X[0][i][m+1] = 1
+            #         X[i][j][m+1] = 1
+            #         X[j][0][m+1] = 1
+            #         indicator = window_time_up(A, Ss, Y, K)
+            #         print(9)
+            #     else:
+            #         x = X
+            #         y = Y
+            #         a = A
+            #         s = Ss
+            #         indicator = window_time_up(A, Ss, Y, K)
+            #         break
             flag[i] = 1
             flag[j] = 1
             print(10)
@@ -244,7 +270,7 @@ while summa != N:
             print(bufer[i][j], end=" ")
         print("\n")
 print (13)
-x, y, s, a = Start_solution(bufer)
+# x, y, s, a = Start_solution(bufer)
 result = CalculationOfObjectiveFunction(x)
 print('result = ', result)
 
