@@ -1,4 +1,5 @@
 from Input_data import *
+import random
 
 N = 13
 
@@ -8,31 +9,33 @@ OY = [15, 15, 15, 3, 20, 7, 8, 14, 2, 22, 12, 17, 8]
 d = [[0 for j in range(N)] for i in range(N)]
 for i in range(N):
     for j in range(N):
-        d[i][j] = sqrt(pow((OX[i] - OX[j]),2) + pow((OY[i] - OY[j]), 2))
+        d[i][j] = sqrt(pow((OX[i] - OX[j]), 2) + pow((OY[i] - OY[j]), 2))
 
 t = d
 for i in range(N):
     for j in range(N):
         t[i][j] = round(t[i][j] / 24)
 
-x = [[[0 for k in range(K)] for j in range(N)] for i in range(N)] # едет или нет ТС с номером К из города I в J
-y = [[0 for k in range(K)] for i in range(N)] # посещает или нет ТС с номером К объект i
+x = [[[0 for k in range(K)] for j in range(N)] for i in range(N)]  # едет или нет ТС с номером К из города I в J
+y = [[0 for k in range(K)] for i in range(N)]  # посещает или нет ТС с номером К объект i
 for k in range(K):
     y[0][k] = 1
 
-bufer = [[0 for k in range((N + 1) * 2)]for i in range(K)] #сохраняет последовательное посещение городов для каждой машины
-flag = [0 for i in range(N)] # флажок, если посетила город
-                             # N так как с обеих сторон должны быть нули (выезжает из депо и возвращ в депо)
+bufer = [[0 for k in range((N + 1) * 2)] for i in
+         range(K)]  # сохраняет последовательное посещение городов для каждой машины
+flag = [0 for i in range(N)]  # флажок, если посетила город
+# N так как с обеих сторон должны быть нули (выезжает из депо и возвращ в депо)
 s = [[0 for k in range(K)] for i in range(N)]  # время работы ТС c номером К на объекте i
 a = [[0 for k in range(K)] for i in range(N)]  # время прибытия ТС с номером К на объект i
 
-#красивая печать
-def BeautifulPrint(X, Y, Sresh, A):
+
+# красивая печать
+def BeautifulPrint(X, Y, Ss, A):
     for k in range(K):
         print('Номер машины ', k)
         for i in range(N):
             for j in range(N):
-                print(X[i][j][k], end = ' ')
+                print(X[i][j][k], end=' ')
             print("\n")
 
         print("E = ", end=' ')
@@ -41,22 +44,23 @@ def BeautifulPrint(X, Y, Sresh, A):
         print("\n")
 
         print("y = ", end=' ')
-        for  i in range(N):
+        for i in range(N):
             print(Y[i][k], end=' ')
         print("\n")
 
         print("a = ", end=' ')
-        for  i in range(N):
+        for i in range(N):
             print(A[i][k], end=' ')
         print("\n")
 
+
         print("s = ", end=' ')
-        for  i in range(N):
-            print(Sresh[i][k], end=' ')
+        for i in range(N):
+            print(Ss[i][k], end=' ')
         print("\n")
     for i in range(N):
-        for k in range (N):
-           print(t[i][k], end=' ')
+        for k in range(N):
+            print(t[i][k], end=' ')
         print('\n')
 
     # for i in range(N):
@@ -77,45 +81,49 @@ def searchMax(km_win):
                 km_win[i][j] = 0
                 return i, j
 
+
 def searchIndex(km_win, km_win_max):
     for i in range(K):
-        for j in range((N+1)*2):
+        for j in range((N + 1) * 2):
             if km_win[i][j] == km_win_max:
                 return i, j
     return -1, -1
 
+
 def search_pustoy_marchrut(bufer):
     summ = 0
     for k in range(K):
-        for i in range((N+1)*2):
+        for i in range((N + 1) * 2):
             summ += bufer[k][i]
         if summ == 0:
             return k
         summ = 0
 
+# штрафная функция
+def shtrafFunction(s, a):
+    shtraf_sum = 0
+    for i in range(N):
+        for k in range(K):
+            if a[i][k] + s[i][k] > l[i]:
+                shtraf_sum += ((a[i][k] + s[i][k]) - l[i]) * shtraf
+    return shtraf_sum
+
 
 # подсчет значения целевой функции
-def CalculationOfObjectiveFunction(x, target_function = 0):
+def CalculationOfObjectiveFunction(x, shtrafFunction=0):
+    target_function = 0
     for k in range(K):
         for i in range(N):
             for j in range(N):
-                target_function += d[i][j]*x[i][j][k]
+                target_function += d[i][j] * x[i][j][k]
+    target_function += shtrafFunction
     return target_function
 
-def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, car, nomer_sosed, l_p, sosed, kyda):
+
+def Zapolnenie(X, Y, Ss, kyda, new_client, sosed, car, nomer_sosed):
     bufer[car][nomer_sosed] = new_client
     Y[new_client][car] = 1
     Ss[new_client][car] = S[new_client]
-    if E[new_client] >= l_p and kyda == "right":
-        A[new_client][car] = E[new_client]
-    elif E[new_client] < l_p and kyda == "right":
-        A[new_client][car] = l_p
-
-    if E[sosed] >= l_p and kyda == "left":
-        A[new_client][car] = E[new_client] - S[j] - t[j][bufer[car][nomer_sosed]]
-    elif E[new_client] < l_p and kyda == "left":
-        A[new_client][car] = E[new_client] - S[j] - t[j][bufer[car][nomer_sosed]]
-
     if kyda == "right":
         X[sosed][new_client][car] = 1
         X[sosed][0][car] = 0
@@ -124,6 +132,31 @@ def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, ca
         X[new_client][sosed][car] = 1
         X[0][sosed][car] = 0
         X[0][new_client][car] = 1
+
+
+def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, car, nomer_sosed, l_p, sosed, kyda):
+    if E[
+        new_client] >= l_p and kyda == "right":  # если время начала работы нового клиента больше чем время прибытия + работы + переезда предыдущего
+        A[new_client][car] = E[new_client]
+        Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
+    elif E[new_client] < l_p and kyda == "right":
+        A[new_client][car] = l_p
+        Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
+
+    if A[sosed][car] >= l_p and kyda == "left":
+        A[new_client][car] = A[sosed][car] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
+        Zapolnenie(X, Y, Ss, "left", new_client, sosed, car, nomer_sosed)
+        if A[new_client][car] <= E[new_client]:
+            A[new_client][car] = E[new_client]
+    elif A[sosed][car] < l_p and kyda == "left":
+        print("ne podhodit dlya marchruta")
+
+    # if E[sosed] >= l_p and kyda == "left":
+    #     A[new_client][car] = t[0][new_client]
+    #     # A[new_client][car] = E[sosed] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
+    #
+    # elif E[sosed] < l_p and kyda == "left":
+    #     A[new_client][car] = E[new_client] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
 
     if VerificationOfBoundaryConditions(X, Y, Ss, A) != 1:
         X = x
@@ -137,42 +170,6 @@ def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, ca
         s = Ss
         flag[new_client] = 1
 
-# Распределяем на каждую локацию по машине
-def Start_solution(bufer):
-    # копия переменной задачи Х, только кол-вo машин = число локаций
-    x = [[[0 for k in range(K)] for j in range(N)] for i in range(N)]  # едет или нет ТС с номером К из города I в J
-    y = [[0 for k in range(K)] for i in range(N)]  # посещает или нет ТС с номером К объект i
-    for k in range(K):
-        y[0][k] = 1
-    s = [[0 for k in range(K)] for i in range(N)]  # время работы ТС c номером К на объекте i
-    a = [[0 for k in range(K)] for i in range(N)]  # время прибытия ТС с номером К на объект i
-
-    #
-
-    for k in range(K):
-        for i in range(1, (N+1)*2):
-            if bufer[k][i] != 0:
-                if bufer[k][i+1] == 0:
-                    x[bufer[k][i]][0][k] = 1
-
-                x[bufer[k][i-1]][bufer[k][i]][k] = 1  # туда
-               # x[bufer[k][i]][bufer[k][i-1]][k] = 1  # обратно
-
-                y[bufer[k][i-1]][k] = 1
-                y[bufer[k][i]][k] = 1
-
-                s[bufer[k][i]][k] = S[bufer[k][i]]
-
-                if E[bufer[k][i]] > t[0][bufer[k][i]] / 24:
-                    a[bufer[k][i]][k] = E[bufer[k][i]]
-                else:
-                    a[bufer[k][i]][k] = t[0][bufer[k][i]] / 24  # иначе начнет, когда приедет
-                # print(a[j][k], end=' ')
-            # print("\n")
-
-
-    return x, y, s, a
-
 
 # Граничные условия
 def X_join_Y(x, y, K):
@@ -185,7 +182,7 @@ def X_join_Y(x, y, K):
                 bufer1 += x[i][j][k]
                 bufer2 += x[j][i][k]
             if bufer1 != bufer2 or bufer2 != y[j][k] or bufer1 != y[j][k]:
-                print("slomalos 1")
+                print("slomalos 1: связность маршрутов x и y")
                 return 0
             bufer1 = 0
             bufer2 = 0
@@ -200,21 +197,21 @@ def V_jobs(s, K):
             for k in range(K):
                 bufer1 += s[i][k]
             if bufer1 != S[i]:
-                print("slomalos 2")
+                print("slomalos 2: общий объем работ на каждом объекте")
                 return 0
             bufer1 = 0
     return 1
 
 
 def TC_equal_K(K, y):
-    bufer1 =0
+    bufer1 = 0
     # Add constraint: sum (y[i][k])<=K[i]
     for i in range(1, N):
         if i != 0:
             for k in range(K):
                 bufer1 += y[i][k]
             if bufer1 > skvaj[i]:
-                print(" slomalos 3")
+                print(" slomalos 3: ТС не больше, чем скважин")
                 return 0
             bufer1 = 0
     return 1
@@ -225,7 +222,7 @@ def ban_driling(s, y, K):
     for i in range(1, N):
         for k in range(K):
             if s[i][k] > S[i] * y[i][k]:
-                print("slomalos 4")
+                print("slomalos 4: установка не работает, если не приехала на объект")
                 return 0
     return 1
 
@@ -235,7 +232,7 @@ def window_time_down(a, y, K):
     for i in range(1, N):
         for k in range(K):
             if E[i] > a[i][k] and y[i][k] == 1:
-                print("slomalos 5")#не работает это ограничение
+                print("slomalos 5: нельзя начать работу раньше, чем приехал")  # не работает это ограничение
                 return 0
     return 1
 
@@ -245,7 +242,7 @@ def window_time_up(a, s, y, K):
     for i in range(1, N):
         for k in range(K):
             if a[i][k] + s[i][k] > l[i] and y[i][k] == 1:
-                print("slomalos 6")
+                print("slomalos 6: нельзя закончить работу позже, чем временное окно")
                 return 0
     return 1
 
@@ -256,7 +253,7 @@ def ban_cycle(a, x, s, y, K):
         for j in range(1, N):
             for k in range(K):
                 if a[i][k] - a[j][k] + x[i][j][k] * t[i][j] + s[i][k] > l[i] * (1 - x[i][j][k]) and y[i][k] == 1:
-                    print("slomalos 7")
+                    print("slomalos 7:запрещ циклы, которые не проходят через депо")
                     return 0
     return 1
 
@@ -267,7 +264,7 @@ def positive_a_and_s(x, y, a, s, K):
         for j in range(N):
             for k in range(K):
                 if s[i][k] < 0 or a[i][k] < 0:
-                    print("slomalos 8")
+                    print("slomalos 8: область изменения перменных")
                     return 0
                 if x[i][j][k] != 0 and x[i][j][k] != 1:
                     return 0
@@ -275,16 +272,72 @@ def positive_a_and_s(x, y, a, s, K):
                     return 0
     return 1
 
-# проверка выполнения граничных условий
-def VerificationOfBoundaryConditions(x, y, s, a):
-    result = X_join_Y(x, y, K) * V_jobs(s, K) * TC_equal_K(K, y) * ban_driling(s, y, K) * window_time_down(a, y, K) * window_time_up(a, s, y, K) * ban_cycle(a, x, s, y, K) * positive_a_and_s(x, y, a, s, K)
-    if result == 1:
-        print("vse ogr rabotayut")  # good
-        return 1
 
+# проверка выполнения граничных условий
+def VerificationOfBoundaryConditions(x, y, s, a, shtraf="false"):
+    # по дефолту смотрим все огр, но если тру то не рассматриваем огр на своевременный конец работ
+    if shtraf == "false":
+        result = X_join_Y(x, y, K) * V_jobs(s, K) * TC_equal_K(K, y) * ban_driling(s, y, K) * \
+                 window_time_down(a, y, K) * window_time_up(a, s, y, K) * \
+                 ban_cycle(a, x, s, y, K) * positive_a_and_s(x, y, a, s, K)
+    elif shtraf == "true":
+        result = X_join_Y(x, y, K) * V_jobs(s, K) * TC_equal_K(K, y) * ban_driling(s, y, K) * \
+                 window_time_down(a, y, K) * \
+                 positive_a_and_s(x, y, a, s, K)
     else:
-        print("ogr slomalis")
+        print("ERROR from VerificationOfBoundaryConditions: неверное значение, переменной shtraf")
+        return -1
+    if result == 1:
+        return 1  # good
+    else:
         return 0
+
+# проверка выполнения граничных условий
+def VerificationOfBoundaryConditionsForStartSolution(x, y, s, a):
+    # по дефолту смотрим все огр, но если тру то не рассматриваем огр на своевременный конец работ
+    result = window_time_down(a, y, K) * window_time_up(a, s, y, K)
+
+    if result == 1:
+        return 1  # good
+    else:
+        return 0
+
+
+def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, car, nomer_sosed, l_p, sosed, kyda):
+    if E[
+        new_client] >= l_p and kyda == "right":  # если время начала работы нового клиента больше чем время прибытия + работы + переезда предыдущего
+        A[new_client][car] = E[new_client]
+        Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
+    elif E[new_client] < l_p and kyda == "right":
+        A[new_client][car] = l_p
+        Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
+
+    if A[sosed][car] >= l_p and kyda == "left":
+        A[new_client][car] = A[sosed][car] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
+        Zapolnenie(X, Y, Ss, "left", new_client, sosed, car, nomer_sosed)
+        if A[new_client][car] <= E[new_client]:
+            A[new_client][car] = E[new_client]
+    elif A[sosed][car] < l_p and kyda == "left":
+        print("ne podhodit dlya marchruta")
+
+    # if E[sosed] >= l_p and kyda == "left":
+    #     A[new_client][car] = t[0][new_client]
+    #     # A[new_client][car] = E[sosed] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
+    #
+    # elif E[sosed] < l_p and kyda == "left":
+    #     A[new_client][car] = E[new_client] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
+
+    if VerificationOfBoundaryConditionsForStartSolution(X, Y, Ss, A) != 1:
+        X = x
+        Y = y
+        A = a
+        Ss = s
+    else:
+        x = X
+        y = Y
+        a = A
+        s = Ss
+        flag[new_client] = 1
 
 
 def AddTwoCityInRoute(i, j, m, x, y, s, a, bufer):
@@ -293,52 +346,655 @@ def AddTwoCityInRoute(i, j, m, x, y, s, a, bufer):
     A = a
     Ss = s
     # print (10)
-    indicator = 0
-    while indicator != 1:
+    if E[j] + Ss[j][m] + t[j][i] <= l[i] - Ss[i][m]:
         bufer[m][N] = j  # двойной массив, где первое - это номер машины, второе - это маршрут
         bufer[m][N + 1] = i
-        Y[i][m] = 1
+
         Y[j][m] = 1
-        Ss[i][m] = S[i]
+        Y[i][m] = 1
+
         Ss[j][m] = S[j]
+        Ss[i][m] = S[i]
+
         if E[j] >= t[0][j]:
             A[j][m] = E[j]
             # print(100)
         else:
             A[j][m] = t[0][j]
+
         A[i][m] = A[j][m] + Ss[j][m] + t[i][j]
+        if A[i][m] <= E[i]:
+            A[i][m] = E[i]
+
         X[0][j][m] = 1
         X[j][i][m] = 1
         X[i][0][m] = 1
         # print(200)
         # BeautifulPrint(X, Y, Ss, A)
-        if window_time_up(A, Ss, Y, K) != 1:
-            X = x
-            Y = y
-            A = a
-            Ss = s
-            bufer[m][N] = i  # двойной массив, где первое - это номер машины, второе - это маршрут
-            bufer[m][N + 1] = j
-            Y[i][m] = 1
-            Y[j][m] = 1
-            Ss[i][m] = S[i]
-            Ss[j][m] = S[j]
-            # print(300)
-            if E[i] >= t[0][i]:
-                A[i][m] = E[i]
-                # print(400)
-            else:
-                A[i][m] = t[0][i]
-                # print(500)
-            A[j][m] = A[i][m] + Ss[i][m] + t[i][j]
-            X[0][i][m] = 1
-            X[i][j][m] = 1
-            X[j][0][m] = 1
-            indicator = window_time_up(A, Ss, Y, K)
+        flag[i] = 1
+        flag[j] = 1
+
+    elif E[i] + Ss[i][m] + t[i][j] <= l[j] - Ss[j][m]:
+        # if window_time_up(A, Ss, Y, K) != 1:
+        X[0][j][m] = 0
+        X[j][i][m] = 0
+        X[i][0][m] = 0
+        bufer[m][N] = i  # двойной массив, где первое - это номер машины, второе - это маршрут
+        bufer[m][N + 1] = j
+        Y[i][m] = 1
+        Y[j][m] = 1
+        Ss[i][m] = S[i]
+        Ss[j][m] = S[j]
+        # print(300)
+        if E[i] >= t[0][i]:
+            A[i][m] = E[i]
+            # print(400)
         else:
-            x = X
-            y = Y
-            a = A
-            s = Ss
-            indicator = window_time_up(A, Ss, Y, K)
-            break
+            A[i][m] = t[0][i]
+            # print(500)
+        A[j][m] = A[i][m] + Ss[i][m] + t[i][j]
+        if A[j][m] <= E[j]:
+            A[j][m] = E[j]
+        X[0][i][m] = 1
+        X[i][j][m] = 1
+        X[j][0][m] = 1
+
+        flag[i] = 1
+        flag[j] = 1
+
+        # indicator = window_time_up(A, Ss, Y, K)
+    else:
+        print("AddTwoCityInRoute: нельзя вставить из-за временных окон")
+        x = X
+        y = Y
+        a = A
+        s = Ss
+
+
+# Считаем кол-во используемых ТС
+def AmountCarUsed(y):
+    summa = 0  # счетчик
+    amount = 0  # число машин
+    for k in range(K):
+        for j in range(N):
+            summa += y[j][k]  # смотрим посещает ли К-ая машина хотя бы один город
+        if summa != 0:  # если не 0 значит  посетила
+            amount += 1  # прибавляем еденичку
+        summa = 0  # Обнуляем счетчик
+    return amount
+
+
+# копирование решения
+def CopyingSolution(x, y, s, a):
+    X = x
+    Y = y
+    Ss = s
+    A = a
+    return X, Y, Ss, A
+
+
+# ищем минимальный путь по которому можно попасть в client
+def SearchTheBestSoseda(client):
+    neighbor = 0  # старый сосед
+    bufer = d[0][client]  # расстояние от старого соседа до клиента
+    for i in range(N):
+        if bufer >= d[i][client] and i != client:  # ищем мин расстояние до клиента с учетом что новый сосед не клиент
+            bufer = d[i][client]
+            neighbor = i
+    return neighbor
+
+
+# номер машины которая обслуживает клиента
+def NumberCarClienta(y, client):
+    for k in range(K):
+        if y[client][k] == 1:
+            return k
+    return "не найдена машина NumberCarClienta"
+
+
+# ищем соседа слева либо справа
+def SearchSosedLeftOrRight(x, y, client, leftOrRight):
+    k = NumberCarClienta(y, client)  # номер машины которая обслуживает клиента
+    print("feffgef", k)
+    if leftOrRight == "left":
+        for i in range(N):  # ищем по столбцу
+            if x[i][client][k] == 1:
+                return i
+        return -1
+    if leftOrRight == "right":
+        for i in range(N):  # ищем по строке
+            if x[client][i][k] == 1:
+                return i
+        return -1
+    if leftOrRight != "left" and leftOrRight != "right":
+        print("ERROR from SearchSosedLeftOrRight: неверное значение переменной leftOrRight")
+
+
+# определяем время приезда на конкретную локацию
+def TimeOfArrival(a, s, client, sosed, sosedK):
+    # если время прибытия меньше начала работ, то ждем
+    if E[client] > a[sosed][sosedK] + s[sosed][sosedK] + t[sosed][client]:
+        a[client][sosedK] = E[client]
+    # иначе ставим время прибытия
+    else:
+        a[client][sosedK] = a[sosed][sosedK] + s[sosed][sosedK] + t[sosed][client]
+
+
+# удаляем клиента из выбранного  маршрута и соединяем соседние вершины
+def DeleteClientaFromPath(x, y, s, a, client):
+    k = NumberCarClienta(y, client)  # номер машины которая обслуживает клиента
+    clientLeft = SearchSosedLeftOrRight(x, y, client, "left")  # ищем город перед клиентом
+    clientRight = SearchSosedLeftOrRight(x, y, client, "right")  # ищем город после клиента
+    # если у клиента есть сосед справа и слева
+    if clientLeft != -1 and clientRight != -1:
+        x[clientLeft][clientRight][k] = 1  # соединяем левого и правого соседа
+        x[client][clientRight][k] = 0  # удаляем ребро клиента с правым соседом
+        x[clientLeft][client][k] = 0  # удаляем ребро клиента с левым соседом
+
+        # У и S для левого и правого не меняются, но время прибытия меняется
+        y[client][k] = 0  # машина К больше не обслуживает клиента
+        s[client][k] = 0  # время работы машины К у клиента = 0
+        a[client][k] = 0  # машина не прибывает к клиенту
+
+        TimeOfArrival(a, s, clientRight, clientLeft, k)
+    # если клиент лист
+    if clientLeft != -1 and clientRight == -1:
+        x[clientLeft][client][k] = 0  # теперь после левого соседа машина К никуда не едет кроме депо
+        if clientLeft != 0:
+            x[clientLeft][0][k] = 1  # значит левый сосед становится листом и должен вернуться в депо
+        x[client][0][k] = 0  # а клиент не возвращается в депо
+        y[client][k] = 0  # клиент больше не обслуживается машиной К
+        s[client][k] = 0  # машиной К больше не тратит время у клиента
+        a[client][k] = 0  # и не приезжает
+    if clientLeft == -1:  # logir
+        print("ERROR from DeleteClientaFromPath: такого не может быть нет ни левого ни правого соседа")
+
+
+# удаляем клиента из выбранного маршрута без соединения соседних вершин для TwoOpt
+def DeleteClientaForTwoOpt(x, y, s, a, client):
+    k = NumberCarClienta(y, client)  # номер машины которая обслуживает клиента
+    clientLeft = SearchSosedLeftOrRight(x, y, client, "left")  # ищем город перед клиентом
+    clientRight = SearchSosedLeftOrRight(x, y, client, "right")  # ищем город после клиента
+    # если у клиента есть сосед справа и слева
+    if clientLeft != -1 and clientRight != -1:
+        # x[clientLeft][clientRight][k] = 1  # соединяем левого и правого соседа
+        x[client][clientRight][k] = 0  # удаляем ребро клиента с правым соседом
+        x[clientLeft][client][k] = 0  # удаляем ребро клиента с левым соседом
+
+        # У и S для левого и правого не меняются, но время прибытия меняется
+        y[client][k] = 0  # машина К больше не обслуживает клиента
+        s[client][k] = 0  # время работы машины К у клиента = 0
+        a[client][k] = 0  # машина не прибывает к клиенту
+
+        TimeOfArrival(a, s, clientRight, clientLeft, k)
+    # если у клиента есть сосед слева, а справо депо
+    if clientLeft != -1 and clientRight == 0:
+        # x[clientLeft][client][k] = 0  # теперь после левого соседа машина К никуда не едет кроме депо
+
+        # x[client][0][k] = 0  # а клиент не возвращается в депо
+        y[client][k] = 0  # клиент больше не обслуживается машиной К
+        s[client][k] = 0  # машиной К больше не тратит время у клиента
+        a[client][k] = 0  # и не приезжает
+    if clientLeft == -1:  # logir
+        print("ERROR from DeleteClientaFromPath: такого не может быть нет ни левого ни правого соседа")
+
+
+# присоединяем к листу
+def JoinClientaList(x, y, s, a, client, sosed):
+    clientK = NumberCarClienta(y, client)  # ищем номер машины клиента
+    sosedK = NumberCarClienta(y, sosed)  # ищем номер машины соседа
+
+    s[client][sosedK] = s[client][clientK]  # машина соседа будет работать у клиента столько же
+    TimeOfArrival(a, s, client, sosed, sosedK)
+
+    DeleteClientaFromPath(x, y, s, a, client)
+
+    x[sosed][0][sosedK] = 0  # теперь сосед не лист, значит из него не едет в депо
+    x[sosed][client][sosedK] = 1  # вставляем клиента после соседа
+    x[client][0][sosedK] = 1  # теперь клиент лист, значит он возвращается в депо
+    y[client][sosedK] = 1  # теперь машина соседа обслуживает клиента
+
+
+# оператор перемещения!!!
+# вклиниваем между
+def JoinClientaNonList(x, y, s, a, client, sosed, arr, p):  # ОПЕРАТОР ПЕРЕМЕЩЕНИЯ!
+    sosedK = NumberCarClienta(y, sosed)
+    clientK = NumberCarClienta(y, client)
+
+    sosedLeft = SearchSosedLeftOrRight(x, y, sosed, "left")  # левый сосед соседа
+    sosedRight = SearchSosedLeftOrRight(x, y, sosed, "right")  # правый сосед соседа
+
+    clientLeft = SearchSosedLeftOrRight(x, y, client, "left") # левый сосед клиента
+
+    if l[sosed] < l[client] < l[sosedRight]:  # вставляем справа и проверям, чтобы было все норм у время окончания работ
+        s[client][sosedK] = s[client][clientK]  # машина соседа будет работать у клиента столько же
+        TimeOfArrival(a, s, client, sosed, sosedK)  # чтобы не считать время фактическое или плановое
+
+        DeleteClientaFromPath(x, y, s, a, client)
+
+        x[sosed][sosedRight][sosedK] = 0
+        x[sosed][client][sosedK] = 1
+        x[client][sosedRight][sosedK] = 1
+        y[client][sosedK] = 1  # теперь машина соседа обслуживает клиента
+        # заполняем то что мы хотим запомнить, 5 параметров
+        arr[p][0] = clientLeft
+        arr[p][1] = client
+        arr[p][2] = clientK
+        arr[p][3] = sosed
+        arr[p][4] = sosedRight
+        arr[p][5] = sosedK
+
+
+    elif l[sosedLeft] < l[client] < l[sosed]: # клиента присоединяем слева
+        s[client][sosedK] = s[client][clientK]  # машина соседа будет работать у клиента столько же
+        TimeOfArrival(a, s, client, sosed, sosedK)
+
+        DeleteClientaFromPath(x, y, s, a, client)
+
+        x[sosedLeft][sosed][sosedK] = 0
+        x[sosedLeft][client][sosedK] = 1
+        x[client][sosed][sosedK] = 1
+        y[client][sosedK] = 1
+        # теперь машина соседа обслуживает клиента
+        arr[p][0] = clientLeft
+        arr[p][1] = client
+        arr[p][2] = clientK
+        arr[p][3] = sosedLeft
+        arr[p][4] = sosed
+        arr[p][5] = sosedK
+
+
+
+
+# реализация оператора перемещения!!!
+# переставляем клиента к новому соседу, локальный поиск
+def JoiningClientToNewSosed(x, y, s, a, target_function, arr, p):
+    # копируем чтобы не испортить решение
+    X, Y, Ss, A = CopyingSolution(x, y, s, a)
+
+    ####### Bыбираем клиента #############
+    client = random.randint(1, (
+                N - 1))  # Берем рандомного клиента/ -1 потому что иногда может появится 10, а это выход за границы
+
+    print("Переставляем клиента ", client)
+    print("на машине ", NumberCarClienta(Y, client))
+
+    sosedK = NumberCarClienta(Y, client)  # берем рандомного соседа, главное чтобы не совпал с клиентом
+    while sosedK == NumberCarClienta(Y, client):
+        sosed = random.randint(1, (N - 1))  # выбираем нового соседа
+        sosedK = NumberCarClienta(Y, sosed)
+
+    print("К соседу ", sosed)
+    print("На машине ", NumberCarClienta(Y, sosed))
+
+     # вклиниваем к соседу не листу
+    JoinClientaNonList(X, Y, Ss, A, client, sosed, arr, p)
+
+    # X, Y, Ss, A = DeleteNotUsedCar(X, Y, Ss, A)
+    # target_function = CalculationOfObjectiveFunction(X)
+    # print(target_function)
+    # BeautifulPrint(X, Y, Ss, A)
+    # проверка на успеваемость выполнения работ
+    # если не успел уложиться в срок, штраф
+    print("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ")
+    if window_time_up(A, Ss, Y, K) == 0:
+        if VerificationOfBoundaryConditions(X, Y, Ss, A, "true") == 1:
+            target_function = CalculationOfObjectiveFunction(X, shtrafFunction(Ss, A))
+            print(target_function)
+
+            return  X, Y, Ss, A, target_function
+
+            # x, y, s, a = CopyingSolution(X, Y, Ss, A)
+        else:
+            print(
+                "ERROR from JoiningClientToNewSosed: из-за сломанных вышестоящих ограничений, решение не сохранено")
+
+    elif VerificationOfBoundaryConditions(X, Y, Ss, A) == 1:
+        target_function = CalculationOfObjectiveFunction(X, shtrafFunction(Ss, A))
+
+        return X, Y, Ss, A, target_function
+        # x, y, s, a = CopyingSolution(X, Y, Ss, A)
+    # return target_function
+    else:
+        print("#############################################################33")
+
+
+
+#Создаем хранилище решений для большего числа рещений
+def SolutionStore(size):
+    # Хранилище решений, первый индекс это номер решения, со второго начинается само решение
+    X = [0 for n in range(size)]  # едет или нет ТС с номером К из города I в J
+    for n in range(size):
+        X[n] = [[[0 for k in range(K)] for j in range(N)] for i in range(N)]
+
+    Y = [0 for n in range(size)]  # посещает или нет ТС с номером К объект i
+    for n in range(size):
+        Y[n] = [[0 for k in range(K)] for i in range(N)]
+
+    Ss = [0 for n in range(size)]  # время работы ТС c номером К на объекте i
+    for n in range(size):
+        Ss[n] = [[0 for k in range(K)] for i in range(N)]
+
+    A = [0 for n in range(size)]  # время прибытия ТС с номером К на объект i
+    for n in range(size):
+        A[n] = [[0 for k in range(K)] for i in range(N)]
+
+    Target_Function = [0 for n in
+                       range(size)]  # здесь сохраняем результат целевой функции для каждого решения
+
+    return X, Y, Ss, A, Target_Function
+
+
+# рандомно печатаем лево или право
+# def PrintRightOrLeft():
+#     foo = ['left', 'right']
+#     print("рандомно выбрали = ", random.choice(foo))
+
+
+# беру рандомного клиента из одного маршрута,
+# беру правого соседа
+# затем беру другого рандомного клиента из другого маршрута и
+# беру его правого соседа
+# обязательно эти пары из разных маршрутов!
+def TwoOpt(X, Y, Ss, A, client1, client2):
+    # копируем чтобы не испортить решение
+    x, y, s, a = CopyingSolution(X, Y, Ss, A)
+    # выбираем 1-го клиента
+    # client1 = random.randint(1, (N - 1))
+    client1_K = NumberCarClienta(y, client1)  # определили на какой он машине
+    sosed1 = SearchSosedLeftOrRight(x, y, client1, "right")  # нашли соседа клиента1
+    sosed1_R = SearchSosedLeftOrRight(x, y, sosed1, "right") # нашли правого соседа соседа
+
+    # выбираем 2-го клиента
+    # client2 = random.randint(1, (N - 1))
+    client2_K = NumberCarClienta(y, client2)
+    sosed2 = SearchSosedLeftOrRight(x, y, client2, "right")
+    sosed2_R = SearchSosedLeftOrRight(x, y, sosed2, "right")
+
+    # спиздить вайл у котика на 134 строчке кроссовер
+
+    # если выбрали клиентов из двух разных маршрутов, то все ок
+    if client1_K != client2_K:
+        if sosed1_R != 0 and sosed2_R != 0:
+            if l[client1] < l[sosed2] < l[sosed1_R] and l[client2] < l[sosed1] < l[sosed2_R]:
+                # не знаю нужны и правильны ли следующие 2 строчки
+                s[sosed1][client2_K] = s[sosed1][client1_K]
+                s[sosed2][client1_K] = s[sosed2][client2_K]
+                TimeOfArrival(a, s, sosed2, client1, client1_K)
+                TimeOfArrival(a, s, sosed1, client2, client2_K)
+                TimeOfArrival(a, s, sosed2, sosed1_R, client1_K)
+                TimeOfArrival(a, s, sosed1, sosed2_R, client2_K)
+
+                DeleteClientaForTwoOpt(x, y, s, a, sosed2)
+                DeleteClientaForTwoOpt(x, y, s, a, sosed1)
+
+                x[client1][sosed1][client1_K] = 0
+                x[client1][sosed2][client1_K] = 1
+                x[sosed1][sosed1_R][client1_K] = 0
+                x[sosed2][sosed1_R][client1_K] = 1
+                x[sosed2][sosed2_R][client2_K] = 0
+                x[sosed1][sosed2_R][client2_K] = 1
+                y[sosed1_R][client1_K] = 1
+                y[sosed2_R][client2_K] = 1
+                y[sosed1_R][client2_K] = 0
+                y[sosed2_R][client1_K] = 0
+                y[sosed1][client1_K] = 0
+                y[sosed2][client1_K] = 1
+                x[client2][sosed2][client2_K] = 0
+                x[client2][sosed1][client2_K] = 1
+                y[sosed2][client2_K] = 0
+                y[sosed1][client2_K] = 1
+
+                print("Переставляем соседа1 ", sosed1)
+                print("который обслуживается на машине ", NumberCarClienta(y, client1))
+                print("К клиенту ", client2)
+                print("На машине ", client2_K)
+
+                print("Переставляем соседа2 ", sosed2)
+                print("На машине ", NumberCarClienta(y, client2))
+                print("К клиенту ", client1)
+                print("На машине ", client1_K)
+
+                x, y, s, a, Target_Function= SolutionStore()
+
+
+
+        elif sosed1_R != 0 and sosed2_R == 0:
+            if l[client1] < l[sosed2] < l[sosed1_R] and l[client2] < l[sosed1]:
+                s[sosed1][client2_K] = s[sosed1][client1_K]
+                s[sosed2][client1_K] = s[sosed2][client2_K]
+                TimeOfArrival(a, s, sosed2, client1, client1_K)
+                TimeOfArrival(a, s, sosed1, client2, client2_K)
+                TimeOfArrival(a, s, sosed2, sosed1_R, client1_K)
+                # TimeOfArrival(a, s, sosed1, sosed2_R, client2_K)
+
+                DeleteClientaForTwoOpt(x, y, s, a, sosed2)
+                DeleteClientaForTwoOpt(x, y, s, a, sosed1)
+
+                x[client1][sosed1][client1_K] = 0
+                x[client1][sosed2][client1_K] = 1
+                x[sosed1][sosed1_R][client1_K] = 0
+                x[sosed2][sosed1_R][client1_K] = 1
+                # x[sosed2][sosed2_R][client2_K] = 0
+                # x[sosed1][sosed2_R][client2_K] = 1
+                y[sosed1_R][client1_K] = 1
+                # y[sosed2_R][client2_K] = 1
+                y[sosed1_R][client2_K] = 0
+                # y[sosed2_R][client1_K] = 0
+                y[sosed1][client1_K] = 0
+                y[sosed2][client1_K] = 1
+                x[client2][sosed2][client2_K] = 0
+                x[client2][sosed1][client2_K] = 1
+                y[sosed2][client2_K] = 0
+                y[sosed1][client2_K] = 1
+                # возвращение в депо после обмена
+                x[sosed1][0][client2_K] = 1
+
+                print("Переставляем соседа1 ", sosed1)
+                print("который обслуживается на машине ", NumberCarClienta(y, client1))
+                print("К клиенту ", client2)
+                print("На машине ", client2_K)
+
+                print("Переставляем соседа2 ", sosed2)
+                print("На машине ", NumberCarClienta(y, client2))
+                print("К клиенту ", client1)
+                print("На машине ", client1_K)
+
+                x, y, s, a, Target_Function = SolutionStore()
+
+        elif sosed1_R == 0 and sosed2_R != 0:
+            if l[client1] < l[sosed2]  and l[client2] < l[sosed1] < l[sosed2_R]:
+                # не знаю нужны и правильны ли следующие 2 строчки
+                s[sosed1][client2_K] = s[sosed1][client1_K]
+                s[sosed2][client1_K] = s[sosed2][client2_K]
+                TimeOfArrival(a, s, sosed2, client1, client1_K)
+                TimeOfArrival(a, s, sosed1, client2, client2_K)
+                # TimeOfArrival(a, s, sosed2, sosed1_R, client1_K)
+                TimeOfArrival(a, s, sosed1, sosed2_R, client2_K)
+
+                DeleteClientaForTwoOpt(x, y, s, a, sosed2)
+                DeleteClientaForTwoOpt(x, y, s, a, sosed1)
+
+                x[client1][sosed1][client1_K] = 0
+                x[client1][sosed2][client1_K] = 1
+                # x[sosed1][sosed1_R][client1_K] = 0
+                # x[sosed2][sosed1_R][client1_K] = 1
+                x[sosed2][sosed2_R][client2_K] = 0
+                x[sosed1][sosed2_R][client2_K] = 1
+                # y[sosed1_R][client1_K] = 1
+                y[sosed2_R][client2_K] = 1
+                # y[sosed1_R][client2_K] = 0
+                y[sosed2_R][client1_K] = 0
+                y[sosed1][client1_K] = 0
+                y[sosed2][client1_K] = 1
+                x[client2][sosed2][client2_K] = 0
+                x[client2][sosed1][client2_K] = 1
+                y[sosed2][client2_K] = 0
+                y[sosed1][client2_K] = 1
+                #возвращ в депо после обмена
+                x[sosed2][0][client1_K] = 1
+
+                print("Переставляем соседа1 ", sosed1)
+                print("который обслуживается на машине ", NumberCarClienta(y, client1))
+                print("К клиенту ", client2)
+                print("На машине ", client2_K)
+
+                print("Переставляем соседа2 ", sosed2)
+                print("На машине ", NumberCarClienta(y, client2))
+                print("К клиенту ", client1)
+                print("На машине ", client1_K)
+
+                x, y, s, a, Target_Function = SolutionStore()
+
+        elif sosed1_R == 0 and sosed2_R == 0:
+            if l[client1] < l[sosed2] and l[client2] < l[sosed1]:
+                s[sosed1][client2_K] = s[sosed1][client1_K]
+                s[sosed2][client1_K] = s[sosed2][client2_K]
+                TimeOfArrival(a, s, sosed2, client1, client1_K)
+                TimeOfArrival(a, s, sosed1, client2, client2_K)
+
+                DeleteClientaForTwoOpt(x, y, s, a, sosed2)
+                DeleteClientaForTwoOpt(x, y, s, a, sosed1)
+
+                x[client1][sosed1][client1_K] = 0
+                x[client1][sosed2][client1_K] = 1
+
+                y[sosed1][client1_K] = 0
+                y[sosed2][client1_K] = 1
+                x[client2][sosed2][client2_K] = 0
+                x[client2][sosed1][client2_K] = 1
+                y[sosed2][client2_K] = 0
+                y[sosed1][client2_K] = 1
+
+                # после перестановки они должны возвращаться в депо
+                x[sosed1][0][client2_K] = 1
+                x[sosed2][0][client1_K] = 1
+
+
+                print("Переставляем соседа1 ", sosed1)
+                print("который обслуживается на машине ", NumberCarClienta(y, client1))
+                print("К клиенту ", client2)
+                print("На машине ", client2_K)
+
+                print("Переставляем соседа2 ", sosed2)
+                print("На машине ", NumberCarClienta(y, client2))
+                print("К клиенту ", client1)
+                print("На машине ", client1_K)
+
+                x, y, s, a, Target_Function= SolutionStore()
+
+
+
+    else:
+        print("выбраны клиенты из одного маршрута")
+
+def RealizationTwoOpt(X, Y, Ss, A, Target_function):
+    # копируем чтобы не испортить решение
+    x, y, s, a = CopyingSolution(X, Y, Ss, A)
+
+    #Bыбираем 1- го клиента
+    client1 = random.randint(1, (N - 1))  # Берем рандомного клиента/ -1 потому что иногда может появится 10, а это выход за границы
+    #Выбираем 2-го клиента
+    client2 = random.randint(1, (N - 1))
+#TODO нужно написать какой то цикл, чтобы выполнилось несколько раз  while
+    TwoOpt(x, y, s, a, client1, client2)
+
+    print("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ")
+    if window_time_up(a, s, y, k) == 0:
+        if VerificationOfBoundaryConditions(x, y, s, a, "true") == 1:
+            target_function = CalculationOfObjectiveFunction(x, shtrafFunction(s, a))
+            print(target_function)
+            X, Y, Ss, A = CopyingSolution(x, y, s, a)
+        else:
+            print("ERROR from RealizationTwoOpt: из-за сломанных вышестоящих ограничений, решение не сохранено")
+
+    if VerificationOfBoundaryConditions(X, Y, Ss, A) == 1:
+        target_function = CalculationOfObjectiveFunction(X, shtrafFunction(Ss, A))
+        X, Y, Ss, A = CopyingSolution(x, y, s, a)
+    return Target_function
+
+
+# функция, которая проверяет встречалось уже такое решение в списке запретов или нет
+def ProverkaNaVstrechu(arr, k):
+    for r in range(NumberStartOper):
+        for j in range(6):
+            if arr[r][j] == arr[k][j]:
+                return 1
+    return 0
+
+# зануляем
+def Zzero(X, Y, Ss, A, arr, Target_function):
+    Target_function = 0
+    for k in range(K):
+        print('Номер машины ', k)
+        for i in range(N):
+            for j in range(N):
+                X[i][j][k] = 0
+
+        for i in range(N):
+            Y[i][k] = 0
+
+        for i in range(N):
+            A[i][k] = 0
+
+        for i in range(N):
+            Ss[i][k] = 0
+
+    for i in range(6):
+        arr[i] = "0"
+    print("10 10 10 10")
+
+
+
+# заполняю массив, сколько операторов, столько и форов
+def start_operator(X, Y, Ss, A, Target_function, x, y, s, a, target_function, arr, p):
+    print("44444444444")
+    # сначала для оператора перемещения:
+    for i in range(NumberStartOper):
+        X[i], Y[i], Ss[i], A[i], Target_function[i] = JoiningClientToNewSosed(x, y, s, a, target_function, arr, p)
+        BeautifulPrint(X[i], Y[i], Ss[i], A[i])
+
+
+        print("5555555555")
+        if ProverkaNaVstrechu(arr, i) == 1:
+            Zzero(X[i], Y[i], Ss[i], A[i], arr[i], Target_function[i])
+            print("6666666666666")
+        print("i = ", i)
+        assert VerificationOfBoundaryConditions(X[i], Y[i], Ss[i], A[i], "true") == 1
+
+
+    # теперь для оператора 2Opt:
+    # for i in range(NumberStartOper, 2 * NumberStartOper):
+    #     Target_function[i], X[i], Y[i], Ss[i], A[i] = RealizationTwoOpt(x, y, s, a, target_function)
+
+
+# ищет минимальную целевую функцию, возвращает индекс
+def MinFromTarget(Target_function):
+    print("888888888")
+    # Target_min = 1000000000000000000000000
+    # for i in range(N):
+    #     if Target_function[i] < Target_min:
+    #         Target_min = Target_function[i]
+    #
+    # for i in range(N):
+    #     if Target_function[i] == Target_min:
+    #         Target_function[i] = 0
+    #         print("888888888")
+    #         return i
+    min_target = min(Target_function)
+    print("99999999999999")
+    return Target_function.index(min_target)
+
+
+
+
+
+
+
+
+
+
+
+
+
+

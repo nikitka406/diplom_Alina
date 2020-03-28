@@ -1,6 +1,7 @@
 from functions import *
 from math import *
 
+result = 0  # значение целевой функции
 N = 13
 g = 5000
 
@@ -11,14 +12,15 @@ d = [[0 for j in range(N)] for i in range(N)]
 for i in range(N):
     for j in range(N):
         d[i][j] = sqrt(pow((OX[i] - OX[j]), 2) + pow((OY[i] - OY[j]), 2))
-        if d[i][j] > g and i == 0:
-            d[i][j] = -1
+        if d[i][j] > g:
+            d[i][j] = 0
+            print("слишком далеко, туда не еду")
 
-
-for i in range(N):
-    for j in range(N):
-        print(d[i][j], end=" ")
-    print("\n")
+# print("d[i][j] = ")
+# for i in range(N):
+#     for j in range(N):
+#         print(d[i][j], end=" ")
+#     print("\n")
 
 
 #километровый выигрыш
@@ -28,16 +30,16 @@ for i in range(N):
         if i != j:
             km_win[i][j] = d[0][i] + d[0][j] - d[i][j]
 
-print('km_win = ')
-for i in range(N):
-    for j in range(N):
-        print(km_win[i][j], end=" ")
-    print("\n")
+# print('km_win = ')
+# for i in range(N):
+#     for j in range(N):
+#         print(km_win[i][j], end=" ")
+#     print("\n")
 
-t = d
-for i in range(N):
-    for j in range(N):
-        t[i][j] = (t[i][j]/24)
+# t = d
+# for i in range(N):
+#     for j in range(N):
+#         t[i][j] = (t[i][j])
 
 #Алгоритм:
 #ищем макс километровый выигрыш
@@ -60,111 +62,102 @@ X = x
 Y = y
 A = a
 Ss = s
-AddTwoCityInRoute(i, j,0, x, y, s, a, bufer)
-# #####################3
-# X = x
-# Y = y
-# A = a
-# Ss = s
-# # print (10)
-# indicator = 0
-# while indicator != 1:
-#
-#     bufer[0][N] = j  # двойной массив, где первое - это номер машины, второе - это маршрут
-#     bufer[0][N + 1] = i
-#     Y[i][0] = 1
-#     Y[j][0] = 1
-#     Ss[i][0] = S[i]
-#     Ss[j][0] = S[j]
-#     if E[j] >= t[0][j]:
-#         A[j][0] = E[j]
-#         # print(100)
-#     else:
-#         A[j][0] = t[0][j]
-#     A[i][0] = A[j][0] + Ss[j][0] + t[i][j]
-#     X[0][j][0] = 1
-#     X[j][i][0] = 1
-#     X[i][0][0] = 1
-#     # print(200)
-#     # BeautifulPrint(X, Y, Ss, A)
-#     if window_time_up(A, Ss, Y, K) != 1:
-#         X = x
-#         Y = y
-#         A = a
-#         Ss = s
-#         bufer[0][N] = i  # двойной массив, где первое - это номер машины, второе - это маршрут
-#         bufer[0][N + 1] = j
-#         Y[i][0] = 1
-#         Y[j][0] = 1
-#         Ss[i][0] = S[i]
-#         Ss[j][0] = S[j]
-#         # print(300)
-#         if E[i] >= t[0][i]:
-#             A[i][0] = E[i]
-#             # print(400)
-#         else:
-#             A[i][0] = t[0][i]
-#             # print(500)
-#         A[j][0] = A[i][0] + Ss[i][0] + t[i][j]
-#         X[0][i][0] = 1
-#         X[i][j][0] = 1
-#         X[j][0][0] = 1
-#         indicator = window_time_up(A, Ss, Y, K)
-#     else:
-#         x = X
-#         y = Y
-#         a = A
-#         s = Ss
-#         indicator = window_time_up(A, Ss, Y, K)
-#         break
-        #####################
+AddTwoCityInRoute(i, j, 0, x, y, s, a, bufer)
+
 flag[0] = 1
 flag[i] = 1
 flag[j] = 1
 
-# print (11)
-# for i in range(K):
-#     for j in range((N + 1) * 2):
-#         print(bufer[i][j], end=" ")
-#     print("\n")
-# print (12)
+def Zapolnenie(X, Y, Ss, kyda, new_client, sosed, car,nomer_sosed):
+    bufer[car][nomer_sosed] = new_client
+    Y[new_client][car] = 1
+    Ss[new_client][car] = S[new_client]
+
+    if kyda == "right":
+        X[sosed][new_client][car] = 1
+        X[sosed][0][car] = 0
+        X[new_client][0][car] = 1
+    elif kyda == "left":
+        X[new_client][sosed][car] = 1
+        X[0][sosed][car] = 0
+        X[0][new_client][car] = 1
+
+
+def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, car, nomer_sosed, l_p, sosed, kyda):
+
+    if E[
+        new_client] >= l_p and kyda == "right":  # если время начала работы нового клиента больше чем время прибытия + работы + переезда предыдущего
+        A[new_client][car] = E[new_client]
+        Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
+        flag[i] = 1
+        flag[j] = 1
+    elif E[new_client] < l_p and kyda == "right":
+        A[new_client][car] = l_p
+        Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
+        flag[i] = 1
+        flag[j] = 1
+
+    if A[sosed][car] >= l_p and kyda == "left":
+        A[new_client][car] = A[sosed][car] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
+        Zapolnenie(X, Y, Ss, "left", new_client, sosed, car, nomer_sosed)
+        flag[i] = 1
+        flag[j] = 1
+        if A[new_client][car] <= E[new_client]:
+            A[new_client][car] = E[new_client]
+    elif A[sosed][car] < l_p and kyda == "left":
+        print("ne podhodit dlya marchruta")
+
+    # if E[sosed] >= l_p and kyda == "left":
+    #     A[new_client][car] = t[0][new_client]
+    #     # A[new_client][car] = E[sosed] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
+    #
+    # elif E[sosed] < l_p and kyda == "left":
+    #     A[new_client][car] = E[new_client] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
+
+    if VerificationOfBoundaryConditionsForStartSolution(X, Y, Ss, A) != 1:
+        X = x
+        Y = y
+        A = a
+        Ss = s
+    else:
+        x = X
+        y = Y
+        a = A
+        s = Ss
+        flag[new_client] = 1
+
 
 summa = 0
 while summa != N:
     summa = 0
-    i, j = searchMax(km_win)          # нашли новый максимум
+    i, j = searchMax(km_win)   # нашли новый максимум
     print("i = ", i)
     print("j = ", j)
     print("\n")
 
     m, n = searchIndex(bufer, i) #если в маршруте нашли индекс i
     print(m, " ", n)
-    p, r = searchIndex(bufer, j) #  p - номер маршрута, r - номер позиции в маршруте для другого города
+    p, r = searchIndex(bufer, j) # если в маршруте нашли индекс j;
+    # p - номер маршрута, r - номер позиции в маршруте для другого города
     print(p, " ", r)
     #смотрим есть ли один из новых индексов в маршруте, возвращает номер маршрута в котором находится  итый город
     # m - номер маршрута, n - номер позиции в маршруте
     if m != -1 and n != -1 and p != -1 and r != -1:
-        print("Оба города есть, то ничего не делаем")
+        print("Exception : Оба города есть, то ничего не делаем")
     else:
-        if m != -1 and n != -1 and p == -1 and r == -1:               # если не -1 то мы нашли индекс i
+        if m != -1 and n != -1 and p == -1 and r == -1:  # если не -1 то мы нашли индекс i
             if n > N and bufer[m][n+1] == 0:  # если больше половины и стоит 0, а не какое-то число, то вставляем в конец
                 # bufer[m][n + 1] = j
                 l_p = A[bufer[m][n]][m] + Ss[bufer[m][n]][m] + t[bufer[m][n]][j]#время приезда к соседу + время на работу + время от соседа до нового клиента
                 Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, j, m, n+1, l_p, i, "right")
-                print(1)
-                flag[i] = 1
-                flag[j] = 1
             elif n <= N and bufer[m][n-1] == 0:  # если меньше половины, то вставляем в начало
                 # bufer[m][n - 1] = j
                 if E[j] >= t[0][j]:
-                    l_p = E[j] + S[j] + t[j][bufer[m][n]]
+                    l_p = E[j] + S[j] + t[j][bufer[m][n]] # мы не можем начать работать раньше, чем временное окно
                 else:
                     l_p = t[0][j] + S[j] + t[j][bufer[m][n]]
                 Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, j, m, n - 1, l_p, i, "left")
-                print(3)
-                flag[i] = 1
-                flag[j] = 1
-        else: print("ничего не делаем")
+        else: print("Exception: на этом шаге ничего не делаем, но скорее всего на следующем вставим в маршрут")
 
         # print(p, " ", r)
         if m == -1 and n == -1 and p != -1 and r != -1: #если нашли индекс j
@@ -172,18 +165,17 @@ while summa != N:
                 # bufer[p][r + 1] = i
                 l_p = A[bufer[p][r]][p] + Ss[bufer[p][r]][p] + t[bufer[p][r]][i]
                 Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, i, p, r+1, l_p, j, "right")
-                print(2)
-                flag[i] = 1
-                flag[j] = 1
+
             elif r <= N and bufer[p][r-1] == 0:  # если меньше половины, то вставляем в начало
-                # bufer[p][r - 1] = i
-                l_p = A[bufer[p][r]][p] + Ss[bufer[p][r]][p] + t[bufer[p][r]][i]
+                if E[i] >= t[0][i]:
+                    l_p = E[i] + S[i] + t[i][bufer[m][n]] # мы не можем начать работать раньше, чем временное окно
+                else:
+                    l_p = t[0][i] + S[i] + t[i][bufer[m][n]]
                 Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, i, p, r-1, l_p, j, "left")
-                print(4)
-                flag[i] = 1
-                flag[j] = 1
-        # if (m != -1 and n == -1) or (n != -1 and m == 1):
-        #     print(444)
+                # bufer[p][r - 1] = i
+                # l_p = A[bufer[p][r]][p] + Ss[bufer[p][r]][p] + t[bufer[p][r]][i]
+                # Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, i, p, r-1, l_p, j, "left")
+
 
         if m == -1 and n == -1 and p == -1 and r == -1:
             m = search_pustoy_marchrut(bufer)  # возвращает номер маршрута, который пустой
@@ -191,54 +183,94 @@ while summa != N:
 
             flag[i] = 1
             flag[j] = 1
-            print(5)
-            for i in range(K):
-                for j in range((N + 1) * 2):
-                    print(bufer[i][j], end=" ")
-                print("\n")
-            print(10)
+
+            # for i in range(K):
+            #     for j in range((N + 1) * 2):
+            #         print(bufer[i][j], end=" ")
+            #     print("\n")
+
 
     for i in range(N):
         summa += flag[i]
 
-    print(summa)
+    print('summa = ', summa)
+
     for i in range(K):
         for j in range((N + 1) * 2):
             print(bufer[i][j], end=" ")
         print("\n")
-print (13)
-# x, y, s, a = Start_solution(bufer)
+
 result = CalculationOfObjectiveFunction(x)
 print('result = ', result)
+BeautifulPrint(x, y, s, a)
 
-for i in range(K):
-    for j in range((N + 1) * 2):
-        print(bufer[i][j], end=" ")
-    print("\n")
+# штрафная функция
+def shtrafFunction(s, a):
+    shtraf_sum = 0
+    for i in range(N):
+        for k in range(K):
+            if a[i][k] + s[i][k] > l[i]:
+                shtraf_sum += ((a[i][k] + s[i][k]) - l[i]) * shtraf
+    return shtraf_sum
 
-for k in range(K):
-    print("Номер машины = ", k)
-    for i in range(N):
-        for j in range(N):
-            print(x[i][j][k], end = " ")
-        print("\n")
-    print("\n")
-    for i in range(N):
-        print(y[i][k], end = ' ')
-    print("\n")
+# подсчет значения целевой функции
+def CalculationOfObjectiveFunction(x, shtrafFunction = 0):
+    target_function = 0
+    for k in range(K):
+        for i in range(N):
+            for j in range(N):
+                target_function += d[i][j]*x[i][j][k]
+    target_function += shtrafFunction
+    return target_function
+
+target_function = CalculationOfObjectiveFunction(x)
+print("target_function_start_solution = ", target_function)
+
+###### Печатаем оператор перемещения
+# for reloc in range(relocate_param):
+#     target_function = JoiningClientToNewSosed(x, y, s, a, target_function)
+#     print("target_function pri relocate operator = ", target_function)
+
+# for TwoOp in range(TwoOpt_param):
+#     target_function = RealizationTwoOpt(x, y, s, a, target_function)
+#     print("target_function pri TwoOpt operator = ", target_function)
+
+# for k in range(K):
+#     print("Номер машины = ", k)
+#     for i in range(N):
+#         for j in range(N):
+#             print(x[i][j][k], end = " ")
+#         print("\n")
+#     print("\n")
+
+# for i in range(K):
+#     for j in range((N + 1) * 2):
+#         print(bufer[i][j], end=" ")
+#     print("\n")
+
+# for k in range(K):
+#     print("Номер машины = ", k)
+#     for i in range(N):
+#         for j in range(N):
+#             print(x[i][j][k], end = " ")
+#         print("\n")
+#     print("\n")
+#     for i in range(N):
+#         print(y[i][k], end = ' ')
+#     print("\n")
 #
 # for i in range(N):
 #     for k in range(K):
 #         print(y[i][k], end = ' ')
 #     print("\n")
 # print("\n")
-print("\n")
+# print("\n")
 
-for i in range(N):
-    for k in range(K):
-        print(a[i][k], end = ' ')
-    print("\n")
-print("\n")
+# for i in range(N):
+#     for k in range(K):
+#         print(a[i][k], end = ' ')
+#     print("\n")
+# print("\n")
 #
 # for i in range(N):
 #     for k in range(K):
@@ -249,8 +281,47 @@ print("\n")
 # for i in range(N):
 #     print(l[i], end = ' ')
 # print("\n")
-#assert VerificationOfBoundaryConditions(x, y, s, a) == 1
 
 
-
+##################################3
+# # создан массив, который будет сохранять решения всех операторов, размера = кол-во операторов * заданное число в инпут дате
+# X_operator, Y_operator, Ss_operator, A_operator, Target_operator = SolutionStore(1 * NumberStartOper)
+# print("111111111111111")
+# # assert VerificationOfBoundaryConditions(X_operator[0], Y_operator[0], Ss_operator[0], A_operator[], "true") == 1
+#
+#
+# # start_operator(X_operator, Y_operator, Ss_operator, A_operator, Target_operator, x, y, s, a, target_function, arr, i)
+# # BeautifulPrint(x, y, s, a)
+#
+# # массив, который сохраняет перемещение оператора с минимальной целевой функцией, где М - кратность повторений списка табу
+# arr = [[0 for i in range(6)] for n in range(10)]    # krat - отвечает на каком круге мы сейчас (кратность круга)
+# # arr[0] - клиент, ОТ которого перемещают
+# # arr[1] - клиент, КОТОРОГО перемещают
+# # arr[2] - машина перемещаемого клиента на которой он БЫЛ
+# # arr[3] - клиент, К которому перемещают
+# # arr[4] - клиент, который ТЕПЕРЬ СПРАВА от перемещаемого
+# # arr[5] - машина перемещаемого клиента на которой он ТЕПЕРЬ
+# print("22222222222222222")
+#
+# # создан массив поиска с запретами, размер = 10, заполняем
+# X_tabu, Y_tabu, Ss_tabu, A_tabu, Target_tabu = SolutionStore(10)
+# print("333333333333333")
+# for k in range(M): # кратность круга (номер круга)
+#     for i in range(1, 10):
+#         # assert VerificationOfBoundaryConditions(X_operator[i], Y_operator[i], Ss_operator[i], A_operator[i], "true") == 1
+#         start_operator(X_operator, Y_operator, Ss_operator, A_operator, Target_operator, x, y, s, a, target_function,
+#                        arr, i)
+#         BeautifulPrint(x, y, s, a)
+#         print("77777777777")
+#         # j = MinFromTarget(Target_operator)
+#         # X_tabu[i] = X_operator[j]
+#         # Y_tabu[i] = Y_operator[j]
+#         # Ss_tabu[i] = Ss_operator[j]
+#         # A_tabu[i] = A_operator[j]
+#         # Target_tabu[i] = Target_operator[j]
+#         # print("123456789")
+#
+#     # print(Target_tabu, "Target_tabu = ")
+#
+##############################################
 

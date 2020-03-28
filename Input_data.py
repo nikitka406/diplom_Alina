@@ -4,13 +4,29 @@ from math import *
 N = 13
 
 #набор всех ТС
-K = 5
+K = 4
+
+shtraf = 100
+relocate_param = 13
+TwoOpt_param = 30
+
+kolvoTabu = 10
+
+# крастность повторений круга табу
+M = 3
 
 # цена за аренду машины
 # car_cost = 1000
 
 # пороговое значение (в км)
-# g = 5000
+g = 5000
+
+# отвечает за то сколько раз вызываем операторы
+NumberStartOper = 0
+if N > 30:
+    NumberStartOper = N * 20 / 100
+else:
+    NumberStartOper = N
 
 
 #координаты депо и объектов
