@@ -120,57 +120,6 @@ def CalculationOfObjectiveFunction(x, shtrafFunction=0):
     return target_function
 
 
-def Zapolnenie(X, Y, Ss, kyda, new_client, sosed, car, nomer_sosed):
-    bufer[car][nomer_sosed] = new_client
-    Y[new_client][car] = 1
-    Ss[new_client][car] = S[new_client]
-    if kyda == "right":
-        X[sosed][new_client][car] = 1
-        X[sosed][0][car] = 0
-        X[new_client][0][car] = 1
-    elif kyda == "left":
-        X[new_client][sosed][car] = 1
-        X[0][sosed][car] = 0
-        X[0][new_client][car] = 1
-
-
-def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, car, nomer_sosed, l_p, sosed, kyda):
-    if E[
-        new_client] >= l_p and kyda == "right":  # если время начала работы нового клиента больше чем время прибытия + работы + переезда предыдущего
-        A[new_client][car] = E[new_client]
-        Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
-    elif E[new_client] < l_p and kyda == "right":
-        A[new_client][car] = l_p
-        Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
-
-    if A[sosed][car] >= l_p and kyda == "left":
-        A[new_client][car] = A[sosed][car] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
-        Zapolnenie(X, Y, Ss, "left", new_client, sosed, car, nomer_sosed)
-        if A[new_client][car] <= E[new_client]:
-            A[new_client][car] = E[new_client]
-    elif A[sosed][car] < l_p and kyda == "left":
-        print("ne podhodit dlya marchruta")
-
-    # if E[sosed] >= l_p and kyda == "left":
-    #     A[new_client][car] = t[0][new_client]
-    #     # A[new_client][car] = E[sosed] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
-    #
-    # elif E[sosed] < l_p and kyda == "left":
-    #     A[new_client][car] = E[new_client] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
-
-    if VerificationOfBoundaryConditions(X, Y, Ss, A) != 1:
-        X = x
-        Y = y
-        A = a
-        Ss = s
-    else:
-        x = X
-        y = Y
-        a = A
-        s = Ss
-        flag[new_client] = 1
-
-
 # Граничные условия
 def X_join_Y(x, y, K):
     bufer1 = 0
@@ -303,41 +252,127 @@ def VerificationOfBoundaryConditionsForStartSolution(x, y, s, a):
         return 0
 
 
-def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, car, nomer_sosed, l_p, sosed, kyda):
-    if E[
-        new_client] >= l_p and kyda == "right":  # если время начала работы нового клиента больше чем время прибытия + работы + переезда предыдущего
-        A[new_client][car] = E[new_client]
-        Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
-    elif E[new_client] < l_p and kyda == "right":
-        A[new_client][car] = l_p
-        Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
+# def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, car, nomer_sosed, l_p, sosed, kyda):
+#     if E[
+#         new_client] >= l_p and kyda == "right":  # если время начала работы нового клиента больше чем время прибытия + работы + переезда предыдущего
+#         A[new_client][car] = E[new_client]
+#         Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
+#     elif E[new_client] < l_p and kyda == "right":
+#         A[new_client][car] = l_p
+#         Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
+#
+#     if A[sosed][car] >= l_p and kyda == "left":
+#         A[new_client][car] = A[sosed][car] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
+#         Zapolnenie(X, Y, Ss, "left", new_client, sosed, car, nomer_sosed)
+#         if A[new_client][car] <= E[new_client]:
+#             A[new_client][car] = E[new_client]
+#     elif A[sosed][car] < l_p and kyda == "left":
+#         print("ne podhodit dlya marchruta")
+#
+#     # if E[sosed] >= l_p and kyda == "left":
+#     #     A[new_client][car] = t[0][new_client]
+#     #     # A[new_client][car] = E[sosed] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
+#     #
+#     # elif E[sosed] < l_p and kyda == "left":
+#     #     A[new_client][car] = E[new_client] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
+#
+#     if VerificationOfBoundaryConditionsForStartSolution(X, Y, Ss, A) != 1:
+#         X = x
+#         Y = y
+#         A = a
+#         Ss = s
+#     else:
+#         x = X
+#         y = Y
+#         a = A
+#         s = Ss
+#         flag[new_client] = 1
 
-    if A[sosed][car] >= l_p and kyda == "left":
-        A[new_client][car] = A[sosed][car] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
-        Zapolnenie(X, Y, Ss, "left", new_client, sosed, car, nomer_sosed)
-        if A[new_client][car] <= E[new_client]:
-            A[new_client][car] = E[new_client]
-    elif A[sosed][car] < l_p and kyda == "left":
-        print("ne podhodit dlya marchruta")
 
-    # if E[sosed] >= l_p and kyda == "left":
-    #     A[new_client][car] = t[0][new_client]
-    #     # A[new_client][car] = E[sosed] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
-    #
-    # elif E[sosed] < l_p and kyda == "left":
-    #     A[new_client][car] = E[new_client] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
+# def AddTwoCityInRoute(i, j, m, x, y, s, a, bufer):
+#     X = x
+#     Y = y
+#     A = a
+#     Ss = s
+#
+#     if E[j] >= t[0][j]:
+#         A[j][m] = E[j]
+#     else:
+#         A[j][m] = t[0][j]
+#
+#     if A[j][m] + Ss[j][m] + t[j][i] <= l[i] - Ss[i][m]:
+#         bufer[m][N] = j  # двойной массив, где первое - это номер машины, второе - это маршрут
+#         bufer[m][N + 1] = i
+#
+#         Y[j][m] = 1
+#         Y[i][m] = 1
+#         Ss[j][m] = S[j]
+#         Ss[i][m] = S[i]
+#
+#         if E[j] >= t[0][j]:
+#             A[j][m] = E[j]
+#         else:
+#             A[j][m] = t[0][j]
+#
+#         A[i][m] = A[j][m] + Ss[j][m] + t[i][j]
+#
+#         if A[i][m] <= E[i]:
+#             A[i][m] = E[i]
+#
+#         X[0][j][m] = 1
+#         X[j][i][m] = 1
+#         X[i][0][m] = 1
+#         # print(200)
+#         # BeautifulPrint(X, Y, Ss, A)
+#         flag[i] = 1
+#         flag[j] = 1
+#
+#
+#     if E[i] >= t[0][i]:
+#         A[i][m] = E[i]
+#     else:
+#         A[i][m] = t[0][i]
+#
+#
+#     elif A[i][m] + Ss[i][m] + t[i][j] <= l[j] - Ss[j][m]:
+#         # if window_time_up(A, Ss, Y, K) != 1:
+#         X[0][j][m] = 0
+#         X[j][i][m] = 0
+#         X[i][0][m] = 0
+#         bufer[m][N] = i  # двойной массив, где первое - это номер машины, второе - это маршрут
+#         bufer[m][N + 1] = j
+#         Y[i][m] = 1
+#         Y[j][m] = 1
+#         Ss[i][m] = S[i]
+#         Ss[j][m] = S[j]
+#
+#         if E[i] >= t[0][i]:
+#             A[i][m] = E[i]
+#         else:
+#             A[i][m] = t[0][i]
+#
+#         A[j][m] = A[i][m] + Ss[i][m] + t[i][j]
+#         if A[j][m] <= E[j]:
+#             A[j][m] = E[j]
+#         X[0][i][m] = 1
+#         X[i][j][m] = 1
+#         X[j][0][m] = 1
+#
+#
+#         flag[i] = 1
+#         flag[j] = 1
+#
+#
+#
+#
+#         # indicator = window_time_up(A, Ss, Y, K)
+#     else:
+#         print("AddTwoCityInRoute: нельзя создать новый маршрут из-за временных окон")
+#         x = X
+#         y = Y
+#         a = A
+#         s = Ss
 
-    if VerificationOfBoundaryConditionsForStartSolution(X, Y, Ss, A) != 1:
-        X = x
-        Y = y
-        A = a
-        Ss = s
-    else:
-        x = X
-        y = Y
-        a = A
-        s = Ss
-        flag[new_client] = 1
 
 
 def AddTwoCityInRoute(i, j, m, x, y, s, a, bufer):
@@ -345,24 +380,34 @@ def AddTwoCityInRoute(i, j, m, x, y, s, a, bufer):
     Y = y
     A = a
     Ss = s
-    # print (10)
-    if E[j] + Ss[j][m] + t[j][i] <= l[i] - Ss[i][m]:
+
+    if E[j] >= t[0][j]:
+        A[j][m] = E[j]
+    else:
+        A[j][m] = t[0][j]
+
+    if E[i] >= t[0][i]:
+        A[i][m] = E[i]
+    else:
+        A[i][m] = t[0][i]
+
+    # если временные рамки не нарушаются при вставлении j i и i j, то вставляем j i
+    if A[j][m] + Ss[j][m] + t[j][i] <= l[i] - Ss[i][m] and A[i][m] + Ss[i][m] + t[i][j] <= l[j] - Ss[j][m]:
         bufer[m][N] = j  # двойной массив, где первое - это номер машины, второе - это маршрут
         bufer[m][N + 1] = i
 
         Y[j][m] = 1
         Y[i][m] = 1
-
         Ss[j][m] = S[j]
         Ss[i][m] = S[i]
 
-        if E[j] >= t[0][j]:
-            A[j][m] = E[j]
-            # print(100)
-        else:
-            A[j][m] = t[0][j]
+        # if E[j] >= t[0][j]:
+        #     A[j][m] = E[j]
+        # else:
+        #     A[j][m] = t[0][j]
 
         A[i][m] = A[j][m] + Ss[j][m] + t[i][j]
+
         if A[i][m] <= E[i]:
             A[i][m] = E[i]
 
@@ -371,44 +416,78 @@ def AddTwoCityInRoute(i, j, m, x, y, s, a, bufer):
         X[i][0][m] = 1
         # print(200)
         # BeautifulPrint(X, Y, Ss, A)
-        flag[i] = 1
-        flag[j] = 1
+        # flag[i] = 1
+        # flag[j] = 1
 
-    elif E[i] + Ss[i][m] + t[i][j] <= l[j] - Ss[j][m]:
+
+    elif A[j][m] + Ss[j][m] + t[j][i] <= l[i] - Ss[i][m] and A[i][m] + Ss[i][m] + t[i][j] > l[j] - Ss[j][m]:
+        bufer[m][N] = j  # двойной массив, где первое - это номер машины, второе - это маршрут
+        bufer[m][N + 1] = i
+
+        Y[j][m] = 1
+        Y[i][m] = 1
+        Ss[j][m] = S[j]
+        Ss[i][m] = S[i]
+
+        # if E[j] >= t[0][j]:
+        #     A[j][m] = E[j]
+        # else:
+        #     A[j][m] = t[0][j]
+
+        A[i][m] = A[j][m] + Ss[j][m] + t[i][j]
+
+        if A[i][m] <= E[i]:
+            A[i][m] = E[i]
+
+        X[0][j][m] = 1
+        X[j][i][m] = 1
+        X[i][0][m] = 1
+        # print(200)
+        # BeautifulPrint(X, Y, Ss, A)
+        # flag[i] = 1
+        # flag[j] = 1
+
+
+    elif A[j][m] + Ss[j][m] + t[j][i] > l[i] - Ss[i][m] and A[i][m] + Ss[i][m] + t[i][j] <= l[j] - Ss[j][m]:
         # if window_time_up(A, Ss, Y, K) != 1:
-        X[0][j][m] = 0
-        X[j][i][m] = 0
-        X[i][0][m] = 0
+        # X[0][j][m] = 0
+        # X[j][i][m] = 0
+        # X[i][0][m] = 0
         bufer[m][N] = i  # двойной массив, где первое - это номер машины, второе - это маршрут
         bufer[m][N + 1] = j
         Y[i][m] = 1
         Y[j][m] = 1
         Ss[i][m] = S[i]
         Ss[j][m] = S[j]
-        # print(300)
-        if E[i] >= t[0][i]:
-            A[i][m] = E[i]
-            # print(400)
-        else:
-            A[i][m] = t[0][i]
-            # print(500)
+
+        # if E[i] >= t[0][i]:
+        #     A[i][m] = E[i]
+        # else:
+        #     A[i][m] = t[0][i]
+
         A[j][m] = A[i][m] + Ss[i][m] + t[i][j]
+
         if A[j][m] <= E[j]:
             A[j][m] = E[j]
+
         X[0][i][m] = 1
         X[i][j][m] = 1
         X[j][0][m] = 1
 
-        flag[i] = 1
-        flag[j] = 1
+        # flag[i] = 1
+        # flag[j] = 1
 
         # indicator = window_time_up(A, Ss, Y, K)
     else:
-        print("AddTwoCityInRoute: нельзя вставить из-за временных окон")
-        x = X
-        y = Y
-        a = A
-        s = Ss
+        print("AddTwoCityInRoute: нельзя создать новый маршрут из-за временных окон")
+        flag[i] = 0
+        flag[j] = 0
+        # x = X
+        # y = Y
+        # a = A
+        # s = Ss
+
+
 
 
 # Считаем кол-во используемых ТС

@@ -84,28 +84,47 @@ def Zapolnenie(X, Y, Ss, kyda, new_client, sosed, car,nomer_sosed):
 
 
 def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, car, nomer_sosed, l_p, sosed, kyda):
-
-    if E[
-        new_client] >= l_p and kyda == "right":  # если время начала работы нового клиента больше чем время прибытия + работы + переезда предыдущего
-        A[new_client][car] = E[new_client]
-        Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
-        flag[i] = 1
-        flag[j] = 1
-    elif E[new_client] < l_p and kyda == "right":
-        A[new_client][car] = l_p
-        Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
-        flag[i] = 1
-        flag[j] = 1
-
-    if A[sosed][car] >= l_p and kyda == "left":
-        A[new_client][car] = A[sosed][car] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
-        Zapolnenie(X, Y, Ss, "left", new_client, sosed, car, nomer_sosed)
-        flag[i] = 1
-        flag[j] = 1
-        if A[new_client][car] <= E[new_client]:
+    if kyda == "right":
+        if E[new_client] >= l_p and l[new_client] >= l_p + S[new_client] and kyda == "right":  # если время начала работы нового клиента больше чем время прибытия + работы + переезда предыдущего
             A[new_client][car] = E[new_client]
-    elif A[sosed][car] < l_p and kyda == "left":
-        print("ne podhodit dlya marchruta")
+            Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
+            flag[i] = 1
+            flag[j] = 1
+        elif E[new_client] < l_p and l[new_client] >= l_p + S[new_client] and kyda == "right":
+            A[new_client][car] = l_p
+            Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
+            flag[i] = 1
+            flag[j] = 1
+        elif l[new_client] < l_p + S[new_client]:
+            print("не можем вставить, т.к. не успеет закончить работу вовремя")
+            # flag[i] = 0
+            # flag[j] = 0
+
+    elif kyda == "left":
+        ############################
+        # if E[j] >= t[0][j]:
+        #     l_p = E[j] + S[j] + t[j][bufer[m][n]]  # мы не можем начать работать раньше, чем временное окно
+        # else:
+        #     l_p = t[0][j] + S[j] + t[j][bufer[m][n]]
+        ##############################
+        if A[sosed][car] >= l_p and kyda == "left": #
+            A[new_client][car] = A[sosed][car] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
+            Zapolnenie(X, Y, Ss, "left", new_client, sosed, car, nomer_sosed)
+            flag[i] = 1
+            flag[j] = 1
+            if A[new_client][car] <= E[new_client]:
+                A[new_client][car] = E[new_client]
+        elif A[sosed][car] < l_p and kyda == "left":
+            print("ne podhodit dlya marchruta")
+            # flag[i] = 0
+            # flag[j] = 0
+
+    else:
+        print("введено неправильно right или left")
+
+
+
+
 
     # if E[sosed] >= l_p and kyda == "left":
     #     A[new_client][car] = t[0][new_client]
@@ -114,20 +133,20 @@ def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, ca
     # elif E[sosed] < l_p and kyda == "left":
     #     A[new_client][car] = E[new_client] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
 
-    if VerificationOfBoundaryConditionsForStartSolution(X, Y, Ss, A) != 1:
-        X = x
-        Y = y
-        A = a
-        Ss = s
+    if VerificationOfBoundaryConditionsForStartSolution(X, Y, Ss, A) != 1:  # если сломались граничные условия, то не сохраняем
+        X = x.copy()
+        Y = y.copy()
+        A = a.copy()
+        Ss = s.copy()
     else:
-        x = X
-        y = Y
-        a = A
-        s = Ss
-        flag[new_client] = 1
+        x = X.copy()
+        y = Y.copy()
+        a = A.copy()
+        s = Ss.copy()
+        # flag[new_client] = 1
 
 
-summa = 0
+summa = 3 # уже построено начальное решение, а значит посетили депо и двух клиентов = 3
 while summa != N:
     summa = 0
     i, j = searchMax(km_win)   # нашли новый максимум
@@ -144,26 +163,31 @@ while summa != N:
     # m - номер маршрута, n - номер позиции в маршруте
     if m != -1 and n != -1 and p != -1 and r != -1:
         print("Exception : Оба города есть, то ничего не делаем")
+
     else:
         if m != -1 and n != -1 and p == -1 and r == -1:  # если не -1 то мы нашли индекс i
             if n > N and bufer[m][n+1] == 0:  # если больше половины и стоит 0, а не какое-то число, то вставляем в конец
                 # bufer[m][n + 1] = j
-                l_p = A[bufer[m][n]][m] + Ss[bufer[m][n]][m] + t[bufer[m][n]][j]#время приезда к соседу + время на работу + время от соседа до нового клиента
+                l_p = A[bufer[m][n]][m] + Ss[bufer[m][n]][m] + t[bufer[m][n]][j] # время приезда к соседу + время на работу + время от соседа до нового клиента
+                # flag[j] = 1
                 Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, j, m, n+1, l_p, i, "right")
+
             elif n <= N and bufer[m][n-1] == 0:  # если меньше половины, то вставляем в начало
                 # bufer[m][n - 1] = j
                 if E[j] >= t[0][j]:
                     l_p = E[j] + S[j] + t[j][bufer[m][n]] # мы не можем начать работать раньше, чем временное окно
                 else:
                     l_p = t[0][j] + S[j] + t[j][bufer[m][n]]
+                # flag[j] = 1
                 Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, j, m, n - 1, l_p, i, "left")
-        else: print("Exception: на этом шаге ничего не делаем, но скорее всего на следующем вставим в маршрут")
+        else: print("Exception: нашли не индекс i, скорее всего на следующем шаге вставим в маршрут")
 
         # print(p, " ", r)
         if m == -1 and n == -1 and p != -1 and r != -1: #если нашли индекс j
             if r > N and bufer[p][r+1] == 0:  # если больше половины, то вставляем в конец
                 # bufer[p][r + 1] = i
                 l_p = A[bufer[p][r]][p] + Ss[bufer[p][r]][p] + t[bufer[p][r]][i]
+                # flag[i] = 1
                 Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, i, p, r+1, l_p, j, "right")
 
             elif r <= N and bufer[p][r-1] == 0:  # если меньше половины, то вставляем в начало
@@ -171,6 +195,7 @@ while summa != N:
                     l_p = E[i] + S[i] + t[i][bufer[m][n]] # мы не можем начать работать раньше, чем временное окно
                 else:
                     l_p = t[0][i] + S[i] + t[i][bufer[m][n]]
+                # flag[i] = 1
                 Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, i, p, r-1, l_p, j, "left")
                 # bufer[p][r - 1] = i
                 # l_p = A[bufer[p][r]][p] + Ss[bufer[p][r]][p] + t[bufer[p][r]][i]
@@ -179,10 +204,11 @@ while summa != N:
 
         if m == -1 and n == -1 and p == -1 and r == -1:
             m = search_pustoy_marchrut(bufer)  # возвращает номер маршрута, который пустой
-            AddTwoCityInRoute(i, j, m, x, y, s, a, bufer)
-
             flag[i] = 1
             flag[j] = 1
+
+            AddTwoCityInRoute(i, j, m, x, y, s, a, bufer)
+
 
             # for i in range(K):
             #     for j in range((N + 1) * 2):
@@ -243,10 +269,10 @@ print("target_function_start_solution = ", target_function)
 #         print("\n")
 #     print("\n")
 
-# for i in range(K):
-#     for j in range((N + 1) * 2):
-#         print(bufer[i][j], end=" ")
-#     print("\n")
+for i in range(K):
+    for j in range((N + 1) * 2):
+        print(bufer[i][j], end=" ")
+    print("\n")
 
 # for k in range(K):
 #     print("Номер машины = ", k)
