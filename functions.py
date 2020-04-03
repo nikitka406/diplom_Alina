@@ -505,10 +505,10 @@ def AmountCarUsed(y):
 
 # копирование решения
 def CopyingSolution(x, y, s, a):
-    X = x
-    Y = y
-    Ss = s
-    A = a
+    X = x.copy()
+    Y = y.copy()
+    Ss = s.copy()
+    A = a.copy()
     return X, Y, Ss, A
 
 
@@ -636,7 +636,7 @@ def JoinClientaList(x, y, s, a, client, sosed):
 
 # оператор перемещения!!!
 # вклиниваем между
-def JoinClientaNonList(x, y, s, a, client, sosed, arr, p):  # ОПЕРАТОР ПЕРЕМЕЩЕНИЯ!
+def JoinClientaNonList(x, y, s, a, client, sosed):  # ОПЕРАТОР ПЕРЕМЕЩЕНИЯ! # (arr, p)
     sosedK = NumberCarClienta(y, sosed)
     clientK = NumberCarClienta(y, client)
 
@@ -656,12 +656,12 @@ def JoinClientaNonList(x, y, s, a, client, sosed, arr, p):  # ОПЕРАТОР �
         x[client][sosedRight][sosedK] = 1
         y[client][sosedK] = 1  # теперь машина соседа обслуживает клиента
         # заполняем то что мы хотим запомнить, 5 параметров
-        arr[p][0] = clientLeft
-        arr[p][1] = client
-        arr[p][2] = clientK
-        arr[p][3] = sosed
-        arr[p][4] = sosedRight
-        arr[p][5] = sosedK
+        # arr[p][0] = clientLeft
+        # arr[p][1] = client
+        # arr[p][2] = clientK
+        # arr[p][3] = sosed
+        # arr[p][4] = sosedRight
+        # arr[p][5] = sosedK
 
 
     elif l[sosedLeft] < l[client] < l[sosed]: # клиента присоединяем слева
@@ -675,19 +675,19 @@ def JoinClientaNonList(x, y, s, a, client, sosed, arr, p):  # ОПЕРАТОР �
         x[client][sosed][sosedK] = 1
         y[client][sosedK] = 1
         # теперь машина соседа обслуживает клиента
-        arr[p][0] = clientLeft
-        arr[p][1] = client
-        arr[p][2] = clientK
-        arr[p][3] = sosedLeft
-        arr[p][4] = sosed
-        arr[p][5] = sosedK
+        # arr[p][0] = clientLeft
+        # arr[p][1] = client
+        # arr[p][2] = clientK
+        # arr[p][3] = sosedLeft
+        # arr[p][4] = sosed
+        # arr[p][5] = sosedK
 
 
 
 
 # реализация оператора перемещения!!!
 # переставляем клиента к новому соседу, локальный поиск
-def JoiningClientToNewSosed(x, y, s, a, target_function, arr, p):
+def JoiningClientToNewSosed(x, y, s, a, target_function): # (arr, p)
     # копируем чтобы не испортить решение
     X, Y, Ss, A = CopyingSolution(x, y, s, a)
 
@@ -707,7 +707,7 @@ def JoiningClientToNewSosed(x, y, s, a, target_function, arr, p):
     print("На машине ", NumberCarClienta(Y, sosed))
 
      # вклиниваем к соседу не листу
-    JoinClientaNonList(X, Y, Ss, A, client, sosed, arr, p)
+    JoinClientaNonList(X, Y, Ss, A, client, sosed) # (arr, p)
 
     # X, Y, Ss, A = DeleteNotUsedCar(X, Y, Ss, A)
     # target_function = CalculationOfObjectiveFunction(X)
@@ -721,7 +721,7 @@ def JoiningClientToNewSosed(x, y, s, a, target_function, arr, p):
             target_function = CalculationOfObjectiveFunction(X, shtrafFunction(Ss, A))
             print(target_function)
 
-            return  X, Y, Ss, A, target_function
+            return target_function  # X, Y, Ss, A,
 
             # x, y, s, a = CopyingSolution(X, Y, Ss, A)
         else:
@@ -731,7 +731,7 @@ def JoiningClientToNewSosed(x, y, s, a, target_function, arr, p):
     elif VerificationOfBoundaryConditions(X, Y, Ss, A) == 1:
         target_function = CalculationOfObjectiveFunction(X, shtrafFunction(Ss, A))
 
-        return X, Y, Ss, A, target_function
+        return  target_function # X, Y, Ss, A,
         # x, y, s, a = CopyingSolution(X, Y, Ss, A)
     # return target_function
     else:

@@ -97,8 +97,7 @@ def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, ca
             flag[j] = 1
         elif l[new_client] < l_p + S[new_client]:
             print("не можем вставить, т.к. не успеет закончить работу вовремя")
-            # flag[i] = 0
-            # flag[j] = 0
+
 
     elif kyda == "left":
         ############################
@@ -116,8 +115,7 @@ def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, ca
                 A[new_client][car] = E[new_client]
         elif A[sosed][car] < l_p and kyda == "left":
             print("ne podhodit dlya marchruta")
-            # flag[i] = 0
-            # flag[j] = 0
+
 
     else:
         print("введено неправильно right или left")
@@ -253,9 +251,13 @@ target_function = CalculationOfObjectiveFunction(x)
 print("target_function_start_solution = ", target_function)
 
 ###### Печатаем оператор перемещения
-# for reloc in range(relocate_param):
-#     target_function = JoiningClientToNewSosed(x, y, s, a, target_function)
-#     print("target_function pri relocate operator = ", target_function)
+for reloc in range(relocate_param):
+    target_function = JoiningClientToNewSosed(x, y, s, a, target_function)
+
+    print("target_function pri relocate operator = ", target_function)
+    print("\n")
+    BeautifulPrint(x, y, s, a)
+    print("\n")
 
 # for TwoOp in range(TwoOpt_param):
 #     target_function = RealizationTwoOpt(x, y, s, a, target_function)
@@ -269,10 +271,10 @@ print("target_function_start_solution = ", target_function)
 #         print("\n")
 #     print("\n")
 
-for i in range(K):
-    for j in range((N + 1) * 2):
-        print(bufer[i][j], end=" ")
-    print("\n")
+# for i in range(K):
+#     for j in range((N + 1) * 2):
+#         print(bufer[i][j], end=" ")
+#     print("\n")
 
 # for k in range(K):
 #     print("Номер машины = ", k)
