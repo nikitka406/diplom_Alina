@@ -1,3 +1,5 @@
+from builtins import range
+
 from functions import *
 from math import *
 
@@ -121,9 +123,6 @@ def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, ca
         print("введено неправильно right или left")
 
 
-
-
-
     # if E[sosed] >= l_p and kyda == "left":
     #     A[new_client][car] = t[0][new_client]
     #     # A[new_client][car] = E[sosed] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
@@ -221,7 +220,7 @@ while summa != N:
 
     for i in range(K):
         for j in range((N + 1) * 2):
-            print(bufer[i][j], end=" ")
+            print(bufer[i][j], end = " ")
         print("\n")
 
 result = CalculationOfObjectiveFunction(x)
@@ -250,8 +249,10 @@ def CalculationOfObjectiveFunction(x, shtrafFunction = 0):
 target_function = CalculationOfObjectiveFunction(x)
 print("target_function_start_solution = ", target_function)
 
+SaveStartSolution(x, y, s, a)
 ###### Печатаем оператор перемещения
 for reloc in range(relocate_param):
+    ReadStartSolutionOfFile(x, y, s, a)
     target_function = JoiningClientToNewSosed(x, y, s, a, target_function)
 
     print("target_function pri relocate operator = ", target_function)
@@ -314,42 +315,42 @@ for reloc in range(relocate_param):
 ##################################3
 # # создан массив, который будет сохранять решения всех операторов, размера = кол-во операторов * заданное число в инпут дате
 # X_operator, Y_operator, Ss_operator, A_operator, Target_operator = SolutionStore(1 * NumberStartOper)
-# print("111111111111111")
-# # assert VerificationOfBoundaryConditions(X_operator[0], Y_operator[0], Ss_operator[0], A_operator[], "true") == 1
-#
-#
-# # start_operator(X_operator, Y_operator, Ss_operator, A_operator, Target_operator, x, y, s, a, target_function, arr, i)
-# # BeautifulPrint(x, y, s, a)
-#
-# # массив, который сохраняет перемещение оператора с минимальной целевой функцией, где М - кратность повторений списка табу
+# # print("111111111111111")
+# # # assert VerificationOfBoundaryConditions(X_operator[0], Y_operator[0], Ss_operator[0], A_operator[], "true") == 1
+# #
+# #
+# # # start_operator(X_operator, Y_operator, Ss_operator, A_operator, Target_operator, x, y, s, a, target_function, arr, i)
+# # # BeautifulPrint(x, y, s, a)
+# #
+# # # массив, который сохраняет перемещение оператора с минимальной целевой функцией, где М - кратность повторений списка табу
 # arr = [[0 for i in range(6)] for n in range(10)]    # krat - отвечает на каком круге мы сейчас (кратность круга)
-# # arr[0] - клиент, ОТ которого перемещают
-# # arr[1] - клиент, КОТОРОГО перемещают
-# # arr[2] - машина перемещаемого клиента на которой он БЫЛ
-# # arr[3] - клиент, К которому перемещают
-# # arr[4] - клиент, который ТЕПЕРЬ СПРАВА от перемещаемого
-# # arr[5] - машина перемещаемого клиента на которой он ТЕПЕРЬ
+# # arr[][0] - клиент, ОТ которого перемещают
+# # arr[][1] - клиент, КОТОРОГО перемещают
+# # arr[][2] - машина перемещаемого клиента на которой он БЫЛ
+# # arr[][3] - клиент, К которому перемещают
+# # arr[][4] - клиент, который ТЕПЕРЬ СПРАВА от перемещаемого
+# # arr[][5] - машина перемещаемого клиента на которой он ТЕПЕРЬ
 # print("22222222222222222")
-#
+# #
 # # создан массив поиска с запретами, размер = 10, заполняем
 # X_tabu, Y_tabu, Ss_tabu, A_tabu, Target_tabu = SolutionStore(10)
-# print("333333333333333")
-# for k in range(M): # кратность круга (номер круга)
-#     for i in range(1, 10):
+# print("33333333")
+# for k in range(M):   # кратность круга (номер круга)
+#     for p in range(1, 10):  # места
 #         # assert VerificationOfBoundaryConditions(X_operator[i], Y_operator[i], Ss_operator[i], A_operator[i], "true") == 1
 #         start_operator(X_operator, Y_operator, Ss_operator, A_operator, Target_operator, x, y, s, a, target_function,
-#                        arr, i)
+#                        arr, p)
 #         BeautifulPrint(x, y, s, a)
 #         print("77777777777")
-#         # j = MinFromTarget(Target_operator)
-#         # X_tabu[i] = X_operator[j]
-#         # Y_tabu[i] = Y_operator[j]
-#         # Ss_tabu[i] = Ss_operator[j]
-#         # A_tabu[i] = A_operator[j]
-#         # Target_tabu[i] = Target_operator[j]
-#         # print("123456789")
-#
-#     # print(Target_tabu, "Target_tabu = ")
+#         j = MinFromTarget(Target_operator)
+#         X_tabu[p] = X_operator[j]
+#         Y_tabu[p] = Y_operator[j]
+#         Ss_tabu[p] = Ss_operator[j]
+#         A_tabu[p] = A_operator[j]
+#         Target_tabu[p] = Target_operator[j]
+#         print("123456789")
+
+    # print(Target_tabu, "Target_tabu = ")
 #
 ##############################################
 

@@ -7,7 +7,7 @@ N = 13
 K = 4
 
 shtraf = 100
-relocate_param = 13
+relocate_param = 10
 TwoOpt_param = 30
 
 kolvoTabu = 10
@@ -69,5 +69,6 @@ for i in range(N):
 
 # конец работы на i объекте: l[i]
 l = [0 for j in range(N)]
-for i in range(N):
+
+for i in range(0, N):
     l[i] = E[i] + 10*S[i]
