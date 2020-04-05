@@ -30,8 +30,8 @@ a = [[0 for k in range(K)] for i in range(N)]  # время прибытия Т�
 
 
 # Сохраняем стартовое решение в файл
-def SaveStartSolution(local_x, local_y, local_s, local_a):
-    file = open('StartSolution.txt', 'w')
+def SaveSolution(local_x, local_y, local_s, local_a, output, option):
+    file = open(output, option)
 
     # Печатаем в файл Х
     for i in range(N):
@@ -58,9 +58,10 @@ def SaveStartSolution(local_x, local_y, local_s, local_a):
 
     file.close()
 
+
 # Читаем стартовое решение в файле
-def ReadStartSolutionOfFile(local_x, local_y, local_s, local_a):
-    file = open('StartSolution.txt', 'r')
+def ReadSolutionOfFile(local_x, local_y, local_s, local_a, output):
+    file = open(output, 'r')
     # прочитали весь файл, получился список из строк файла
     line = file.readlines()
 
@@ -95,6 +96,43 @@ def ReadStartSolutionOfFile(local_x, local_y, local_s, local_a):
     file.close()
 
 
+def SaveTabu(arr, target):
+    file = open("TabuSearch.txt", 'a')
+    print("arr[i] = ", arr)
+    for i in range(6):
+        print("arr[i] = ", arr[i])
+        file.write(str(arr[i]) + ' ')
+    file.write('\n')
+    file.write(str(target)+'\n')
+    file.close()
+
+
+#
+def ReadTabu(arr, target):
+    file = open("TabuSearch.txt", 'r')
+    line = file.readlines()
+    i = 0
+    index = 0
+    print(len(line))
+    while index < len(line):
+        print("i", i)
+        arr[i] = line[index].split()
+
+        for j in range(len(arr[i])):
+            # print(arr[i][j])
+            arr[i][j] = int(arr[i][j])
+
+        index += 1
+        target[i] = line[index].split()[0]
+        target[i] = float(target[i])
+        print("target = ", target)
+
+        index += 1
+        i += 1
+
+def ClearTabu():
+    file = open("TabuSearch.txt", 'w')
+    file.close()
 # красивая печать в файл
 def BeautifulPrintInFile(loKl_X, loKl_Y, loKl_Ss, loKl_A, target_function, number_solution):
     file = open('population.txt', 'a')
@@ -241,6 +279,7 @@ def CalculationOfObjectiveFunction(x, shtrafFunction=0):
             for j in range(N):
                 target_function += d[i][j] * x[i][j][k]
     target_function += shtrafFunction
+    print("target_function в самой функции подсчета = ", target_function)
     return target_function
 
 
@@ -656,7 +695,7 @@ def NumberCarClienta(y, client):
 # ищем соседа слева либо справа
 def SearchSosedLeftOrRight(x, y, client, leftOrRight):
     k = NumberCarClienta(y, client)  # номер машины которая обслуживает клиента
-    print("номер машины, которая обслуживает клиента ", k)
+    # print("номер машины, которая обслуживает клиента ", k)
     if leftOrRight == "left":
         for i in range(N):  # ищем по столбцу
             if x[i][client][k] == 1:
@@ -747,7 +786,7 @@ def DeleteClientaForTwoOpt(x, y, s, a, client):
 
 # оператор перемещения!!!
 # вклиниваем между
-def JoinClientaNonList(x, y, s, a, client, sosed):  # ОПЕРАТОР ПЕРЕМЕЩЕНИЯ! # (arr, p)
+def JoinClientaNonList(x, y, s, a, client, sosed, arr, p, target_function):  # ОПЕРАТОР ПЕРЕМЕЩЕНИЯ! # (arr, p)
     sosedK = NumberCarClienta(y, sosed)
     clientK = NumberCarClienta(y, client)
 
@@ -771,12 +810,12 @@ def JoinClientaNonList(x, y, s, a, client, sosed):  # ОПЕРАТОР ПЕРЕ�
         x[client][sosedRight][sosedK] = 1
         y[client][sosedK] = 1  # теперь машина соседа обслуживает клиента
         # заполняем то что мы хотим запомнить, 5 параметров
-        # arr[p][0] = clientLeft
-        # arr[p][1] = client
-        # arr[p][2] = clientK
-        # arr[p][3] = sosed
-        # arr[p][4] = sosedRight
-        # arr[p][5] = sosedK
+        arr[p][0] = clientLeft
+        arr[p][1] = client
+        arr[p][2] = clientK
+        arr[p][3] = sosed
+        arr[p][4] = sosedRight
+        arr[p][5] = sosedK
 
     # клиента присоединяем слева
     elif (sosedLeft != 0 and l[sosedLeft] < l[client] < l[sosed]) or (sosedLeft == 0 and l[client] < l[sosed]):
@@ -791,40 +830,43 @@ def JoinClientaNonList(x, y, s, a, client, sosed):  # ОПЕРАТОР ПЕРЕ�
         x[client][sosed][sosedK] = 1
         y[client][sosedK] = 1
         # теперь машина соседа обслуживает клиента
-        # arr[p][0] = clientLeft
-        # arr[p][1] = client
-        # arr[p][2] = clientK
-        # arr[p][3] = sosedLeft
-        # arr[p][4] = sosed
-        # arr[p][5] = sosedK
+        arr[p][0] = clientLeft
+        arr[p][1] = client
+        arr[p][2] = clientK
+        arr[p][3] = sosedLeft
+        arr[p][4] = sosed
+        arr[p][5] = sosedK
 
     else:
-        print("не можем переместить из-за временных окон")
+        print("не можем переместить из-за временных окон")  # Плохооооооо!!!
+        # target_function = 100000000000000000000000000000000
+        # print("target_funcrion = ", target_function)
 
 
 # реализация оператора перемещения!!!
 # переставляем клиента к новому соседу, локальный поиск
-def JoiningClientToNewSosed(x, y, s, a, target_function):  # (arr, p)
+def JoiningClientToNewSosed(x, y, s, a, target_function, arr, p):  # (arr, p)
     # копируем чтобы не испортить решение
-    X, Y, Ss, A = CopyingSolution(x, y, s, a)
+    SaveSolution(x, y, s, a, "Joining.txt", 'w') # стартовое сохранила в другой файл
+    # X, Y, Ss, A = CopyingSolution(x, y, s, a)
 
     ####### Bыбираем клиента #############
     client = random.randint(1, (
             N - 1))  # Берем рандомного клиента/ -1 потому что иногда может появится 10, а это выход за границы
 
     print("Переставляем клиента ", client)
-    print("на машине ", NumberCarClienta(Y, client))
+    print("на машине ", NumberCarClienta(y, client))
 
-    sosedK = NumberCarClienta(Y, client)  # берем рандомного соседа, главное чтобы не совпал с клиентом
-    while sosedK == NumberCarClienta(Y, client):
+    sosedK = NumberCarClienta(y, client)  # берем рандомного соседа, главное чтобы не совпал с клиентом
+    while sosedK == NumberCarClienta(y, client):
         sosed = random.randint(1, (N - 1))  # выбираем нового соседа
-        sosedK = NumberCarClienta(Y, sosed)
+        sosedK = NumberCarClienta(y, sosed)
 
     print("К соседу ", sosed)
-    print("На машине ", NumberCarClienta(Y, sosed))
+    print("На машине ", NumberCarClienta(y, sosed))
 
     # вклиниваем к соседу
-    JoinClientaNonList(X, Y, Ss, A, client, sosed)  # (arr, p)
+    JoinClientaNonList(x, y, s, a, client, sosed, arr, p, target_function)  # (arr, p)
 
     # X, Y, Ss, A = DeleteNotUsedCar(X, Y, Ss, A)
     # target_function = CalculationOfObjectiveFunction(X)
@@ -834,30 +876,37 @@ def JoiningClientToNewSosed(x, y, s, a, target_function):  # (arr, p)
     # проверка на успеваемость выполнения работ
     # если не успел уложиться в срок, штраф
     print("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ")
-    if window_time_up(A, Ss, Y, K) == 0:  # сломалось ли времен окно сверху,
-        if VerificationOfBoundaryConditions(X, Y, Ss, A, "true") == 1:
+    if window_time_up(a, s, y, K) == 0:  # сломалось ли времен окно сверху,
+        if VerificationOfBoundaryConditions(x, y, s, a, "true") == 1:
             print("вставили со штрафом на временные окна")
-            target_function = CalculationOfObjectiveFunction(X, shtrafFunction(Ss, A))
+            target_function = CalculationOfObjectiveFunction(x, shtrafFunction(s, a))
             print(target_function)
 
-            # return target_function  # X, Y, Ss, A,
+            return target_function  # X, Y, Ss, A,
+            # x, y, s, a = CopyingSolution(X, Y, Ss, A)
 
-            x, y, s, a = CopyingSolution(X, Y, Ss, A)
         else:
             print(
                 "ERROR from JoiningClientToNewSosed: из-за сломанных вышестоящих ограничений, решение не сохранено")
 
-    elif VerificationOfBoundaryConditions(X, Y, Ss, A) == 1:
-        target_function = CalculationOfObjectiveFunction(X, shtrafFunction(Ss, A))
-        print("вставили без нарушений временного окна")
+    elif VerificationOfBoundaryConditions(x, y, s, a) == 1:
+        target_function = CalculationOfObjectiveFunction(x, shtrafFunction(s, a))
+        print("вставили без нарушений временного окна или не вставили")
 
-        # return target_function # X, Y, Ss, A,
-        x, y, s, a = CopyingSolution(X, Y, Ss, A)
+        return target_function  # X, Y, Ss, A,
+        # x, y, s, a = CopyingSolution(X, Y, Ss, A)
 
     else:
+        ReadSolutionOfFile(x, y, s, a, "Joining.txt")
+        target_function = CalculationOfObjectiveFunction(x, shtrafFunction(s, a))
         print("не можем переместить клиентов, что то пошло не так")
 
-    return target_function
+        return target_function
+    print("\n")
+
+
+
+
 
 
 # Создаем хранилище решений для большего числа рещений
@@ -1115,12 +1164,12 @@ def RealizationTwoOpt(X, Y, Ss, A, Target_function):
 
 
 # функция, которая проверяет встречалось уже такое решение в списке запретов или нет
-def ProverKNaVstrechu(arr, k):
-    for r in range(NumberStartOper):
-        for j in range(6):
-            if arr[r][j] == arr[k][j]:
-                return 1
+def ProverKNaVstrechu(arr_Tabu, arr):
+    for r in range(len(arr_Tabu)):
+        if arr_Tabu[r] == arr:
+            return 1
     return 0
+
 
 
 # зануляем
@@ -1143,24 +1192,31 @@ def Zzero(X, Y, Ss, A, arr, Target_function):
 
     for i in range(6):
         arr[i] = "0"
-    print("10 10 10 10")
+    # print("10 10 10 10")
 
 
 # заполняю массив, сколько операторов, столько и форов
-def start_operator(X, Y, Ss, A, Target_function, x, y, s, a, target_function, arr, p):
-    print("44444444444")
+def start_operator(local_Target_function, local_x, local_y, local_s, local_a, target_function, arr):
+    # print("44444444444")
     # сначала для оператора перемещения:
+    SaveSolution(local_x, local_y, local_s, local_a, 'StartSolution.txt', 'w')
     for i in range(NumberStartOper):
-        X[i], Y[i], Ss[i], A[i], Target_function[i], arr[i] = JoiningClientToNewSosed(x, y, s, a, target_function, arr,
-                                                                                      p)
-        BeautifulPrint(X[i], Y[i], Ss[i], A[i])
+        local_Target_function[i] = JoiningClientToNewSosed(local_x, local_y, local_s, local_a, target_function, arr, i)
+        SaveSolution(local_x, local_y, local_s, local_a, 'ResultOperator.txt', 'a') # а - дозаписывать в конец
 
-        print("5555555555")
-        if ProverKNaVstrechu(arr, i) == 1:
-            Zzero(X[i], Y[i], Ss[i], A[i], arr[i], Target_function[i])
-            print("6666666666666")
-        print("i = ", i)
-        assert VerificationOfBoundaryConditions(X[i], Y[i], Ss[i], A[i], "true") == 1
+        # local_Target_function[i] = TwoOpt(i+1)???????????
+        # SaveSolution(x, y, s, a, 'ResultOperator.txt', 'a')
+
+
+
+        # # BeautifulPrint(X[i], Y[i], Ss[i], A[i])
+        # # print("5555555555")
+        # # if ProverKNaVstrechu(arr, i) == 1:
+        #     # Zzero(X[i], Y[i], Ss[i], A[i], arr[i], Target_function[i])
+        #     # print("6666666666666")
+        # print("i = ", i)
+        # if VerificationOfBoundaryConditions(X[i], Y[i], Ss[i], A[i], "true") != 1:
+        #     print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 
     # теперь для оператора 2Opt:
     # for i in range(NumberStartOper, 2 * NumberStartOper):
@@ -1169,17 +1225,21 @@ def start_operator(X, Y, Ss, A, Target_function, x, y, s, a, target_function, ar
 
 # ищет минимальную целевую функцию, возвращает индекс
 def MinFromTarget(Target_function):
-    print("888888888")
-    # Target_min = 1000000000000000000000000
-    # for i in range(N):
-    #     if Target_function[i] < Target_min:
-    #         Target_min = Target_function[i]
-    #
+    target_min = 1000000000
+    for i in range(N):
+        if Target_function[i] < target_min and Target_function[i] != 1 and Target_function[i] != 2 and \
+                Target_function[i] != 3 and Target_function[i] != 4 and Target_function[i] != 5 and\
+                Target_function[i] != 6 and Target_function[i] != 7 and Target_function[i] != 8 and Target_function[i] != 9:
+            target_min = Target_function[i]
+
     # for i in range(N):
     #     if Target_function[i] == Target_min:
     #         Target_function[i] = 0
-    #         print("888888888")
     #         return i
-    min_target = min(Target_function)
-    print("99999999999999")
-    return Target_function.index(min_target)
+    # min_target = min(Target_function)
+    if target_min == 1000000000:
+        return -1
+
+    print("\n")
+    print("Target_min = ", target_min)
+    return Target_function.index(target_min)

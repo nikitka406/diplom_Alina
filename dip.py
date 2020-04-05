@@ -3,12 +3,23 @@ from builtins import range
 from functions import *
 from math import *
 
+ClearTabu()
+
 result = 0  # значение целевой функции
 N = 13
 g = 5000
 
 OX = [10, 17, 6, 13, 9, 19, 8, 4, 17, 12, 6, 19, 12]
 OY = [15, 15, 15, 3, 20, 7, 8, 14, 2, 22, 12, 17, 8]
+
+# массив, который сохраняет перемещение оператора с минимальной целевой функцией, где М - кратность повторений списка табу
+arr = [[0 for i in range(6)] for n in range(1*NumberStartOper)]    # krat - отвечает на каком круге мы сейчас (кратность круга)
+# arr[][0] - клиент, ОТ которого перемещают
+# arr[][1] - клиент, КОТОРОГО перемещают
+# arr[][2] - машина перемещаемого клиента на которой он БЫЛ
+# arr[][3] - клиент, К которому перемещают
+# arr[][4] - клиент, который ТЕПЕРЬ СПРАВА от перемещаемого
+# arr[][5] - машина перемещаемого клиента на которой он ТЕПЕРЬ
 
 d = [[0 for j in range(N)] for i in range(N)]
 for i in range(N):
@@ -58,8 +69,8 @@ s = [[0 for k in range(K)] for i in range(N)]  # время работы ТС c 
 a = [[0 for k in range(K)] for i in range(N)]  # время прибытия ТС с номером К на объект i
 
 i, j = searchMax(km_win)
-print("i = ", i)
-print("j = ", j)
+# print("i = ", i)
+# print("j = ", j)
 X = x
 Y = y
 A = a
@@ -147,15 +158,15 @@ summa = 3 # уже построено начальное решение, а зн
 while summa != N:
     summa = 0
     i, j = searchMax(km_win)   # нашли новый максимум
-    print("i = ", i)
-    print("j = ", j)
-    print("\n")
+    # print("i = ", i)
+    # print("j = ", j)
+    # print("\n")
 
     m, n = searchIndex(bufer, i) #если в маршруте нашли индекс i
-    print(m, " ", n)
+    # print(m, " ", n)
     p, r = searchIndex(bufer, j) # если в маршруте нашли индекс j;
     # p - номер маршрута, r - номер позиции в маршруте для другого города
-    print(p, " ", r)
+    # print(p, " ", r)
     #смотрим есть ли один из новых индексов в маршруте, возвращает номер маршрута в котором находится  итый город
     # m - номер маршрута, n - номер позиции в маршруте
     if m != -1 and n != -1 and p != -1 and r != -1:
@@ -170,21 +181,16 @@ while summa != N:
                 Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, j, m, n+1, l_p, i, "right")
 
             elif n <= N and bufer[m][n-1] == 0:  # если меньше половины, то вставляем в начало
-                # bufer[m][n - 1] = j
                 if E[j] >= t[0][j]:
                     l_p = E[j] + S[j] + t[j][bufer[m][n]] # мы не можем начать работать раньше, чем временное окно
                 else:
                     l_p = t[0][j] + S[j] + t[j][bufer[m][n]]
-                # flag[j] = 1
                 Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, j, m, n - 1, l_p, i, "left")
-        else: print("Exception: нашли не индекс i, скорее всего на следующем шаге вставим в маршрут")
+        # else: print("Exception: нашли не индекс i, скорее всего на следующем шаге вставим в маршрут")
 
-        # print(p, " ", r)
         if m == -1 and n == -1 and p != -1 and r != -1: #если нашли индекс j
             if r > N and bufer[p][r+1] == 0:  # если больше половины, то вставляем в конец
-                # bufer[p][r + 1] = i
                 l_p = A[bufer[p][r]][p] + Ss[bufer[p][r]][p] + t[bufer[p][r]][i]
-                # flag[i] = 1
                 Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, i, p, r+1, l_p, j, "right")
 
             elif r <= N and bufer[p][r-1] == 0:  # если меньше половины, то вставляем в начало
@@ -192,9 +198,7 @@ while summa != N:
                     l_p = E[i] + S[i] + t[i][bufer[m][n]] # мы не можем начать работать раньше, чем временное окно
                 else:
                     l_p = t[0][i] + S[i] + t[i][bufer[m][n]]
-                # flag[i] = 1
                 Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, i, p, r-1, l_p, j, "left")
-                # bufer[p][r - 1] = i
                 # l_p = A[bufer[p][r]][p] + Ss[bufer[p][r]][p] + t[bufer[p][r]][i]
                 # Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, i, p, r-1, l_p, j, "left")
 
@@ -216,16 +220,13 @@ while summa != N:
     for i in range(N):
         summa += flag[i]
 
-    print('summa = ', summa)
 
-    for i in range(K):
-        for j in range((N + 1) * 2):
-            print(bufer[i][j], end = " ")
-        print("\n")
+    # for i in range(K):
+    #     for j in range((N + 1) * 2):
+    #         print(bufer[i][j], end = " ")
+    #     print("\n")
 
-result = CalculationOfObjectiveFunction(x)
-print('result = ', result)
-BeautifulPrint(x, y, s, a)
+# BeautifulPrint(x, y, s, a)
 
 # штрафная функция
 def shtrafFunction(s, a):
@@ -243,114 +244,106 @@ def CalculationOfObjectiveFunction(x, shtrafFunction = 0):
         for i in range(N):
             for j in range(N):
                 target_function += d[i][j]*x[i][j][k]
+    print("target_function в самой функции подсчета = ", target_function)
     target_function += shtrafFunction
+
     return target_function
 
 target_function = CalculationOfObjectiveFunction(x)
 print("target_function_start_solution = ", target_function)
 
-SaveStartSolution(x, y, s, a)
-###### Печатаем оператор перемещения
-for reloc in range(relocate_param):
-    ReadStartSolutionOfFile(x, y, s, a)
-    target_function = JoiningClientToNewSosed(x, y, s, a, target_function)
 
-    print("target_function pri relocate operator = ", target_function)
-    print("\n")
-    BeautifulPrint(x, y, s, a)
-    print("\n")
+
+
+# assert VerificationOfBoundaryConditions(X_operator[0], Y_operator[0], Ss_operator[0], A_operator[], "true") == 1
+
+# start_operator(X_operator, Y_operator, Ss_operator, A_operator, Target_operator, x, y, s, a, target_function, arr, i)
+# BeautifulPrint(x, y, s, a)
+#
+# SaveSolution(x, y, s, a, 'StartSolution.txt')
+# ###### Печатаем оператор перемещения
+# for reloc in range(NumberStartOper):
+#     ReadSolutionOfFile(x, y, s, a, 'StartSolution.txt')
+#     target_function = JoiningClientToNewSosed(x, y, s, a, target_function, arr, p)
+# # схр изменения
+#
+#
+#     print("target_function pri relocate operator = ", target_function)
+#     print("\n")
+#     BeautifulPrint(x, y, s, a)
+#     print("\n")
+
+
+# Поиск с запретами
+# создан массив, который будет сохранять решения всех операторов, размера = кол-во операторов * заданное число в инпут дате
+# Todo поменять кол-во операторов, если увеличится
+X_operator, Y_operator, Ss_operator, A_operator, Target_operator = SolutionStore(1 * NumberStartOper) # лучше через ctr+shift+R
+# создан массив поиска с запретами, размер = 10, заполняем
+# X_tabu, Y_tabu, Ss_tabu, A_tabu, Target_tabu = SolutionStore(10)
+arr_Tabu = [0 for n in range(10)]
+Target_Tabu = [0 for n in range(10)]
+for k in range(M):   # кратность круга (номер круга)
+    for p in range(10):  # места
+        # assert VerificationOfBoundaryConditions(X_operator[i], Y_operator[i], Ss_operator[i], A_operator[i],
+        # "true") == 1
+        start_operator(Target_operator, x, y, s, a, target_function, arr)
+
+        for i in range(len(Target_operator)):
+            ReadSolutionOfFile(X_operator[i], Y_operator[i], Ss_operator[i], A_operator[i], "ResultOperator.txt")
+            # print("arr = ", arr[i])
+
+        # выбирает минимум из (кол-во операторов * NumberStartOper) элементов
+        min_in_target = MinFromTarget(Target_operator)
+        if min_in_target != -1:
+            # print("\n")
+            print("index = ", min_in_target)  # печатает индекс минимального
+            # index = Target_operator.index(min_in_target)
+            # print("index min_in_target = ", index)
+            print("Target_operator = ", Target_operator)  # печатает список длины = NumberStartOper
+            print("arr_min = ", arr[min_in_target])
+            print("\n")
+
+            # если такого решения еще не было, то
+            if ProverKNaVstrechu(arr_Tabu, arr[min_in_target]) != 1:
+                print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+                # сохраняем в список запретов arr и целевую
+                SaveTabu(arr[min_in_target], Target_operator[min_in_target])
+                # сохраняем решение с мин целевой функцией в StartSolution.txt
+                SaveSolution(x, y, s, a, 'StartSolution.txt', 'w')
+                ReadTabu(arr_Tabu, Target_Tabu)
+                # BeautifulPrint(x, y, s, a)
+                print("Target_Tabu = ", Target_Tabu)
+                print("arr_Tabu = ", arr_Tabu)
+                # Zzero(X[i], Y[i], Ss[i], A[i], arr[i], Target_function[i])
+
+            # если решение с мин целевой ф уже встречалось, то его никуда не сохраняем и пользуемся предыдущим решением еще раз
+            else:
+                print("SSSSSSSSSSSS в ProverknaVstrechu ушли в else")
+                ReadSolutionOfFile(x, y, s, a, 'StartSolution.txt')
+                print("\n")
+
+
+    # print("Target_Tabu = ", Target_Tabu)
+    # print("arr_Tabu = ", arr_Tabu)
+        # BeautifulPrint(x, y, s, a)
+        # print("77777777777")
+    #     j = MinFromTarget(Target_operator)
+    #     X_tabu[p] = X_operator[j]
+    #     Y_tabu[p] = Y_operator[j]
+    #     Ss_tabu[p] = Ss_operator[j]
+    #     A_tabu[p] = A_operator[j]
+    #     Target_tabu[p] = Target_operator[j]
+    #     # print("123456789")
+    #
+    # print("Target_tabu = ", Target_tabu)
+#
+##############################################
+
+
 
 # for TwoOp in range(TwoOpt_param):
 #     target_function = RealizationTwoOpt(x, y, s, a, target_function)
 #     print("target_function pri TwoOpt operator = ", target_function)
 
-# for k in range(K):
-#     print("Номер машины = ", k)
-#     for i in range(N):
-#         for j in range(N):
-#             print(x[i][j][k], end = " ")
-#         print("\n")
-#     print("\n")
 
-# for i in range(K):
-#     for j in range((N + 1) * 2):
-#         print(bufer[i][j], end=" ")
-#     print("\n")
-
-# for k in range(K):
-#     print("Номер машины = ", k)
-#     for i in range(N):
-#         for j in range(N):
-#             print(x[i][j][k], end = " ")
-#         print("\n")
-#     print("\n")
-#     for i in range(N):
-#         print(y[i][k], end = ' ')
-#     print("\n")
-#
-# for i in range(N):
-#     for k in range(K):
-#         print(y[i][k], end = ' ')
-#     print("\n")
-# print("\n")
-# print("\n")
-
-# for i in range(N):
-#     for k in range(K):
-#         print(a[i][k], end = ' ')
-#     print("\n")
-# print("\n")
-#
-# for i in range(N):
-#     for k in range(K):
-#         print(s[i][k], end = ' ')
-#     print("\n")
-# print("\n")
-#
-# for i in range(N):
-#     print(l[i], end = ' ')
-# print("\n")
-
-
-##################################3
-# # создан массив, который будет сохранять решения всех операторов, размера = кол-во операторов * заданное число в инпут дате
-# X_operator, Y_operator, Ss_operator, A_operator, Target_operator = SolutionStore(1 * NumberStartOper)
-# # print("111111111111111")
-# # # assert VerificationOfBoundaryConditions(X_operator[0], Y_operator[0], Ss_operator[0], A_operator[], "true") == 1
-# #
-# #
-# # # start_operator(X_operator, Y_operator, Ss_operator, A_operator, Target_operator, x, y, s, a, target_function, arr, i)
-# # # BeautifulPrint(x, y, s, a)
-# #
-# # # массив, который сохраняет перемещение оператора с минимальной целевой функцией, где М - кратность повторений списка табу
-# arr = [[0 for i in range(6)] for n in range(10)]    # krat - отвечает на каком круге мы сейчас (кратность круга)
-# # arr[][0] - клиент, ОТ которого перемещают
-# # arr[][1] - клиент, КОТОРОГО перемещают
-# # arr[][2] - машина перемещаемого клиента на которой он БЫЛ
-# # arr[][3] - клиент, К которому перемещают
-# # arr[][4] - клиент, который ТЕПЕРЬ СПРАВА от перемещаемого
-# # arr[][5] - машина перемещаемого клиента на которой он ТЕПЕРЬ
-# print("22222222222222222")
-# #
-# # создан массив поиска с запретами, размер = 10, заполняем
-# X_tabu, Y_tabu, Ss_tabu, A_tabu, Target_tabu = SolutionStore(10)
-# print("33333333")
-# for k in range(M):   # кратность круга (номер круга)
-#     for p in range(1, 10):  # места
-#         # assert VerificationOfBoundaryConditions(X_operator[i], Y_operator[i], Ss_operator[i], A_operator[i], "true") == 1
-#         start_operator(X_operator, Y_operator, Ss_operator, A_operator, Target_operator, x, y, s, a, target_function,
-#                        arr, p)
-#         BeautifulPrint(x, y, s, a)
-#         print("77777777777")
-#         j = MinFromTarget(Target_operator)
-#         X_tabu[p] = X_operator[j]
-#         Y_tabu[p] = Y_operator[j]
-#         Ss_tabu[p] = Ss_operator[j]
-#         A_tabu[p] = A_operator[j]
-#         Target_tabu[p] = Target_operator[j]
-#         print("123456789")
-
-    # print(Target_tabu, "Target_tabu = ")
-#
-##############################################
 
