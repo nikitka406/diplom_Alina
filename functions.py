@@ -130,6 +130,9 @@ def ReadTabu(arr, target):
         index += 1
         i += 1
 
+def SeekTabu():
+    file = open("TabuSearch.txt", 'r+')
+
 def ClearTabu():
     file = open("TabuSearch.txt", 'w')
     file.close()
@@ -1226,8 +1229,8 @@ def start_operator(local_Target_function, local_x, local_y, local_s, local_a, ta
 # ищет минимальную целевую функцию, возвращает индекс
 def MinFromTarget(Target_function):
     target_min = 1000000000
-    for i in range(N):
-        if Target_function[i] < target_min and Target_function[i] != 1 and Target_function[i] != 2 and \
+    for i in range(len(Target_function)):
+        if Target_function[i] < target_min and Target_function[i] != 0 and Target_function[i] != 1 and Target_function[i] != 2 and \
                 Target_function[i] != 3 and Target_function[i] != 4 and Target_function[i] != 5 and\
                 Target_function[i] != 6 and Target_function[i] != 7 and Target_function[i] != 8 and Target_function[i] != 9:
             target_min = Target_function[i]

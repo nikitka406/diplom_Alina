@@ -22,11 +22,12 @@ M = 2
 g = 5000
 
 # отвечает за то сколько раз вызываем операторы
-NumberStartOper = 0
-if N > 30:
-    NumberStartOper = N * 20 / 100
-else:
-    NumberStartOper = N
+NumberStartOper = 5
+# NumberStartOper = 0
+# if N > 30:
+#     NumberStartOper = N * 20 / 100
+# else:
+#     NumberStartOper = N
 
 
 #координаты депо и объектов

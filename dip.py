@@ -280,10 +280,11 @@ print("target_function_start_solution = ", target_function)
 X_operator, Y_operator, Ss_operator, A_operator, Target_operator = SolutionStore(1 * NumberStartOper) # лучше через ctr+shift+R
 # создан массив поиска с запретами, размер = 10, заполняем
 # X_tabu, Y_tabu, Ss_tabu, A_tabu, Target_tabu = SolutionStore(10)
-arr_Tabu = [0 for n in range(10)]
-Target_Tabu = [0 for n in range(10)]
+arr_Tabu = []
+Target_Tabu = []
 for k in range(M):   # кратность круга (номер круга)
     for p in range(10):  # места
+    # while len(arr_Tabu) < 10 and w <= 12: # чтобы while не работал бесконечное число раз, в крайнем случае сработает 20 раз
         # assert VerificationOfBoundaryConditions(X_operator[i], Y_operator[i], Ss_operator[i], A_operator[i],
         # "true") == 1
         start_operator(Target_operator, x, y, s, a, target_function, arr)
@@ -305,15 +306,36 @@ for k in range(M):   # кратность круга (номер круга)
 
             # если такого решения еще не было, то
             if ProverKNaVstrechu(arr_Tabu, arr[min_in_target]) != 1:
-                print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
-                # сохраняем в список запретов arr и целевую
-                SaveTabu(arr[min_in_target], Target_operator[min_in_target])
-                # сохраняем решение с мин целевой функцией в StartSolution.txt
                 SaveSolution(x, y, s, a, 'StartSolution.txt', 'w')
-                ReadTabu(arr_Tabu, Target_Tabu)
+
+                if len(arr_Tabu) < 10:
+                    print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+                    print("на этом шаге вставляем в TargetTabu ", Target_operator[min_in_target])
+                    print ("на этом шаге вставляем в arrTabu ", arr[min_in_target])
+                    print("\n")
+                    arr_Tabu.append(arr[min_in_target])
+                    Target_Tabu.append(Target_operator[min_in_target])
+
+                elif len(arr_Tabu) == 10:
+                    print("yyyyyyyyyy")
+                    print("на этом шаге вставляем в TargetTabu ", Target_operator[min_in_target])
+                    print("на этом шаге вставляем в arrTabu ", arr[min_in_target])
+                    print("\n")
+                    deleteTabuArr = arr_Tabu.pop(0)
+                    arr_Tabu.append(arr[min_in_target])
+                    deleteTabuTarget = Target_Tabu.pop(0)
+                    Target_Tabu.append(Target_operator[min_in_target])
+
+
+
+
+                # сохраняем в список запретов arr и целевую
+                # SaveTabu(arr[min_in_target], Target_operator[min_in_target])
+                # сохраняем решение с мин целевой функцией в StartSolution.txt
+                # ReadTabu(arr_Tabu, Target_Tabu)
                 # BeautifulPrint(x, y, s, a)
-                print("Target_Tabu = ", Target_Tabu)
-                print("arr_Tabu = ", arr_Tabu)
+                # print("Target_Tabu = ", Target_Tabu)
+                # print("arr_Tabu = ", arr_Tabu)
                 # Zzero(X[i], Y[i], Ss[i], A[i], arr[i], Target_function[i])
 
             # если решение с мин целевой ф уже встречалось, то его никуда не сохраняем и пользуемся предыдущим решением еще раз
@@ -322,11 +344,14 @@ for k in range(M):   # кратность круга (номер круга)
                 ReadSolutionOfFile(x, y, s, a, 'StartSolution.txt')
                 print("\n")
 
+    print("Target_Tabu = ", Target_Tabu)
+    print("arr_Tabu = ", arr_Tabu)
 
-    # print("Target_Tabu = ", Target_Tabu)
-    # print("arr_Tabu = ", arr_Tabu)
-        # BeautifulPrint(x, y, s, a)
-        # print("77777777777")
+TheBestSolution = MinFromTarget(Target_Tabu)
+print("TheBestindex = ", TheBestSolution )
+print("TheBestTarget = ", Target_Tabu[TheBestSolution])
+print("TheBestarr = ", arr_Tabu[TheBestSolution])
+
     #     j = MinFromTarget(Target_operator)
     #     X_tabu[p] = X_operator[j]
     #     Y_tabu[p] = Y_operator[j]
