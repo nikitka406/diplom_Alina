@@ -585,7 +585,6 @@ def AddTwoCityInRoute(i, j, m, x, y, s, a, bufer):
         # flag[i] = 1
         # flag[j] = 1
 
-
     elif A[j][m] + Ss[j][m] + t[j][i] <= l[i] - Ss[i][m] and A[i][m] + Ss[i][m] + t[i][j] > l[j] - Ss[j][m]:
         bufer[m][N] = j  # двойной массив, где первое - это номер машины, второе - это маршрут
         bufer[m][N + 1] = i

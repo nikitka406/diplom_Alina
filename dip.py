@@ -12,14 +12,7 @@ g = 5000
 OX = [10, 17, 6, 13, 9, 19, 8, 4, 17, 12, 6, 19, 12]
 OY = [15, 15, 15, 3, 20, 7, 8, 14, 2, 22, 12, 17, 8]
 
-# массив, который сохраняет перемещение оператора с минимальной целевой функцией, где М - кратность повторений списка табу
-arr = [[0 for i in range(6)] for n in range(1*NumberStartOper)]    # krat - отвечает на каком круге мы сейчас (кратность круга)
-# arr[][0] - клиент, ОТ которого перемещают
-# arr[][1] - клиент, КОТОРОГО перемещают
-# arr[][2] - машина перемещаемого клиента на которой он БЫЛ
-# arr[][3] - клиент, К которому перемещают
-# arr[][4] - клиент, который ТЕПЕРЬ СПРАВА от перемещаемого
-# arr[][5] - машина перемещаемого клиента на которой он ТЕПЕРЬ
+
 
 d = [[0 for j in range(N)] for i in range(N)]
 for i in range(N):
@@ -67,6 +60,7 @@ flag = [0 for i in range(N)] # флажок, если посетила горо�
                              # N так как с обеих сторон должны быть нули (выезжает из депо и возвращ в депо)
 s = [[0 for k in range(K)] for i in range(N)]  # время работы ТС c номером К на объекте i
 a = [[0 for k in range(K)] for i in range(N)]  # время прибытия ТС с номером К на объект i
+
 
 i, j = searchMax(km_win)
 # print("i = ", i)
@@ -155,7 +149,10 @@ def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, ca
 
 
 summa = 3 # уже построено начальное решение, а значит посетили депо и двух клиентов = 3
+kolvo_Auto = 1
+
 while summa != N:
+
     summa = 0
     i, j = searchMax(km_win)   # нашли новый максимум
     # print("i = ", i)
@@ -177,7 +174,6 @@ while summa != N:
             if n > N and bufer[m][n+1] == 0:  # если больше половины и стоит 0, а не какое-то число, то вставляем в конец
                 # bufer[m][n + 1] = j
                 l_p = A[bufer[m][n]][m] + Ss[bufer[m][n]][m] + t[bufer[m][n]][j] # время приезда к соседу + время на работу + время от соседа до нового клиента
-                # flag[j] = 1
                 Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, j, m, n+1, l_p, i, "right")
 
             elif n <= N and bufer[m][n-1] == 0:  # если меньше половины, то вставляем в начало
@@ -202,19 +198,36 @@ while summa != N:
                 # l_p = A[bufer[p][r]][p] + Ss[bufer[p][r]][p] + t[bufer[p][r]][i]
                 # Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, i, p, r-1, l_p, j, "left")
 
-
+        # если ни один индекс не найден, то строим новый маршрут пока у нас есть доступные ТС, если их нет,
+        # то берем новый километровй выигрыш и проходим по ифам заново
         if m == -1 and n == -1 and p == -1 and r == -1:
-            m = search_pustoy_marchrut(bufer)  # возвращает номер маршрута, который пустой
-            flag[i] = 1
-            flag[j] = 1
+            if kolvo_Auto < K:
+                kolvo_Auto += 1
+                m = search_pustoy_marchrut(bufer)  # возвращает номер маршрута, который пустой
+                # print("m = ", m)
+                flag[i] = 1
+                flag[j] = 1
+                AddTwoCityInRoute(i, j, m, x, y, s, a, bufer)
 
-            AddTwoCityInRoute(i, j, m, x, y, s, a, bufer)
+
+            elif kolvo_Auto == K:
+                print("Это ребро не получилось вставить")
+
+            else:
+                print("превысили количество доступных авто")
+
+
+
+
+
+
 
 
             # for i in range(K):
             #     for j in range((N + 1) * 2):
             #         print(bufer[i][j], end=" ")
             #     print("\n")
+
 
 
     for i in range(N):
@@ -227,6 +240,11 @@ while summa != N:
     #     print("\n")
 
 # BeautifulPrint(x, y, s, a)
+for i in range(K):
+    for j in range((N + 1) * 2):
+        print(bufer[i][j], end=" ")
+    print("\n")
+
 
 # штрафная функция
 def shtrafFunction(s, a):
@@ -254,7 +272,6 @@ print("target_function_start_solution = ", target_function)
 
 
 
-
 # assert VerificationOfBoundaryConditions(X_operator[0], Y_operator[0], Ss_operator[0], A_operator[], "true") == 1
 
 # start_operator(X_operator, Y_operator, Ss_operator, A_operator, Target_operator, x, y, s, a, target_function, arr, i)
@@ -265,14 +282,20 @@ print("target_function_start_solution = ", target_function)
 # for reloc in range(NumberStartOper):
 #     ReadSolutionOfFile(x, y, s, a, 'StartSolution.txt')
 #     target_function = JoiningClientToNewSosed(x, y, s, a, target_function, arr, p)
-# # схр изменения
-#
-#
 #     print("target_function pri relocate operator = ", target_function)
 #     print("\n")
 #     BeautifulPrint(x, y, s, a)
 #     print("\n")
 
+
+# массив, который сохраняет перемещение оператора с минимальной целевой функцией, где М - кратность повторений списка табу
+arr = [[0 for i in range(6)] for n in range(1*NumberStartOper)]    # krat - отвечает на каком круге мы сейчас (кратность круга)
+# arr[][0] - клиент, ОТ которого перемещают
+# arr[][1] - клиент, КОТОРОГО перемещают
+# arr[][2] - машина перемещаемого клиента на которой он БЫЛ
+# arr[][3] - клиент, К которому перемещают
+# arr[][4] - клиент, который ТЕПЕРЬ СПРАВА от перемещаемого
+# arr[][5] - машина перемещаемого клиента на которой он ТЕПЕРЬ
 
 # Поиск с запретами
 # создан массив, который будет сохранять решения всех операторов, размера = кол-во операторов * заданное число в инпут дате
@@ -308,16 +331,18 @@ for k in range(M):   # кратность круга (номер круга)
             if ProverKNaVstrechu(arr_Tabu, arr[min_in_target]) != 1:
                 SaveSolution(x, y, s, a, 'StartSolution.txt', 'w')
 
+                # сохраняем в список запретов
                 if len(arr_Tabu) < 10:
-                    print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+                    print("Все хорошо, сохраняем в список запретов")
                     print("на этом шаге вставляем в TargetTabu ", Target_operator[min_in_target])
                     print ("на этом шаге вставляем в arrTabu ", arr[min_in_target])
                     print("\n")
                     arr_Tabu.append(arr[min_in_target])
                     Target_Tabu.append(Target_operator[min_in_target])
 
+                # если заполнился список запретов, то начинаем перезаписывать
                 elif len(arr_Tabu) == 10:
-                    print("yyyyyyyyyy")
+                    print("Начинаем потихоньку перезаписывать список запретов")
                     print("на этом шаге вставляем в TargetTabu ", Target_operator[min_in_target])
                     print("на этом шаге вставляем в arrTabu ", arr[min_in_target])
                     print("\n")
@@ -327,9 +352,7 @@ for k in range(M):   # кратность круга (номер круга)
                     Target_Tabu.append(Target_operator[min_in_target])
 
 
-
-
-                # сохраняем в список запретов arr и целевую
+                # сохраняем в список запретов arr и целевую (ЧЕРЕЗ ФАЙЛ)
                 # SaveTabu(arr[min_in_target], Target_operator[min_in_target])
                 # сохраняем решение с мин целевой функцией в StartSolution.txt
                 # ReadTabu(arr_Tabu, Target_Tabu)
@@ -340,7 +363,7 @@ for k in range(M):   # кратность круга (номер круга)
 
             # если решение с мин целевой ф уже встречалось, то его никуда не сохраняем и пользуемся предыдущим решением еще раз
             else:
-                print("SSSSSSSSSSSS в ProverknaVstrechu ушли в else")
+                print("в ProverknaVstrechu ушли в else")
                 ReadSolutionOfFile(x, y, s, a, 'StartSolution.txt')
                 print("\n")
 
@@ -348,20 +371,12 @@ for k in range(M):   # кратность круга (номер круга)
     print("arr_Tabu = ", arr_Tabu)
 
 TheBestSolution = MinFromTarget(Target_Tabu)
+print("target_function_start_solution = ", target_function)
 print("TheBestindex = ", TheBestSolution )
 print("TheBestTarget = ", Target_Tabu[TheBestSolution])
 print("TheBestarr = ", arr_Tabu[TheBestSolution])
 
-    #     j = MinFromTarget(Target_operator)
-    #     X_tabu[p] = X_operator[j]
-    #     Y_tabu[p] = Y_operator[j]
-    #     Ss_tabu[p] = Ss_operator[j]
-    #     A_tabu[p] = A_operator[j]
-    #     Target_tabu[p] = Target_operator[j]
-    #     # print("123456789")
-    #
-    # print("Target_tabu = ", Target_tabu)
-#
+
 ##############################################
 
 

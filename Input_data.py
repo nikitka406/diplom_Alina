@@ -7,28 +7,25 @@ N = 13
 K = 4
 
 shtraf = 100
-relocate_param = 10
-TwoOpt_param = 30
 
-kolvoTabu = 10
-
-# крастность повторений круга табу
+# кратность повторений круга табу
 M = 2
-
-# цена за аренду машины
-# car_cost = 1000
 
 # пороговое значение (в км)
 g = 5000
 
 # отвечает за то сколько раз вызываем операторы
-NumberStartOper = 5
+NumberStartOper = 20
 # NumberStartOper = 0
 # if N > 30:
 #     NumberStartOper = N * 20 / 100
 # else:
 #     NumberStartOper = N
 
+relocate_param = 10
+TwoOpt_param = 30
+
+kolvoTabu = 10
 
 #координаты депо и объектов
 # OX = [10, 17, 6, 13, 9, 19, 8, 4, 17, 12, 6, 19, 12]
