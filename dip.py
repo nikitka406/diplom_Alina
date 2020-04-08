@@ -1,26 +1,23 @@
 from builtins import range
-
 from functions import *
 from math import *
+import time
+start = time.time()
+ClearFiles()
 
-ClearTabu()
+# d = [[0 for j in range(N)] for i in range(N)]
+# for i in range(N):
+#     for j in range(N):
+#         d[i][j] = sqrt(pow((OX[i] - OX[j]), 2) + pow((OY[i] - OY[j]), 2))
+#         if d[i][j] > g:
+#             d[i][j] = 0
+#             print("слишком далеко, туда не еду")
 
-result = 0  # значение целевой функции
-N = 13
-g = 5000
-
-OX = [10, 17, 6, 13, 9, 19, 8, 4, 17, 12, 6, 19, 12]
-OY = [15, 15, 15, 3, 20, 7, 8, 14, 2, 22, 12, 17, 8]
-
-
-
-d = [[0 for j in range(N)] for i in range(N)]
+d = [[0 for j in range(N)] for i in range(N)]  # расстояния между городами
 for i in range(N):
     for j in range(N):
-        d[i][j] = sqrt(pow((OX[i] - OX[j]), 2) + pow((OY[i] - OY[j]), 2))
-        if d[i][j] > g:
-            d[i][j] = 0
-            print("слишком далеко, туда не еду")
+        d[i][j] = 111.1 * acos(sin(OX[i]) * sin(OX[j]) + cos(OX[i]) * cos(OX[j]) * cos(OY[j] - OY[i]))
+
 
 # print("d[i][j] = ")
 # for i in range(N):
@@ -63,8 +60,8 @@ a = [[0 for k in range(K)] for i in range(N)]  # время прибытия Т�
 
 
 i, j = searchMax(km_win)
-# print("i = ", i)
-# print("j = ", j)
+print("i = ", i)
+print("j = ", j)
 X = x
 Y = y
 A = a
@@ -92,28 +89,28 @@ def Zapolnenie(X, Y, Ss, kyda, new_client, sosed, car,nomer_sosed):
 
 def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, car, nomer_sosed, l_p, sosed, kyda):
     if kyda == "right":
-        if E[new_client] >= l_p and l[new_client] >= l_p + S[new_client] and kyda == "right":  # если время начала работы нового клиента больше чем время прибытия + работы + переезда предыдущего
+
+        if E[new_client] >= l_p:
             A[new_client][car] = E[new_client]
             Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
             flag[i] = 1
             flag[j] = 1
-        elif E[new_client] < l_p and l[new_client] >= l_p + S[new_client] and kyda == "right":
+        # and l[new_client] >= l_p + S[new_client] and kyda == "right":  # если время начала работы нового клиента больше чем время прибытия + работы + переезда предыдущего
+
+        elif E[new_client] < l_p:
             A[new_client][car] = l_p
             Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
             flag[i] = 1
             flag[j] = 1
-        elif l[new_client] < l_p + S[new_client]:
-            print("не можем вставить, т.к. не успеет закончить работу вовремя")
+        # and l[new_client] >= l_p + S[new_client] and kyda == "right":
+
+        # elif l[new_client] < l_p + S[new_client]:
+        #     print("не можем вставить, т.к. не успеет закончить работу вовремя")
+
 
 
     elif kyda == "left":
-        ############################
-        # if E[j] >= t[0][j]:
-        #     l_p = E[j] + S[j] + t[j][bufer[m][n]]  # мы не можем начать работать раньше, чем временное окно
-        # else:
-        #     l_p = t[0][j] + S[j] + t[j][bufer[m][n]]
-        ##############################
-        if A[sosed][car] >= l_p and kyda == "left": #
+        if A[sosed][car] >= l_p and kyda == "left":
             A[new_client][car] = A[sosed][car] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
             Zapolnenie(X, Y, Ss, "left", new_client, sosed, car, nomer_sosed)
             flag[i] = 1
@@ -122,6 +119,15 @@ def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, ca
                 A[new_client][car] = E[new_client]
         elif A[sosed][car] < l_p and kyda == "left":
             print("ne podhodit dlya marchruta")
+
+
+        ############################
+        # if E[j] >= t[0][j]:
+        #     l_p = E[j] + S[j] + t[j][bufer[m][n]]  # мы не можем начать работать раньше, чем временное окно
+        # else:
+        #     l_p = t[0][j] + S[j] + t[j][bufer[m][n]]
+        ##############################
+
 
 
     else:
@@ -155,8 +161,8 @@ while summa != N:
 
     summa = 0
     i, j = searchMax(km_win)   # нашли новый максимум
-    # print("i = ", i)
-    # print("j = ", j)
+    print("i = ", i)
+    print("j = ", j)
     # print("\n")
 
     m, n = searchIndex(bufer, i) #если в маршруте нашли индекс i
@@ -232,18 +238,18 @@ while summa != N:
 
     for i in range(N):
         summa += flag[i]
+    print("summa = ",summa )
 
-
-    # for i in range(K):
-    #     for j in range((N + 1) * 2):
-    #         print(bufer[i][j], end = " ")
-    #     print("\n")
+    for i in range(K):
+        for j in range((N + 1) * 2):
+            print(bufer[i][j], end = " ")
+        print("\n")
 
 # BeautifulPrint(x, y, s, a)
-for i in range(K):
-    for j in range((N + 1) * 2):
-        print(bufer[i][j], end=" ")
-    print("\n")
+# for i in range(K):
+#     for j in range((N + 1) * 2):
+#         print(bufer[i][j], end=" ")
+#     print("\n")
 
 
 # штрафная функция
@@ -256,18 +262,20 @@ def shtrafFunction(s, a):
     return shtraf_sum
 
 # подсчет значения целевой функции
-def CalculationOfObjectiveFunction(x, shtrafFunction = 0):
+def CalculationOfObjectiveFunction(x, shtrafFunction):
     target_function = 0
     for k in range(K):
         for i in range(N):
             for j in range(N):
+                # Если время окончания не совпадает с регламентом, то умножаем разницу во времени на коэффициент
                 target_function += d[i][j]*x[i][j][k]
-    print("target_function в самой функции подсчета = ", target_function)
+    print("target_function в самой функции подсчета без штрафа = ", target_function)
     target_function += shtrafFunction
-
+    print("target_function в самой функции подсчета со штрафом = ", target_function)
     return target_function
 
-target_function = CalculationOfObjectiveFunction(x)
+
+target_function = CalculationOfObjectiveFunction(x, shtrafFunction(s, a))
 print("target_function_start_solution = ", target_function)
 
 
@@ -299,7 +307,7 @@ arr = [[0 for i in range(6)] for n in range(1*NumberStartOper)]    # krat - от
 
 # Поиск с запретами
 # создан массив, который будет сохранять решения всех операторов, размера = кол-во операторов * заданное число в инпут дате
-# Todo поменять кол-во операторов, если увеличится
+# Todo поменять кол-во операторов, если увеличится (лучше через ctr+shift+R)
 X_operator, Y_operator, Ss_operator, A_operator, Target_operator = SolutionStore(1 * NumberStartOper) # лучше через ctr+shift+R
 # создан массив поиска с запретами, размер = 10, заполняем
 # X_tabu, Y_tabu, Ss_tabu, A_tabu, Target_tabu = SolutionStore(10)
@@ -387,3 +395,4 @@ print("TheBestarr = ", arr_Tabu[TheBestSolution])
 
 
 
+print(time.time() - start, "sec")

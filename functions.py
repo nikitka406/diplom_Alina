@@ -1,20 +1,32 @@
 from Input_data import *
 import random
 
-N = 13
 
-OX = [10, 17, 6, 13, 9, 19, 8, 4, 17, 12, 6, 19, 12]
-OY = [15, 15, 15, 3, 20, 7, 8, 14, 2, 22, 12, 17, 8]
+# d = [[0 for j in range(N)] for i in range(N)]
+# for i in range(N):
+#     for j in range(N):
+#         d[i][j] = sqrt(pow((OX[i] - OX[j]), 2) + pow((OY[i] - OY[j]), 2))
+#         if d[i][j] > g:
+#             d[i][j] = 0
+#             print("слишком далеко, туда не еду")
+#
+# t = d
+# for i in range(N):
+#     for j in range(N):
+#         t[i][j] = round(t[i][j] / 24)
 
-d = [[0 for j in range(N)] for i in range(N)]
+# Строим матрицу расстояний и времени
+d = [[0 for j in range(N)] for i in range(N)]  # расстояния между городами
 for i in range(N):
     for j in range(N):
-        d[i][j] = sqrt(pow((OX[i] - OX[j]), 2) + pow((OY[i] - OY[j]), 2))
+        d[i][j] = 111.1 * acos(sin(OX[i]) * sin(OX[j]) + cos(OX[i]) * cos(OX[j]) * cos(OY[j] - OY[i]))
+        # d[i][j] = sqrt(pow((OX[i] - OX[j]), 2) + pow((OY[i] - OY[j]), 2))
 
-t = d
+t = [[0 for j in range(N)] for i in range(N)]  # время перемещения между городами
 for i in range(N):
     for j in range(N):
-        t[i][j] = round(t[i][j] / 24)
+        t[i][j] = (d[i][j] * 40) / (v * 24)
+
 
 x = [[[0 for k in range(K)] for j in range(N)] for i in range(N)]  # едет или нет ТС с номером К из города I в J
 y = [[0 for k in range(K)] for i in range(N)]  # посещает или нет ТС с номером К объект i
@@ -133,9 +145,14 @@ def ReadTabu(arr, target):
 def SeekTabu():
     file = open("TabuSearch.txt", 'r+')
 
-def ClearTabu():
+def ClearFiles():
     file = open("TabuSearch.txt", 'w')
     file.close()
+    file = open("ResultOperator.txt", 'w')
+    file.close()
+    file = open("Joining.txt", 'w')
+    file.close()
+
 # красивая печать в файл
 def BeautifulPrintInFile(loKl_X, loKl_Y, loKl_Ss, loKl_A, target_function, number_solution):
     file = open('population.txt', 'a')
@@ -392,13 +409,14 @@ def positive_a_and_s(x, y, a, s, K):
 def VerificationOfBoundaryConditions(x, y, s, a, shtraf="false"):
     # по дефолту смотрим все огр, но если тру то не рассматриваем огр на своевременный конец работ
     if shtraf == "false":
-        result = X_join_Y(x, y, K) * V_jobs(s, K) * TC_equal_K(K, y) * ban_driling(s, y, K) * \
+        result = X_join_Y(x, y, K)   * ban_driling(s, y, K) * \
                  window_time_down(a, y, K) * window_time_up(a, s, y, K) * \
                  ban_cycle(a, x, s, y, K) * positive_a_and_s(x, y, a, s, K)
+        # * V_jobs(s, K) * TC_equal_K(K, y)
     elif shtraf == "true":
-        result = X_join_Y(x, y, K) * V_jobs(s, K) * TC_equal_K(K, y) * ban_driling(s, y, K) * \
-                 window_time_down(a, y, K) * \
-                 positive_a_and_s(x, y, a, s, K)
+        result = X_join_Y(x, y, K)  * ban_driling(s, y, K) * \
+                 window_time_down(a, y, K) * positive_a_and_s(x, y, a, s, K)
+# * V_jobs(s, K) * TC_equal_K(K, y)
     else:
         print("ERROR from VerificationOfBoundaryConditions: неверное значение, переменной shtraf")
         return -1
@@ -411,7 +429,7 @@ def VerificationOfBoundaryConditions(x, y, s, a, shtraf="false"):
 # проверка выполнения граничных условий
 def VerificationOfBoundaryConditionsForStartSolution(x, y, s, a):
     # по дефолту смотрим все огр, но если тру то не рассматриваем огр на своевременный конец работ
-    result = window_time_down(a, y, K) * window_time_up(a, s, y, K)
+    result = window_time_down(a, y, K)  # * window_time_up(a, s, y, K)
 
     if result == 1:
         return 1  # good
@@ -699,15 +717,17 @@ def SearchSosedLeftOrRight(x, y, client, leftOrRight):
     k = NumberCarClienta(y, client)  # номер машины которая обслуживает клиента
     # print("номер машины, которая обслуживает клиента ", k)
     if leftOrRight == "left":
-        for i in range(N):  # ищем по столбцу
+        for i in range(N-1):  # ищем по столбцу                             ### здесь измененя
             if x[i][client][k] == 1:
                 return i
         return -1
+
     if leftOrRight == "right":
-        for i in range(N):  # ищем по строке
+        for i in range(N-1):  # ищем по строке                            ### здесь измененя
             if x[client][i][k] == 1:
                 return i
         return -1
+
     if leftOrRight != "left" and leftOrRight != "right":
         print("ERROR from SearchSosedLeftOrRight: неверное значение переменной leftOrRight")
 
@@ -905,9 +925,6 @@ def JoiningClientToNewSosed(x, y, s, a, target_function, arr, p):  # (arr, p)
 
         return target_function
     print("\n")
-
-
-
 
 
 
