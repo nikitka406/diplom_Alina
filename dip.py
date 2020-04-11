@@ -12,11 +12,92 @@ ClearFiles()
 #         if d[i][j] > g:
 #             d[i][j] = 0
 #             print("слишком далеко, туда не еду")
-
+#
 d = [[0 for j in range(N)] for i in range(N)]  # расстояния между городами
 for i in range(N):
     for j in range(N):
         d[i][j] = 111.1 * acos(sin(OX[i]) * sin(OX[j]) + cos(OX[i]) * cos(OX[j]) * cos(OY[j] - OY[i]))
+
+def Zapolnenie(X, Y, Ss, kyda, new_client, sosed, car,nomer_sosed):
+    bufer[car][nomer_sosed] = new_client
+    Y[new_client][car] = 1
+    Ss[new_client][car] = S[new_client]
+
+    if kyda == "right":
+        X[sosed][new_client][car] = 1
+        X[sosed][0][car] = 0
+        X[new_client][0][car] = 1
+    elif kyda == "left":
+        X[new_client][sosed][car] = 1
+        X[0][sosed][car] = 0
+        X[0][new_client][car] = 1
+
+
+def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, car, nomer_sosed, l_p, sosed, kyda):
+    if kyda == "right":
+
+        if E[new_client] >= l_p:
+            A[new_client][car] = E[new_client]
+            Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
+            flag[i] = 1
+            flag[j] = 1
+        # and l[new_client] >= l_p + S[new_client] and kyda == "right":  # если время начала работы нового клиента больше чем время прибытия + работы + переезда предыдущего
+
+        elif E[new_client] < l_p:
+            A[new_client][car] = l_p
+            Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
+            flag[i] = 1
+            flag[j] = 1
+        # and l[new_client] >= l_p + S[new_client] and kyda == "right":
+
+        # elif l[new_client] < l_p + S[new_client]:
+        #     print("не можем вставить, т.к. не успеет закончить работу вовремя")
+
+
+    elif kyda == "left":
+        if A[sosed][car] >= l_p and kyda == "left":
+            A[new_client][car] = A[sosed][car] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
+            Zapolnenie(X, Y, Ss, "left", new_client, sosed, car, nomer_sosed)
+            flag[i] = 1
+            flag[j] = 1
+            if A[new_client][car] <= E[new_client]:
+                A[new_client][car] = E[new_client]
+        elif A[sosed][car] < l_p and kyda == "left":
+            print("ne podhodit dlya marchruta")
+
+
+        ############################
+        # if E[j] >= t[0][j]:
+        #     l_p = E[j] + S[j] + t[j][bufer[m][n]]  # мы не можем начать работать раньше, чем временное окно
+        # else:
+        #     l_p = t[0][j] + S[j] + t[j][bufer[m][n]]
+        ##############################
+
+    else:
+        print("введено неправильно right или left")
+
+
+    # if E[sosed] >= l_p and kyda == "left":
+    #     A[new_client][car] = t[0][new_client]
+    #     # A[new_client][car] = E[sosed] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
+    #
+    # elif E[sosed] < l_p and kyda == "left":
+    #     A[new_client][car] = E[new_client] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
+
+    if VerificationOfBoundaryConditionsForStartSolution(X, Y, Ss, A) != 1:  # если сломались граничные условия, то не сохраняем
+        X = x.copy()
+        Y = y.copy()
+        A = a.copy()
+        Ss = s.copy()
+    else:
+        x = X.copy()
+        y = Y.copy()
+        a = A.copy()
+        s = Ss.copy()
+        # flag[new_client] = 1
+
+
+
 
 
 # print("d[i][j] = ")
@@ -59,100 +140,25 @@ s = [[0 for k in range(K)] for i in range(N)]  # время работы ТС c 
 a = [[0 for k in range(K)] for i in range(N)]  # время прибытия ТС с номером К на объект i
 
 
+
 i, j = searchMax(km_win)
 print("i = ", i)
 print("j = ", j)
-X = x
-Y = y
-A = a
-Ss = s
+X = x.copy()
+Y = y.copy()
+A = a.copy()
+Ss = s.copy()
+print("начинается процедура: добавить 2 первых города в маршрут")
 AddTwoCityInRoute(i, j, 0, x, y, s, a, bufer)
+# for i in range(K):
+#     for j in range((N + 1) * 2):
+#         print(bufer[i][j], end=" ")
+#     print("\n")
+
 
 flag[0] = 1
 flag[i] = 1
 flag[j] = 1
-
-def Zapolnenie(X, Y, Ss, kyda, new_client, sosed, car,nomer_sosed):
-    bufer[car][nomer_sosed] = new_client
-    Y[new_client][car] = 1
-    Ss[new_client][car] = S[new_client]
-
-    if kyda == "right":
-        X[sosed][new_client][car] = 1
-        X[sosed][0][car] = 0
-        X[new_client][0][car] = 1
-    elif kyda == "left":
-        X[new_client][sosed][car] = 1
-        X[0][sosed][car] = 0
-        X[0][new_client][car] = 1
-
-
-def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, car, nomer_sosed, l_p, sosed, kyda):
-    if kyda == "right":
-
-        if E[new_client] >= l_p:
-            A[new_client][car] = E[new_client]
-            Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
-            flag[i] = 1
-            flag[j] = 1
-        # and l[new_client] >= l_p + S[new_client] and kyda == "right":  # если время начала работы нового клиента больше чем время прибытия + работы + переезда предыдущего
-
-        elif E[new_client] < l_p:
-            A[new_client][car] = l_p
-            Zapolnenie(X, Y, Ss, "right", new_client, sosed, car, nomer_sosed)
-            flag[i] = 1
-            flag[j] = 1
-        # and l[new_client] >= l_p + S[new_client] and kyda == "right":
-
-        # elif l[new_client] < l_p + S[new_client]:
-        #     print("не можем вставить, т.к. не успеет закончить работу вовремя")
-
-
-
-    elif kyda == "left":
-        if A[sosed][car] >= l_p and kyda == "left":
-            A[new_client][car] = A[sosed][car] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
-            Zapolnenie(X, Y, Ss, "left", new_client, sosed, car, nomer_sosed)
-            flag[i] = 1
-            flag[j] = 1
-            if A[new_client][car] <= E[new_client]:
-                A[new_client][car] = E[new_client]
-        elif A[sosed][car] < l_p and kyda == "left":
-            print("ne podhodit dlya marchruta")
-
-
-        ############################
-        # if E[j] >= t[0][j]:
-        #     l_p = E[j] + S[j] + t[j][bufer[m][n]]  # мы не можем начать работать раньше, чем временное окно
-        # else:
-        #     l_p = t[0][j] + S[j] + t[j][bufer[m][n]]
-        ##############################
-
-
-
-    else:
-        print("введено неправильно right или left")
-
-
-    # if E[sosed] >= l_p and kyda == "left":
-    #     A[new_client][car] = t[0][new_client]
-    #     # A[new_client][car] = E[sosed] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
-    #
-    # elif E[sosed] < l_p and kyda == "left":
-    #     A[new_client][car] = E[new_client] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
-
-    if VerificationOfBoundaryConditionsForStartSolution(X, Y, Ss, A) != 1:  # если сломались граничные условия, то не сохраняем
-        X = x.copy()
-        Y = y.copy()
-        A = a.copy()
-        Ss = s.copy()
-    else:
-        x = X.copy()
-        y = Y.copy()
-        a = A.copy()
-        s = Ss.copy()
-        # flag[new_client] = 1
-
 
 summa = 3 # уже построено начальное решение, а значит посетили депо и двух клиентов = 3
 kolvo_Auto = 1
@@ -245,7 +251,13 @@ while summa != N:
             print(bufer[i][j], end = " ")
         print("\n")
 
-# BeautifulPrint(x, y, s, a)
+    print("s[j][k] = ")
+    for k in range(K):
+        for j in range(N):
+            print(s[j][k], end=" ")
+        print('\n')
+
+BeautifulPrint(x, y, s, a)
 # for i in range(K):
 #     for j in range((N + 1) * 2):
 #         print(bufer[i][j], end=" ")
@@ -277,8 +289,10 @@ def CalculationOfObjectiveFunction(x, shtrafFunction):
 
 target_function = CalculationOfObjectiveFunction(x, shtrafFunction(s, a))
 print("target_function_start_solution = ", target_function)
+print(time.time() - start, "sec")
 
-
+Target_Tabu = []
+Target_Tabu.append(target_function)
 
 # assert VerificationOfBoundaryConditions(X_operator[0], Y_operator[0], Ss_operator[0], A_operator[], "true") == 1
 
@@ -311,13 +325,33 @@ arr = [[0 for i in range(6)] for n in range(1*NumberStartOper)]    # krat - от
 X_operator, Y_operator, Ss_operator, A_operator, Target_operator = SolutionStore(1 * NumberStartOper) # лучше через ctr+shift+R
 # создан массив поиска с запретами, размер = 10, заполняем
 # X_tabu, Y_tabu, Ss_tabu, A_tabu, Target_tabu = SolutionStore(10)
-arr_Tabu = []
-Target_Tabu = []
+
+arr_Tabu = [0] # поставили 0, чтобы у стартового arr был не пуст
+# Target_Tabu = []
 for k in range(M):   # кратность круга (номер круга)
-    for p in range(10):  # места
+
+    for p in range(20):  # места
+
+        # print("x[i][j][k] в starte= ")
+        # for k in range(K):
+        #     print('Номер машины ', k)
+        #     for i in range(N):
+        #         for j in range(N):
+        #             print(x[i][j][k], end=' ')
+        #         print("\n")
+        #
+        # print("y[j][k] v starte = ")
+        # for k in range(K):
+        #     for j in range(N):
+        #         print(y[j][k], end=" ")
+        #     print('\n')
+
+
+
     # while len(arr_Tabu) < 10 and w <= 12: # чтобы while не работал бесконечное число раз, в крайнем случае сработает 20 раз
         # assert VerificationOfBoundaryConditions(X_operator[i], Y_operator[i], Ss_operator[i], A_operator[i],
         # "true") == 1
+
         start_operator(Target_operator, x, y, s, a, target_function, arr)
 
         for i in range(len(Target_operator)):
@@ -337,39 +371,46 @@ for k in range(M):   # кратность круга (номер круга)
 
             # если такого решения еще не было, то
             if ProverKNaVstrechu(arr_Tabu, arr[min_in_target]) != 1:
-                SaveSolution(x, y, s, a, 'StartSolution.txt', 'w')
+                if Target_operator[min_in_target] < min(Target_Tabu):
+                    SaveSolution(x, y, s, a, 'StartSolution.txt', 'w')
+                    print("y[j][k] v starte = ")
+                    for k in range(K):
+                        for j in range(N):
+                            print(y[j][k], end=" ")
+                        print('\n')
+                    # сохраняем в список запретов
+                    if len(arr_Tabu) < 10:
+                        print("Все хорошо, сохраняем в список запретов")
+                        print("на этом шаге вставляем в TargetTabu ", Target_operator[min_in_target])
+                        print("на этом шаге вставляем в arrTabu ", arr[min_in_target])
+                        print("\n")
+                        arr_Tabu.append(arr[min_in_target])
+                        Target_Tabu.append(Target_operator[min_in_target])
 
-                # сохраняем в список запретов
-                if len(arr_Tabu) < 10:
-                    print("Все хорошо, сохраняем в список запретов")
-                    print("на этом шаге вставляем в TargetTabu ", Target_operator[min_in_target])
-                    print ("на этом шаге вставляем в arrTabu ", arr[min_in_target])
-                    print("\n")
-                    arr_Tabu.append(arr[min_in_target])
-                    Target_Tabu.append(Target_operator[min_in_target])
+                    # если заполнился список запретов, то начинаем перезаписывать
+                    elif len(arr_Tabu) == 10:
+                        print("Начинаем потихоньку перезаписывать список запретов")
+                        print("на этом шаге вставляем в TargetTabu ", Target_operator[min_in_target])
+                        print("на этом шаге вставляем в arrTabu ", arr[min_in_target])
+                        print("\n")
+                        deleteTabuArr = arr_Tabu.pop(0)
+                        arr_Tabu.append(arr[min_in_target])
+                        deleteTabuTarget = Target_Tabu.pop(0)
+                        Target_Tabu.append(Target_operator[min_in_target])
 
-                # если заполнился список запретов, то начинаем перезаписывать
-                elif len(arr_Tabu) == 10:
-                    print("Начинаем потихоньку перезаписывать список запретов")
-                    print("на этом шаге вставляем в TargetTabu ", Target_operator[min_in_target])
-                    print("на этом шаге вставляем в arrTabu ", arr[min_in_target])
-                    print("\n")
-                    deleteTabuArr = arr_Tabu.pop(0)
-                    arr_Tabu.append(arr[min_in_target])
-                    deleteTabuTarget = Target_Tabu.pop(0)
-                    Target_Tabu.append(Target_operator[min_in_target])
+                    # сохраняем в список запретов arr и целевую (ЧЕРЕЗ ФАЙЛ)
+                    # SaveTabu(arr[min_in_target], Target_operator[min_in_target])
+                    # сохраняем решение с мин целевой функцией в StartSolution.txt
+                    # ReadTabu(arr_Tabu, Target_Tabu)
+                    # BeautifulPrint(x, y, s, a)
+                    # print("Target_Tabu = ", Target_Tabu)
+                    # print("arr_Tabu = ", arr_Tabu)
+                    # Zzero(X[i], Y[i], Ss[i], A[i], arr[i], Target_function[i])
+
+                    # если решение с мин целевой ф уже встречалось, то его никуда не сохраняем и пользуемся предыдущим решением еще раз
+                    # if Target_operator[min_in_target] < Target_Tabu[i]:
 
 
-                # сохраняем в список запретов arr и целевую (ЧЕРЕЗ ФАЙЛ)
-                # SaveTabu(arr[min_in_target], Target_operator[min_in_target])
-                # сохраняем решение с мин целевой функцией в StartSolution.txt
-                # ReadTabu(arr_Tabu, Target_Tabu)
-                # BeautifulPrint(x, y, s, a)
-                # print("Target_Tabu = ", Target_Tabu)
-                # print("arr_Tabu = ", arr_Tabu)
-                # Zzero(X[i], Y[i], Ss[i], A[i], arr[i], Target_function[i])
-
-            # если решение с мин целевой ф уже встречалось, то его никуда не сохраняем и пользуемся предыдущим решением еще раз
             else:
                 print("в ProverknaVstrechu ушли в else")
                 ReadSolutionOfFile(x, y, s, a, 'StartSolution.txt')
@@ -382,7 +423,10 @@ TheBestSolution = MinFromTarget(Target_Tabu)
 print("target_function_start_solution = ", target_function)
 print("TheBestindex = ", TheBestSolution )
 print("TheBestTarget = ", Target_Tabu[TheBestSolution])
-print("TheBestarr = ", arr_Tabu[TheBestSolution])
+
+if TheBestSolution != target_function:
+    print("TheBestarr = ", arr_Tabu[TheBestSolution])
+
 
 
 ##############################################
