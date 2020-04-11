@@ -7,7 +7,7 @@ import csv
 # #набор всех ТС
 # K = 3
 
-shtraf = 100
+shtraf = 1.3
 
 # кратность повторений круга табу
 M = 2
@@ -135,7 +135,7 @@ print("N = ", N)
 
 
 # отвечает за то сколько раз вызываем операторы
-NumberStartOper = 20
+NumberStartOper = 200
 # NumberStartOper = 0
 # if N > 60:
 #     NumberStartOper = int(N * 20 / 100)

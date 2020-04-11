@@ -295,26 +295,26 @@ def search_pustoy_marchrut(bufer):
 
 
 # штрафная функция
-def shtrafFunction(s, a):
+def shtrafFunction(s, a, iterations):
     shtraf_sum = 0
     for i in range(N):
         for k in range(K):
             if a[i][k] + s[i][k] > l[i]:
-                shtraf_sum += ((a[i][k] + s[i][k]) - l[i]) * shtraf
+                shtraf_sum += max(0, (a[i][k] + s[i][k] - l[i]) * shtraf * iterations)
     return shtraf_sum
 
-
 # подсчет значения целевой функции
-def CalculationOfObjectiveFunction(x, shtrafFunction=0):
+def CalculationOfObjectiveFunction(x, shtrafFunction):
     target_function = 0
     for k in range(K):
         for i in range(N):
             for j in range(N):
-                target_function += d[i][j] * x[i][j][k]
+                # Если время окончания не совпадает с регламентом, то умножаем разницу во времени на коэффициент
+                target_function += d[i][j]*x[i][j][k]
+    print("target_function в самой функции подсчета без штрафа = ", target_function)
     target_function += shtrafFunction
-    print("target_function в самой функции подсчета = ", target_function)
+    print("target_function в самой функции подсчета со штрафом = ", target_function)
     return target_function
-
 
 # Граничные условия
 def X_join_Y(x, y, K):
@@ -961,7 +961,7 @@ def DeleteClientaForTwoOpt(x, y, s, a, client):
         print("ERROR from DeleteClientaFromPath: такого не может быть нет ни левого ни правого соседа")
 
 
-def OperatorJoin(x, y, s, a, client, sosed, arr, p):
+def OperatorJoin(x, y, s, a, client, sosed, arr, iterations): # p
     Xl, Yl, Sl, Al = ReadSolutionOfFile("Relocate.txt")
     XR, YR, SR, AR = ReadSolutionOfFile("Relocate.txt")
 
@@ -991,7 +991,6 @@ def OperatorJoin(x, y, s, a, client, sosed, arr, p):
         # машина соседа будет работать у клиента столько же
         SR[client][sosedK] = SR[client][clientK]
 
-
         # Чтобы все корректно работало, сначала надо написать
         # новое время приезда и новое время работы, потом
         # удалить старое решение, и только потом заполнять Х и У
@@ -1001,12 +1000,12 @@ def OperatorJoin(x, y, s, a, client, sosed, arr, p):
         XR[client][sosedRight][sosedK] = 1
         YR[client][sosedK] = 1  # тепреь машина соседа обслуживает клиента
 
-        arr[p][0] = clientLeft
-        arr[p][1] = client
-        arr[p][2] = clientK
-        arr[p][3] = sosed
-        arr[p][4] = sosedRight
-        arr[p][5] = sosedK
+        arr[0] = clientLeft
+        arr[1] = client
+        arr[2] = clientK
+        arr[3] = sosed
+        arr[4] = sosedRight
+        arr[5] = sosedK
 
         # Подсчет времени приезда к клиенту от соседа
         AR = TimeOfArrival(XR, YR, SR)
@@ -1045,12 +1044,12 @@ def OperatorJoin(x, y, s, a, client, sosed, arr, p):
         Xl[client][sosed][sosedK] = 0
         Yl[client][sosedK] = 0  # теперь машина соседа обслуживает клиента
 
-        arr[p][0] = clientLeft
-        arr[p][1] = client
-        arr[p][2] = clientK
-        arr[p][3] = sosedLeft
-        arr[p][4] = sosed
-        arr[p][5] = sosedK
+        arr[0] = clientLeft
+        arr[1] = client
+        arr[2] = clientK
+        arr[3] = sosedLeft
+        arr[4] = sosed
+        arr[5] = sosedK
 
         # Подсчет времени приезда к клиенту от соседа
         Al = TimeOfArrival(Xl, Yl, Sl)
@@ -1059,7 +1058,7 @@ def OperatorJoin(x, y, s, a, client, sosed, arr, p):
     if window_time_up(Al, Sl, Yl, K) == 0:
         if VerificationOfBoundaryConditions(Xl, Yl, Sl, Al, "true") == 1:
             print("NOTIFICATION from Relocate: вставили с нарушением временного окна")
-            targetL = CalculationOfObjectiveFunction(Xl, shtrafFunction(SR, AR))
+            targetL = CalculationOfObjectiveFunction(Xl, shtrafFunction(SR, AR, iterations))
             print("Подсчет целевой функции для левого вставления ", targetL)
         else:
             targetL = -1
@@ -1067,7 +1066,7 @@ def OperatorJoin(x, y, s, a, client, sosed, arr, p):
                 "ERROR from Relocate: из-за сломанных вышестоящих ограничений, решение не сохранено")
     elif VerificationOfBoundaryConditions(Xl, Yl, Sl, Al) == 1:
         print("NOTIFICATION from Relocate: вставили без нарушений ограничений")
-        targetL = CalculationOfObjectiveFunction(Xl, shtrafFunction(SR, AR))
+        targetL = CalculationOfObjectiveFunction(Xl, shtrafFunction(SR, AR, iterations))
         print("Подсчет целевой функции для левого вставления ", targetL)
     else:
         targetL = -1
@@ -1077,7 +1076,7 @@ def OperatorJoin(x, y, s, a, client, sosed, arr, p):
     if window_time_up(AR, SR, YR, K) == 0:
         if VerificationOfBoundaryConditions(XR, YR, SR, AR, "true") == 1:
             print("NOTIFICATION from Relocate: вставили с нарушением временного окна")
-            targetR = CalculationOfObjectiveFunction(XR, shtrafFunction(SR, AR))
+            targetR = CalculationOfObjectiveFunction(XR, shtrafFunction(SR, AR,  iterations))
             print("Подсчет целевой функции для правого вставления ", targetR)
         else:
             targetR = -1
@@ -1085,7 +1084,7 @@ def OperatorJoin(x, y, s, a, client, sosed, arr, p):
                 "ERROR from Relocate: из-за сломанных вышестоящих ограничений, решение не сохранено")
     elif VerificationOfBoundaryConditions(XR, YR, SR, AR) == 1:
         print("NOTIFICATION from Relocate: вставили без нарушений ограничений")
-        targetR = CalculationOfObjectiveFunction(XR, shtrafFunction(SR, AR))
+        targetR = CalculationOfObjectiveFunction(XR, shtrafFunction(SR, AR,iterations))
         print("Подсчет целевой функции для правого вставления ", targetR)
     else:
         targetR = -1
@@ -1094,61 +1093,65 @@ def OperatorJoin(x, y, s, a, client, sosed, arr, p):
     print("Теперь ищем минимум из двух целевых")
     minimum = min(targetL, targetR)
     if minimum == targetL and minimum != -1:
+        iterations += 2
         print("Выбрали левого у него целевая меньше")
-        return Xl, Yl, Sl, Al, targetL
+        return Xl, Yl, Sl, Al, targetL, iterations
 
     elif minimum == targetR and minimum != -1:
+        iterations += 2
         print("Выбрали правого у него целевая меньше")
-        return XR, YR, SR, AR, targetR
+        return XR, YR, SR, AR, targetR, iterations
 
     else:
         print("Все пошло по пизде ничего не сохранили")
-        return x, y, s, a, CalculationOfObjectiveFunction(x, shtrafFunction(SR, AR))
+        return x, y, s, a, CalculationOfObjectiveFunction(x, shtrafFunction(SR, AR, iterations)), iterations
 
 
-def Relocate(target_function_start, arr, p):
+def Relocate(X, Y, Ss, A, target_function_start, arr, iterations):
     # копируем чтобы не испортить решение
-    X, Y, Ss, A = ReadSolutionOfFile("StartSolution.txt")
     SaveSolution(X, Y, Ss, A, "Relocate.txt", 'w')
     TargetFunction = target_function_start
     buf_targ = 0
 
-    while TargetFunction != buf_targ:
+    while TargetFunction != buf_targ:  # пока меняется
         buf_targ = TargetFunction
-        ReadSolutionOfFile("Relocate.txt")
+        X, Y, Ss, A = ReadSolutionOfFile("Relocate.txt")
 
+        # for Q in range(1, 7):  # это сколько я буду брать рандомных клиентов и переставлять
         # Bыбираем клиента
-        client = random.randint(1, (N - 1))  # Берем рандомного клиента -1 потому что иногда может появится 10, а это выход за граници
+        client = random.randint(1, (
+                    N - 1))  # Берем рандомного клиента -1 потому что иногда может появится 10, а это выход за граници
 
         print("Переставляем клиентa ", client)
         print("С машины", NumberCarClienta(Y, client))
 
         for sosed in range(1, N):
+            if client != sosed:
+                sosedK = NumberCarClienta(Y, sosed)
 
-            sosedK = NumberCarClienta(Y, sosed)
+                print("К соседу ", sosed)
+                print("На машине ", sosedK)
+                print("Время перемещение от 0 до всех ", t[0])
+                print("Время перемещение от ", client, " до ", sosed, " = ", t[client][sosed])
+                print("Время перемещение от соседа до 0 ", t[sosed][0])
 
-            print("К соседу ", sosed)
-            print("На машине ", sosedK)
-            print("Время перемещение от 0 до всех ", t[0])
-            print("Время перемещение от ", client, " до ", sosed, " = ", t[client][sosed])
-            print("Время перемещение от соседа до 0 ", t[sosed][0])
+                x, y, s, a, target_function, iterations = OperatorJoin(X, Y, Ss, A, client, sosed, arr, iterations)
 
-            x, y, s, a, target_function = OperatorJoin(X, Y, Ss, A, client, sosed, arr, p)
+                print("Выбираем минимальное решение")
+                minimum = min(TargetFunction, target_function)
+                if minimum == target_function:
+                    print("Новое перемещение, лучше чем то что было, сохраняем это решение")
+                    SaveSolution(x, y, s, a, "Relocate.txt", "w")
 
-            print("Выбираем минимальное решение")
-            minimum = min(TargetFunction, target_function)
-            if minimum == target_function:
-                print("Новое перемещение, лучше чем то что было, сохраняем это решение")
-                SaveSolution(x, y, s, a, "Relocate.txt", "w")
+                    TargetFunction = target_function
+                elif minimum == TargetFunction:
+                    print("Новое перемещение, хуже чем то что было, возвращаем наше старое решение")
+                    # ReadRelocateOfFile(X, Y, Ss, A)
 
-                TargetFunction = target_function
-            elif minimum == TargetFunction:
-                print("Новое перемещение, хуже чем то что было, возвращаем наше старое решение")
-                # ReadRelocateOfFile(X, Y, Ss, A)
 
     ReadSolutionOfFile("Relocate.txt")
 
-    return TargetFunction, X, Y, Ss, A
+    return TargetFunction, X, Y, Ss, A, iterations
 
 
 # оператор перемещения!!!
@@ -1760,14 +1763,14 @@ def RealizationTwoOpt(X, Y, Ss, A, Target_function):
     print("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ")
     if window_time_up(a, s, y, k) == 0:
         if VerificationOfBoundaryConditions(x, y, s, a, "true") == 1:
-            target_function = CalculationOfObjectiveFunction(x, shtrafFunction(s, a))
+            target_function = CalculationOfObjectiveFunction(x, shtrafFunction(s, a, iterations))
             print(target_function)
             X, Y, Ss, A = CopyingSolution(x, y, s, a)
         else:
             print("ERROR from RealizationTwoOpt: из-за сломанных вышестоящих ограничений, решение не сохранено")
 
     if VerificationOfBoundaryConditions(X, Y, Ss, A) == 1:
-        target_function = CalculationOfObjectiveFunction(X, shtrafFunction(Ss, A))
+        target_function = CalculationOfObjectiveFunction(X, shtrafFunction(Ss, A, iterations))
         X, Y, Ss, A = CopyingSolution(x, y, s, a)
     return Target_function
 
@@ -1804,45 +1807,38 @@ def Zzero(X, Y, Ss, A, arr, Target_function):
 
 
 # заполняю массив, сколько операторов, столько и форов
-def start_operator(local_Target_function, local_x, local_y, local_s, local_a, target_function, arr):
+def start_operator(target_function, local_x, local_y, local_s, local_a, arr, iterations):
 
     # сначала для оператора перемещения:
     SaveSolution(local_x, local_y, local_s, local_a, 'StartSolution.txt', 'w')
-    for i in range(NumberStartOper):
-        ReadSolutionOfFile(local_x, local_y, local_s, local_a, 'StartSolution.txt')
-        local_Target_function[i], local_x, local_y, local_s, local_a = JoiningClientToNewSosed(local_x, local_y, local_s, local_a, target_function, arr, i)
-        print("s[j][k] = ")
-        for k in range(K):
-            for j in range(N):
-                print(local_s[j][k], end=" ")
-            print('\n')
-        print("y[j][k] = ")
-        for k in range(K):
-            for j in range(N):
-                print(local_y[j][k], end=" ")
-            print('\n')
-            
-        # Marchrut = CreateSequence(local_x)
-        # print("Marchrut = ", Marchrut)
-        # BeautifulPrint(x, y, s, a)
+    local_x, local_y, local_s, local_a = ReadSolutionOfFile('StartSolution.txt')
 
-        SaveSolution(local_x, local_y, local_s, local_a, 'ResultOperator.txt', 'a')  # а - дозаписывать в конец
+    # local_Target_function[i], local_x, local_y, local_s, local_a = JoiningClientToNewSosed(local_x, local_y, local_s, local_a, target_function, arr, i)
 
-        # local_Target_function[i] = TwoOpt(i+1)???????????
-        # SaveSolution(x, y, s, a, 'ResultOperator.txt', 'a')
+    Target_function_reloc, x_reloc, y_reloc, s_reloc, a_reloc, iterations = Relocate(local_x, local_y, local_s, local_a, target_function, arr, iterations)
+    print("Target_function_reloc = ", Target_function_reloc)
+    # print("s[j][k] = ")
+    # for k in range(K):
+    #     for j in range(N):
+    #         print(local_s[j][k], end=" ")
+    #     print('\n')
+    # print("y[j][k] = ")
+    # for k in range(K):
+    #     for j in range(N):
+    #         print(local_y[j][k], end=" ")
+    #     print('\n')
 
-        # # BeautifulPrint(X[i], Y[i], Ss[i], A[i])
-        # # print("5555555555")
-        # # if ProverKNaVstrechu(arr, i) == 1:
-        #     # Zzero(X[i], Y[i], Ss[i], A[i], arr[i], Target_function[i])
-        #     # print("6666666666666")
-        # print("i = ", i)
-        # if VerificationOfBoundaryConditions(X[i], Y[i], Ss[i], A[i], "true") != 1:
-        #     print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+    return Target_function_reloc, x_reloc, y_reloc, s_reloc, a_reloc, iterations
 
-    # теперь для оператора 2Opt:
-    # for i in range(NumberStartOper, 2 * NumberStartOper):
-    #     Target_function[i], X[i], Y[i], Ss[i], A[i] = RealizationTwoOpt(x, y, s, a, target_function)
+    #TODO  Раскоментить, когда появится 2-Opt
+    # прочитали стартовое решение, чтобы все делать с 2-Opt:
+    # local_x, local_y, local_s, local_a = ReadSolutionOfFile('StartSolution.txt')
+    # TODO считаем локальный минимум для 2-Opt
+    # minimum = min(Target_function_reloc, Target_function_TwoOpt)
+    # if minimum == Target_function_reloc:
+    #     return Target_function_reloc, x_reloc, y_reloc, s_reloc, a_reloc
+    # elif minimum == Target_function_TwoOpt:
+    #     return Target_function_TwoOpt, x_TwoOpt, y_TwoOpt, s_TwoOpt, a_TwoOpt
 
 
 # ищет минимальную целевую функцию, возвращает индекс
