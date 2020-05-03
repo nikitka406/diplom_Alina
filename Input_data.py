@@ -7,7 +7,8 @@ import csv
 # #набор всех ТС
 # K = 3
 
-shtraf = 1.3
+shtraf = 1.03
+coins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]  # Значение монетки, сколько значений такая вероятность
 
 # кратность повторений круга табу
 M = 2
@@ -28,6 +29,7 @@ E = []
 l = []
 N = 0
 K = 0
+
 
 # Читаем файл с клиентами
 FILENAME1 = path + "customers1.csv"
@@ -132,10 +134,11 @@ for i in range(N):
 print("K = ", K)
 print("N = ", N)
 
-
+# столько мест заполнилось в списке запретов
+kriteriy_ostanovki = 3
 
 # отвечает за то сколько раз вызываем операторы
-NumberStartOper = 200
+NumberStartOper = 5
 # NumberStartOper = 0
 # if N > 60:
 #     NumberStartOper = int(N * 20 / 100)
