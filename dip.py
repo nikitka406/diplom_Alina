@@ -144,7 +144,6 @@ s = [[0 for k in range(K)] for i in range(N)]  # время работы ТС c 
 a = [[0 for k in range(K)] for i in range(N)]  # время прибытия ТС с номером К на объект i
 
 
-
 i, j = searchMax(km_win)
 # print("i = ", i)
 # print("j = ", j)
@@ -232,19 +231,10 @@ while summa != N:
             else:
                 print("превысили количество доступных авто")
 
-
-
-
-
-
-
-
             # for i in range(K):
             #     for j in range((N + 1) * 2):
             #         print(bufer[i][j], end=" ")
             #     print("\n")
-
-
 
     for i in range(N):
         summa += flag[i]
@@ -269,53 +259,20 @@ for i in range(K):
     print("\n")
 
 
-# штрафная функция
-def shtrafFunction(s, a, iterations):
-    shtraf_sum = 0
-    for i in range(N):
-        for k in range(K):
-            if a[i][k] + s[i][k] > l[i]:
-                shtraf_sum += max(0, (a[i][k] + s[i][k] - l[i]) * shtraf * iterations)
-    return shtraf_sum
-
-# подсчет значения целевой функции
-def CalculationOfObjectiveFunction(x, shtrafFunction):
-    target_function = 0
-    for k in range(K):
-        for i in range(N):
-            for j in range(N):
-                # Если время окончания не совпадает с регламентом, то умножаем разницу во времени на коэффициент
-                target_function += d[i][j]*x[i][j][k]
-    print("target_function в самой функции подсчета без штрафа = ", target_function)
-    target_function += shtrafFunction
-    print("target_function в самой функции подсчета со штрафом = ", target_function)
-    return target_function
-
 print(" \n")
 target_function = CalculationOfObjectiveFunction(x, shtrafFunction(s, a, iterations))
 print("target_function_start_solution = ", target_function)
+Targer_Start = target_function
 print(time.time() - start, "sec")
+print(" \n")
 
 x, y, s, a, target_function = Help(x, y, s, a, target_function, iterations)
 print("Target_function_Help = ", target_function)
+Target_Help1 = target_function
 
-Target_Tabu = []
-Target_Tabu.append(target_function)
-
-# assert VerificationOfBoundaryConditions(X_operator[0], Y_operator[0], Ss_operator[0], A_operator[], "true") == 1
-
-# start_operator(X_operator, Y_operator, Ss_operator, A_operator, Target_operator, x, y, s, a, target_function, arr, i)
-# BeautifulPrint(x, y, s, a)
-#
-# SaveSolution(x, y, s, a, 'StartSolution.txt')
-# ###### Печатаем оператор перемещения
-# for reloc in range(NumberStartOper):
-#     ReadSolutionOfFile(x, y, s, a, 'StartSolution.txt')
-#     target_function = JoiningClientToNewSosed(x, y, s, a, target_function, arr, p)
-#     print("target_function pri relocate operator = ", target_function)
-#     print("\n")
-#     BeautifulPrint(x, y, s, a)
-#     print("\n")
+Target_Tabu = [99999]
+Best_From_Tabu = []
+Best_From_Tabu.append(target_function)
 
 
 # # увеличивает в маршруте количество объектов = кол-ву скважин
@@ -341,7 +298,7 @@ Target_Tabu.append(target_function)
 
 
 # массив, который сохраняет перемещение оператора с минимальной целевой функцией, где М - кратность повторений списка табу
-arr = [0 for i in range(6)]     # krat - отвечает на каком круге мы сейчас (кратность круга)
+arr = [0 for i in range(8)]     # krat - отвечает на каком круге мы сейчас (кратность круга)
 # arr[][0] - клиент, ОТ которого перемещают
 # arr[][1] - клиент, КОТОРОГО перемещают
 # arr[][2] - машина перемещаемого клиента на которой он БЫЛ
@@ -362,101 +319,91 @@ arr_Tabu = [0] # поставили 0, чтобы у стартового arr б
 
 
 for Q in range(kriteriy_ostanovki): # сколько раз я запускаю список запретов
-    Target_operator, x_operator, y_operator, s_operator, a_operator, iterations = start_operator(target_function, x, y,
-                                                                                                 s, a, arr, iterations)
+    Target_operator, x_operator, y_operator, s_operator, a_operator, arr_operator = start_operator(x, y, s, a, arr, iterations)
     # если такого решения еще не было, то
-    if ProverKNaVstrechu(arr_Tabu, arr) != 1:
-        # if Target_operator < min(Target_Tabu):
-        SaveSolution(x_operator, y_operator, s_operator, a_operator, 'StartSolution.txt', 'w')
-        # print("y[j][k] v starte = ")
-        # for k in range(K):
-        #     for j in range(N):
-        #         print(y[j][k], end=" ")
-        #     print('\n')
-        # сохраняем в список запретов
-        if len(arr_Tabu) < 10:
+    if ProverKNaVstrechu(arr_Tabu, arr_operator) != 1:
+        if Target_operator <= min(Best_From_Tabu):
+            print("Target_operator = ", Target_operator)
+            Best_From_Tabu.append(Target_operator)
 
+
+        print("Target_operator = ", Target_operator)
+        SaveSolution(x_operator, y_operator, s_operator, a_operator, 'StartSolution.txt', 'w')
+
+
+        if len(arr_Tabu) < 15:
             print("Все хорошо, длина списка запретов < 10, сохраняем в список запретов")
-            arr_Tabu.append(arr)
-            print("на этом шаге вставляем в arrTabu ", arr)
+            arr_Tabu.append(arr_operator)
+            print("на этом шаге вставляем в arrTabu ", arr_operator)
             Target_Tabu.append(Target_operator)
             print("на этом шаге вставляем в TargetTabu ", Target_operator)
-            print("Target_Tabuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu = ",
-                  Target_Tabu)
-            print("arr_Tabuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu = ",
-                  arr_Tabu)
+            print("Target_Tabu = ", Target_Tabu)
+            print("arr_Tabu = ", arr_Tabu)
 
         # если заполнился список запретов, то начинаем перезаписывать
-        elif len(arr_Tabu) == 10:
-            print("Начинаем потихоньку перезаписывать список запретов")
-            print("на этом шаге вставляем в TargetTabu ", Target_operator)
-            print("на этом шаге вставляем в arrTabu ", arr)
+        elif len(arr_Tabu) == 15:
+            print("Начинаем потихоньку перезаписывать список запретов, потому что заполнился")
             print("\n")
             deleteTabuArr = arr_Tabu.pop(0)
-            arr_Tabu.append(arr)
+            arr_Tabu.append(arr_operator)
+            print("на этом шаге вставляем в arrTabu ", arr_operator)
             deleteTabuTarget = Target_Tabu.pop(0)
+            print("на этом шаге вставляем в TargetTabu ", Target_operator)
             Target_Tabu.append(Target_operator)
-            print("Target_Tabuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu = ",
-                  Target_Tabu)
-            print("arr_Tabuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu = ",
-                  arr_Tabu)
+            print("Target_Tabu = ", Target_Tabu)
+            print("arr_Tabu = ", arr_Tabu)
 
-        # сохраняем в список запретов arr и целевую (ЧЕРЕЗ ФАЙЛ)
-        # SaveTabu(arr[min_in_target], Target_operator[min_in_target])
-        # сохраняем решение с мин целевой функцией в StartSolution.txt
-        # ReadTabu(arr_Tabu, Target_Tabu)
-        # BeautifulPrint(x, y, s, a)
-        # print("Target_Tabu = ", Target_Tabu)
-        # print("arr_Tabu = ", arr_Tabu)
-        # Zzero(X[i], Y[i], Ss[i], A[i], arr[i], Target_function[i])
+        else:
+            x, y, s, a = ReadSolutionOfFile('StartSolution.txt')
 
-        # если решение с мин целевой ф уже встречалось, то его никуда не сохраняем и пользуемся предыдущим решением еще раз
-        # if Target_operator[min_in_target] < Target_Tabu[i]:
-
+#         # сохраняем в список запретов arr и целевую (ЧЕРЕЗ ФАЙЛ)
+#         # SaveTabu(arr[min_in_target], Target_operator[min_in_target])
+#         # сохраняем решение с мин целевой функцией в StartSolution.txt
+#         # ReadTabu(arr_Tabu, Target_Tabu)
+#         # BeautifulPrint(x, y, s, a)
+#         # print("Target_Tabu = ", Target_Tabu)
+#         # print("arr_Tabu = ", arr_Tabu)
+#         # Zzero(X[i], Y[i], Ss[i], A[i], arr[i], Target_function[i])
+#
+    # если решение с мин целевой ф уже встречалось, то его никуда не сохраняем и пользуемся предыдущим решением еще раз
     else:
         print("в ProverknaVstrechu ушли в else")
         x, y, s, a = ReadSolutionOfFile('StartSolution.txt')
+        print("arr_operator =  ", arr_operator)
         print("\n")
 
-
-
     iterations += 1
-        # for i in range(len(Target_operator)):
-        #     ReadSolutionOfFile(X_operator[i], Y_operator[i], Ss_operator[i], A_operator[i], "ResultOperator.txt")
-            # print("arr = ", arr[i])
-
-        # выбирает минимум из (кол-во операторов * NumberStartOper) элементов
-        # min_in_target = MinFromTarget(Target_operator)
-        # if min_in_target != -1:
-        #     # print("\n")
-        #     print("index = ", min_in_target)  # печатает индекс минимального
-        #     # index = Target_operator.index(min_in_target)
-        #     # print("index min_in_target = ", index)
-        #     print("Target_operator = ", Target_operator)  # печатает список длины = NumberStartOper
-        #     print("arr_min = ", arr[min_in_target])
-        #     print("\n")
-
+#
+#         # выбирает минимум из (кол-во операторов * NumberStartOper) элементов
+#         # min_in_target = MinFromTarget(Target_operator)
+#         # if min_in_target != -1:
+#         #     # print("\n")
+#         #     print("index = ", min_in_target)  # печатает индекс минимального
+#         #     # index = Target_operator.index(min_in_target)
+#         #     # print("index min_in_target = ", index)
+#         #     print("Target_operator = ", Target_operator)  # печатает список длины = NumberStartOper
+#         #     print("arr_min = ", arr[min_in_target])
+#         #     print("\n")
+#
+print("Best_From_Tabu =  ", Best_From_Tabu)
 print("Target_Tabu = ", Target_Tabu)
 print("arr_Tabu = ", arr_Tabu)
+print("\n")
+print("target_function_start_solution = ", Targer_Start)
+print("target_function_Help1 = ", Target_Help1)
 
 
-TheBestSolution = MinFromTarget(Target_Tabu)
-print("target_function_start_solution = ", target_function)
-print("TheBestindex = ", TheBestSolution )
-print("TheBestTarget = ", Target_Tabu[TheBestSolution])
-
-if TheBestSolution != target_function:
-    print("TheBestarr = ", arr_Tabu[TheBestSolution])
-
+# TheBestSolution = MinFromTarget(Target_Tabu)
+# print("target_function_start_solution = ", target_function)
+# print("TheBestindex = ", TheBestSolution )
+# print("TheBestTarget = ", Target_Tabu[TheBestSolution])
+#
+# if TheBestSolution != target_function:
+#     print("TheBestarr = ", arr_Tabu[TheBestSolution])
+#
 print("kol-vo iterations = ", iterations)
 
 ##############################################
-
-
-
-# for TwoOp in range(TwoOpt_param):
-#     target_function = RealizationTwoOpt(x, y, s, a, target_function)
-#     print("target_function pri TwoOpt operator = ", target_function)
 
 
 print(time.time() - start, "sec")

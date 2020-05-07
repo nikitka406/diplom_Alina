@@ -371,7 +371,7 @@ def ReadStartLocalSearchOfFile():
 
 
 # Cохраняем промежуточное решение в релоке
-def SaveLocalSearch(local_x, local_y, local_s, local_a ):
+def SaveLocalSearch(local_x, local_y, local_s, local_a):
     file = open('LocalSearch.txt', 'w')
 
     # Печатаем в файл Х
@@ -453,6 +453,8 @@ def ClearFiles():
     file = open("Joining.txt", 'w')
     file.close()
     file = open('log/helog.txt', 'w')
+    file.close()
+    file = open('log/relog.txt', 'w')
     file.close()
     file = open('Help.txt', 'w')
     file.close()
