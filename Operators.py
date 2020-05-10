@@ -71,6 +71,11 @@ def OperatorJoinFromReloc(x, y, s, a, target_function_start, client, clientK, so
                 # Подсчет времени приезда к клиенту от соседа
                 AR = TimeOfArrival(XR, YR, SR, file)
 
+            try:
+                XR, YR, SR, AR, targetR = Checker(XR, YR, SR, AR, iterations, "Relocate", file)
+            except TypeError:
+                targetR = -1
+
         if sosedLeft != -1:
             try:
                 file.write("Вставляем клиента к соседу слева" + '\n')
@@ -113,33 +118,25 @@ def OperatorJoinFromReloc(x, y, s, a, target_function_start, client, clientK, so
                 # Подсчет времени приезда к клиенту от соседа
                 Al = TimeOfArrival(Xl, Yl, Sl, file)
 
-        if sosedLeft != -1 and sosedRight != -1:
             try:
                 Xl, Yl, Sl, Al, targetL = Checker(Xl, Yl, Sl, Al, iterations, "Relocate", file)
             except TypeError:
                 targetL = -1
 
-            try:
-                XR, YR, SR, AR, targetR = Checker(XR, YR, SR, AR, iterations, "Relocate", file)
-            except TypeError:
-                targetR = -1
+        file.write("Теперь ищем минимум из двух целевых" + '\n')
+        minimum = min(targetL, targetR)
+        if minimum == targetL and minimum != -1:
+            file.write("Выбрали левого у него целевая меньше" + '\n')
+            return Xl, Yl, Sl, Al, targetL
 
-            file.write("Теперь ищем минимум из двух целевых" + '\n')
-            minimum = min(targetL, targetR)
-            if minimum == targetL and minimum != -1:
-                file.write("Выбрали левого у него целевая меньше" + '\n')
-                return Xl, Yl, Sl, Al, targetL
+        elif minimum == targetR and minimum != -1 and targetR != targetL:
+            file.write("Выбрали правого у него целевая меньше" + '\n')
+            return XR, YR, SR, AR, targetR
 
-            elif minimum == targetR and minimum != -1 and targetR != targetL:
-                file.write("Выбрали правого у него целевая меньше" + '\n')
-                return XR, YR, SR, AR, targetR
+        else:
+            file.write("Все пошло по пизде ничего не сохранили" + '\n')
+            return x, y, s, a, target_function_start
 
-            else:
-                file.write("Все пошло по пизде ничего не сохранили" + '\n')
-                return x, y, s, a, target_function_start,
-
-        file.write("По какой-то причине нет соседей" + '\n')
-        return x, y, s, a, target_function_start,
 
     elif client == sosed and clientK != sosedK:
         try:
@@ -181,6 +178,7 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, iteratio
 
     SaveStartLocalSearch(x_start, y_start, s_start, a_start)
     TargetFunction = target_function_start
+    SEQUENCE = []
     buf_targ = 0
     fileflag = 0
 
@@ -250,6 +248,9 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, iteratio
         SaveStartLocalSearch(x, y, s, a)
         target_function_start = target_function
         TargetFunction = target_function
+        sequenceX2 = GettingTheSequence(x)
+        SEQUENCE = TransferX2toX1(sequenceX2, x)
+
     else:
         file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
         file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
@@ -261,7 +262,7 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, iteratio
     file.write("<-Relocate stop" + '\n')
     file.close()
 
-    return x_start, y_start, s_start, a_start, target_function_start
+    return x_start, y_start, s_start, a_start, target_function_start, SEQUENCE
 
 
 def OperatorJoinFromHelp(x, y, s, a, client, clientCar, sosed, sosedCar, timeWork, target_function_start, iterations, flag, file):
@@ -295,7 +296,7 @@ def OperatorJoinFromHelp(x, y, s, a, client, clientCar, sosed, sosedCar, timeWor
             file.write("    OperatorJoinFromHelp stop: <-\n")
             return x, y, s, a, target_function_start
 
-    elif not IsContainskvaj(sequenceX2[sosedCar], client, file):
+    elif not IsContainskvaj2(sequenceX2[sosedCar], client):
         file.write("    Не равны\n")
         Xl, Yl, Sl, Al = ReadStartHelpOfFile()
         XR, YR, SR, AR = ReadStartHelpOfFile()
@@ -404,11 +405,17 @@ def OperatorJoinFromHelp(x, y, s, a, client, clientCar, sosed, sosedCar, timeWor
             if minimum == targetL and minimum != -1:
                 file.write("    Выбрали левого у него целевая меньше" + '\n')
                 file.write("OperatorJoinFromHelp stop: <-\n")
+                # sequenceX2 = GettingTheSequence(Xl)
+                # sequenceX1 = TransferX2toX1(sequenceX2, Xl)
+                # print("sequenceX1 in Reloc left= ", sequenceX1)
                 return Xl, Yl, Sl, Al, targetL
 
             elif minimum == targetR and minimum != -1 and targetR != targetL:
                 file.write("    Выбрали правого у него целевая меньше" + '\n')
                 file.write("OperatorJoinFromHelp stop: <-\n")
+                # sequenceX2 = GettingTheSequence(XR)
+                # sequenceX1 = TransferX2toX1(sequenceX2, XR)
+                # print("sequenceX1 in Reloc right= ", sequenceX1)
                 return XR, YR, SR, AR, targetR
 
             else:
@@ -1096,17 +1103,21 @@ def start_operator(local_x, local_y, local_s, local_a, iterations):
     target_function = 9999999999
 
     for i in range(NumberStartOper):
-        x_reloc, y_reloc, s_reloc, a_reloc, Target_function_reloc = Relocate(local_x, local_y, local_s, local_a,
-                                                                             target_function, iterations)
+        x_reloc, y_reloc, s_reloc, a_reloc, Target_function_reloc, SEQUENCE_reloc = Relocate(local_x, local_y, local_s, local_a,
+                                                                                            target_function, iterations)
         print("Target_function_reloc = ", Target_function_reloc)
+        sequenceX2 = GettingTheSequence(local_x)
+        sequenceX1 = TransferX2toX1(sequenceX2, local_x)
+        print("sequenceX1 Reloc= ", sequenceX1)
 
         minimum = min(Target_function_reloc, target_function)
         if minimum == Target_function_reloc:
             SaveSolution(local_x, local_y, local_s, local_a, 'ResultOperator.txt', 'w')
             target_function = Target_function_reloc
+            local_SEQUENCE = SEQUENCE_reloc
             print("min_target this is Reloc = ", target_function)
 
-        x_exch, y_exch, s_exch, a_exch, Target_function_exch = Exchange(local_x, local_y, local_s, local_a,
+        x_exch, y_exch, s_exch, a_exch, Target_function_exch, SEQUENCE_exch = Exchange(local_x, local_y, local_s, local_a,
                                                                         target_function, iterations)
         print("target in Exchange = ", Target_function_exch)
         minimum = min(Target_function_exch, target_function)
@@ -1126,7 +1137,7 @@ def start_operator(local_x, local_y, local_s, local_a, iterations):
         #     print("target in 2-opt = ", target_function)
 
         local_x, local_y, local_s, local_a = ReadSolutionOfFile("ResultOperator.txt")
-        return target_function, local_x, local_y, local_s, local_a
+        return target_function, local_x, local_y, local_s, local_a, local_SEQUENCE
 
     # x_reloc, y_reloc, s_reloc, a_reloc = ReadSolutionOfFile('ResultOperator.txt')
     #

@@ -9,7 +9,7 @@ import csv
 
 shtraf = 1.03
 prostoy = 0.5
-coins = [0, 1, 2, 3, 4, 5, 6] #, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]  # Значение монетки, сколько значений такая вероятность
+coins = [0, 1, 2, 3] #, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]  # Значение монетки, сколько значений такая вероятность
 param_len_subseq = 2  # максимальная длина подпоследовательности в exchange, если 2 - значит состоит из трех элементов
 # param_local_search = 20 # сколько раз пересатвляем каждую скважину к каждому объекту
 # кратность повторений круга табу
@@ -135,10 +135,10 @@ print("K = ", K)
 print("N = ", N)
 
 # столько мест заполнилось в списке запретов
-kriteriy_ostanovki = 10
+kriteriy_ostanovki = 100
 
 # отвечает за то сколько раз вызываем операторы
-NumberStartOper = 10
+NumberStartOper = 150
 # NumberStartOper = 0
 # if N > 60:
 #     NumberStartOper = int(N * 20 / 100)
@@ -146,7 +146,6 @@ NumberStartOper = 10
 #     NumberStartOper = int(N * 30 / 100)
 # else:
 #     NumberStartOper = N
-
 
 
 relocate_param = 10

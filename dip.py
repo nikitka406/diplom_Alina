@@ -266,9 +266,9 @@ Targer_Start = target_function
 print(time.time() - start, "sec")
 print(" \n")
 
-x, y, s, a, target_function = Help(x, y, s, a, target_function, iterations)
-print("Target_function_Help = ", target_function)
-Target_Help1 = target_function
+# x, y, s, a, target_function = Help(x, y, s, a, target_function, iterations)
+# print("Target_function_Help = ", target_function)
+# Target_Help1 = target_function
 
 Target_Tabu = []
 Sequence_Tabu = []
@@ -316,20 +316,27 @@ arr = [0 for i in range(8)]     # krat - отвечает на каком кру
 # создан массив поиска с запретами, размер = 10, заполняем
 # X_tabu, Y_tabu, Ss_tabu, A_tabu, Target_tabu = SolutionStore(10)
 
-arr_Tabu = [0] # поставили 0, чтобы у стартового arr был не пуст
-# Target_Tabu = []
-# for k in range(M):   # кратность круга (номер круга)
-
 
 for Q in range(kriteriy_ostanovki): # сколько раз я запускаю список запретов
-    # o = open("TargAndIterat.txt", "a")
-    Target_operator, x_operator, y_operator, s_operator, a_operator = start_operator(x, y, s, a, iterations)
-    sequenceX2 = GettingTheSequence(x_operator)
-    sequenceX1 = TransferX2toX1(sequenceX2, x_operator)
-    print("sequenceX1 = ", sequenceX1)
+    Target_operator, x_operator, y_operator, s_operator, a_operator, SEQUENCE_operator = start_operator(x, y, s, a, iterations)
+    # sequenceX2 = GettingTheSequence(x_operator)
+    # sequenceX1 = TransferX2toX1(sequenceX2, x_operator)
+    # print("sequenceX1 1= ", sequenceX1)
+
+    # x_operator, y_operator, s_operator, a_operator, Target_operator = Help(x_operator, y_operator, s_operator,
+    #                                                                        a_operator, Target_operator, iterations)
+    # print("Target_function_Help = ", Target_operator)
+    # Target_Help2 = Target_operator
+    #
+    # sequenceX2 = GettingTheSequence(x_operator)
+    # sequenceX1 = TransferX2toX1(sequenceX2, x_operator)
+    #
+    # print("sequenceX1 2= ", sequenceX1)
+
+
     # если такого решения еще не было, то
 
-    if ProverKNaVstrechu(Sequence_Tabu, sequenceX1) != 1:
+    if ProverKNaVstrechu(Sequence_Tabu, SEQUENCE_operator) != 1:
         print("Прошло проверку на встречу")
         Spisok_TS.append(Target_operator)
         itera.append(iterations)
@@ -340,22 +347,22 @@ for Q in range(kriteriy_ostanovki): # сколько раз я запускаю 
         print("Target_operator = ", Target_operator)
         SaveSolution(x_operator, y_operator, s_operator, a_operator, 'StartSolution.txt', 'w')
 
-        if len(Sequence_Tabu) < 10:
+        if len(Sequence_Tabu) < 7:
             print("Все хорошо, длина списка запретов < 10, сохраняем в список запретов")
-            Sequence_Tabu.append(sequenceX1)
-            print("на этом шаге вставляем в sequence_Tabu ", sequenceX1)
+            Sequence_Tabu.append(SEQUENCE_operator)
+            print("на этом шаге вставляем в sequence_Tabu ", SEQUENCE_operator)
             Target_Tabu.append(Target_operator)
             print("на этом шаге вставляем в TargetTabu ", Target_operator)
             print("Target_Tabu = ", Target_Tabu)
             print("Sequence_Tabu = ", Sequence_Tabu)
 
         # если заполнился список запретов, то начинаем перезаписывать
-        elif len(Sequence_Tabu) == 10:
+        elif len(Sequence_Tabu) == 7:
             print("Начинаем потихоньку перезаписывать список запретов, потому что заполнился")
             print("\n")
             deleteSequence_Tabu = Sequence_Tabu.pop(0)
-            arr_Tabu.append(sequenceX1)
-            print("на этом шаге вставляем в Sequence_Tabu ", sequenceX1)
+            Sequence_Tabu.append(SEQUENCE_operator)
+            print("на этом шаге вставляем в Sequence_Tabu ", SEQUENCE_operator)
             deleteTabuTarget = Target_Tabu.pop(0)
             print("на этом шаге вставляем в TargetTabu ", Target_operator)
             Target_Tabu.append(Target_operator)
@@ -365,20 +372,11 @@ for Q in range(kriteriy_ostanovki): # сколько раз я запускаю 
         else:
             x, y, s, a = ReadSolutionOfFile('StartSolution.txt')
 
-#         # сохраняем в список запретов arr и целевую (ЧЕРЕЗ ФАЙЛ)
-#         # SaveTabu(arr[min_in_target], Target_operator[min_in_target])
-#         # сохраняем решение с мин целевой функцией в StartSolution.txt
-#         # ReadTabu(arr_Tabu, Target_Tabu)
-#         # BeautifulPrint(x, y, s, a)
-#         # print("Target_Tabu = ", Target_Tabu)
-#         # print("arr_Tabu = ", arr_Tabu)
-#         # Zzero(X[i], Y[i], Ss[i], A[i], arr[i], Target_function[i])
-#
     # если решение с мин целевой ф уже встречалось, то его никуда не сохраняем и пользуемся предыдущим решением еще раз
     else:
         print("в ProverknaVstrechu ушли в else")
         x, y, s, a = ReadSolutionOfFile('StartSolution.txt')
-        print("sequenceX1 =  ", sequenceX1)
+        print("sequenceX1 =  ", SEQUENCE_operator)
         print("\n")
 
     iterations += 1
@@ -399,7 +397,9 @@ print("Target_Tabu = ", Target_Tabu)
 print("Sequence_Tabu = ", Sequence_Tabu)
 print("\n")
 print("target_function_start_solution = ", Targer_Start)
-print("target_function_Help1 = ", Target_Help1)
+# print("target_function_Help1 = ", Target_Help1)
+print("\n")
+# print("target_function_Help2 = ", Target_Help2)
 print("\n")
 print("Spisok_TS = ", Spisok_TS)
 print("Itera = ", itera)

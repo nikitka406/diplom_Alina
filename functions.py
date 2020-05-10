@@ -465,13 +465,16 @@ def SaveHelp(local_x, local_y, local_s, local_a):
     file.close()
 
 
-# # Проверка на содержание скважин тех же объектов car у soseda
-# def IsContainskvaj(y, client, sosedCar):
-#     for i in range(1, N):
-#         if y[i][sosedCar] == 1 and i == client:
-#             return True
-#     return False
-
+# Проверка на содержание скважин тех же объектов car у soseda
+def IsContainskvaj2(sequence, client, place='all'):
+    if place == 'all':
+        size = len(sequence)
+    else:
+        size = sequence.index(place)
+    for i in range(size):
+        if sequence[i] == client:
+            return True
+    return False
 
 def AddTwoCityInRoute(i, j, m, x, y, s, a, bufer):
     X = x.copy()
