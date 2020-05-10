@@ -4,13 +4,13 @@ from WorkWithFile import *
 
 
 # вклиниваем между
-def OperatorJoinFromReloc(x, y, s, a, target_function_start, client, clientK, sosed, sosedK, arr, iterations, file):
+def OperatorJoinFromReloc(x, y, s, a, target_function_start, client, clientK, sosed, sosedK, iterations, file):
     Xl, Yl, Sl, Al = ReadStartLocalSearchOfFile()
     XR, YR, SR, AR = ReadStartLocalSearchOfFile()
     X, Y, Ss, A = ReadStartLocalSearchOfFile()
-    arrR = arr.copy()
-    arrL = arr.copy()
-    arrC = arr.copy()
+    # arrR = arr.copy()
+    # arrL = arr.copy()
+    # arrC = arr.copy()
     sosedLeft = SearchSosedLeftOrRight(Xl, Yl, sosed, "left", sosedK)  # левый сосед соседа
     sosedRight = SearchSosedLeftOrRight(Xl, Yl, sosed, "right", sosedK)  # правый сосед соседа
 
@@ -49,14 +49,14 @@ def OperatorJoinFromReloc(x, y, s, a, target_function_start, client, clientK, so
                 XR[client][sosedRight][sosedK] = 1
                 YR[client][sosedK] = 1  # тепреь машина соседа обслуживает клиента
 
-                arrR[0] = clientLeft
-                arrR[1] = client
-                arrR[2] = clientRight
-                arrR[3] = clientK
-                arrR[4] = sosedLeft
-                arrR[5] = sosed
-                arrR[6] = sosedRight
-                arrR[7] = sosedK
+                # arrR[0] = clientLeft
+                # arrR[1] = client
+                # arrR[2] = clientRight
+                # arrR[3] = clientK
+                # arrR[4] = sosedLeft
+                # arrR[5] = sosed
+                # arrR[6] = sosedRight
+                # arrR[7] = sosedK
 
                 # Подсчет времени приезда к клиенту от соседа
                 AR = TimeOfArrival(XR, YR, SR, file)
@@ -101,14 +101,14 @@ def OperatorJoinFromReloc(x, y, s, a, target_function_start, client, clientK, so
                 Xl[client][sosed][sosedK] = 0
                 Yl[client][sosedK] = 0  # теперь машина соседа обслуживает клиента
 
-                arrL[0] = clientLeft
-                arrL[1] = client
-                arrL[2] = clientRight
-                arrL[3] = clientK
-                arrL[4] = sosedLeft
-                arrL[5] = sosed
-                arrL[6] = sosedRight
-                arrL[7] = sosedK
+                # arrL[0] = clientLeft
+                # arrL[1] = client
+                # arrL[2] = clientRight
+                # arrL[3] = clientK
+                # arrL[4] = sosedLeft
+                # arrL[5] = sosed
+                # arrL[6] = sosedRight
+                # arrL[7] = sosedK
 
                 # Подсчет времени приезда к клиенту от соседа
                 Al = TimeOfArrival(Xl, Yl, Sl, file)
@@ -128,18 +128,18 @@ def OperatorJoinFromReloc(x, y, s, a, target_function_start, client, clientK, so
             minimum = min(targetL, targetR)
             if minimum == targetL and minimum != -1:
                 file.write("Выбрали левого у него целевая меньше" + '\n')
-                return Xl, Yl, Sl, Al, targetL, arrL
+                return Xl, Yl, Sl, Al, targetL
 
             elif minimum == targetR and minimum != -1 and targetR != targetL:
                 file.write("Выбрали правого у него целевая меньше" + '\n')
-                return XR, YR, SR, AR, targetR, arrR
+                return XR, YR, SR, AR, targetR
 
             else:
                 file.write("Все пошло по пизде ничего не сохранили" + '\n')
-                return x, y, s, a, target_function_start, arr
+                return x, y, s, a, target_function_start,
 
         file.write("По какой-то причине нет соседей" + '\n')
-        return x, y, s, a, target_function_start, arr
+        return x, y, s, a, target_function_start,
 
     elif client == sosed and clientK != sosedK:
         try:
@@ -147,14 +147,14 @@ def OperatorJoinFromReloc(x, y, s, a, target_function_start, client, clientK, so
             Ss[sosed][sosedK] += Ss[client][clientK]
             X, Y, Ss, A = DeleteClientaFromPath(X, Y, Ss, A, client, clientK)
             A = TimeOfArrival(X, Y, Ss, file)
-            arrC[0] = clientLeft
-            arrC[1] = client
-            arrC[2] = clientRight
-            arrC[3] = clientK
-            arrC[4] = sosedLeft
-            arrC[5] = sosed
-            arrC[6] = sosedRight
-            arrC[7] = sosedK
+            # arrC[0] = clientLeft
+            # arrC[1] = client
+            # arrC[2] = clientRight
+            # arrC[3] = clientK
+            # arrC[4] = sosedLeft
+            # arrC[5] = sosed
+            # arrC[6] = sosedRight
+            # arrC[7] = sosedK
 
         except IOError:
             file.write("Объект не удален" + '\n')
@@ -164,17 +164,17 @@ def OperatorJoinFromReloc(x, y, s, a, target_function_start, client, clientK, so
         try:
             X, Y, Ss, A, target = Checker(X, Y, Ss, A, iterations, "Reloc", file)
             file.write("OperatorJoinFromReloc stop: <-\n")
-            return X, Y, Ss, A, target, arrC
+            return X, Y, Ss, A, target
         except TypeError:
             file.write("OperatorJoinFromReloc stop: <-\n")
-            return x, y, s, a, target_function_start, arr
+            return x, y, s, a, target_function_start
 
     file.write("Что-то пошло не так" + '\n')
-    return x, y, s, a, target_function_start, arr
+    return x, y, s, a, target_function_start
 
 
 # переставляем клиента к новому соседу, локальный поиск
-def Relocate(x_start, y_start, s_start, a_start, target_function_start, arr, iterations):
+def Relocate(x_start, y_start, s_start, a_start, target_function_start, iterations):
     file = open("log/relog.txt", 'a')
     file.write("->Relocate start" + '\n')
     file.write("Целевая функция до применения Relocate = " + str(target_function_start) + '\n')
@@ -206,9 +206,8 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, arr, ite
                             file.write("К соседу " + str(sosed) + '\n')
                             file.write("На машине " + str(sosedK) + '\n')
 
-                            x, y, s, a, target_function, arr = OperatorJoinFromReloc(X, Y, Ss, A, target_function_start,
-                                                                                client, clientCar,
-                                                                                sosed, sosedK, arr,
+                            x, y, s, a, target_function = OperatorJoinFromReloc(X, Y, Ss, A, target_function_start,
+                                                                                client, clientCar, sosed, sosedK,
                                                                                 iterations, file)
                             file.write("Число используемых машин " + str(AmountCarUsed(y)) + '\n')
 
@@ -262,7 +261,7 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, arr, ite
     file.write("<-Relocate stop" + '\n')
     file.close()
 
-    return x_start, y_start, s_start, a_start, target_function_start, arr
+    return x_start, y_start, s_start, a_start, target_function_start
 
 
 def OperatorJoinFromHelp(x, y, s, a, client, clientCar, sosed, sosedCar, timeWork, target_function_start, iterations, flag, file):
@@ -296,7 +295,7 @@ def OperatorJoinFromHelp(x, y, s, a, client, clientCar, sosed, sosedCar, timeWor
             file.write("    OperatorJoinFromHelp stop: <-\n")
             return x, y, s, a, target_function_start
 
-    if not IsContainskvaj(y, client, sosedCar):
+    elif not IsContainskvaj(sequenceX2[sosedCar], client, file):
         file.write("    Не равны\n")
         Xl, Yl, Sl, Al = ReadStartHelpOfFile()
         XR, YR, SR, AR = ReadStartHelpOfFile()
@@ -538,7 +537,7 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, iterations):
         file.write("\nПопробуем отдать несколько скважин\n")
 
         file.write("Пересчитываем проебанные скважины\n")
-        contWells = CountskvajWithFane(Sstart, Astart, client, k)
+        contskvaj = CountskvajWithFane(Sstart, Astart, client, k)
         file.write("Всего не укладывается " + str(contskvaj) + " скважин\n")
 
         for proebSkv in range(2, contskvaj + 1):
@@ -640,24 +639,482 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, iterations):
     return Xstart, Ystart, Sstart, Astart, target_function_start
 
 
+def Exchange(x_start, y_start, s_start, a_start, target_function_start, iteration): #timeLocal):
+    file = open("log/exchlog.txt", 'a')
+
+    # start = time.time()
+    # timeLocal[1] += 1
+
+    file.write("->Exchange start" + '\n')
+    file.write("Целевая функция до применения Exchange = " + str(target_function_start) + '\n')
+
+    SaveStartLocalSearch(x_start, y_start, s_start, a_start)
+    TargetFunction = target_function_start
+    buf_targ = 0
+
+    fileflag = 0
+    buf_targ = TargetFunction
+    X, Y, Ss, A = ReadStartLocalSearchOfFile()
+    sequenceX2 = GettingTheSequence(X)
+
+    # Bыбираем клиента
+    for clientCar in range(K):
+        for client in range(1, N):
+            if Y[client][clientCar] == 1:
+                for sosedCar in range(K):
+                    for sosed in range(1, N):
+                        # TODO случай с равными машинами
+                        if Y[sosed][sosedCar] == 1 and sosedCar != clientCar:
+
+                            subseq1 = []
+                            subseq2 = []
+
+                            indexCl = sequenceX2[clientCar].index(client)
+                            indexSos = sequenceX2[sosedCar].index(sosed)
+
+                            for i in range(indexCl, len(sequenceX2[clientCar])):
+                                if i <= indexCl + param_len_subseq and sequenceX2[clientCar][i] != 0:
+                                    subseq1.append(sequenceX2[clientCar][i])
+                                else:
+                                    break
+                            for i in range(indexSos, len(sequenceX2[sosedCar])):
+                                if i <= indexSos + param_len_subseq and sequenceX2[sosedCar][i] != 0:
+                                    subseq2.append(sequenceX2[sosedCar][i])
+                                else:
+                                    break
+
+                            if subseq1 != [] and subseq2 != []:
+                                file.write("Переставляем клиентa " + str(client) + '\n')
+                                file.write("С машины " + str(clientCar) + '\n')
+
+                                file.write("К соседу " + str(sosed) + '\n')
+                                file.write("На машине " + str(sosedCar) + '\n')
+
+                                file.write("Собираем подпоследовательности\n")
+                                file.write("path1 = " + str(sequenceX2[clientCar]) + '\n')
+                                file.write("path2 = " + str(sequenceX2[sosedCar]) + '\n')
+
+                                file.write("subseq1 = " + str(subseq1) + '\n')
+                                file.write("subseq2 = " + str(subseq2) + '\n')
+
+                                if indexCl - 1 == 0:
+                                    sequence1Left = 0
+                                else:
+                                    sequence1Left = sequenceX2[clientCar][indexCl - 2]
+                                if indexCl + param_len_subseq + 2 < len(sequenceX2):
+                                    sequence1Right = sequenceX2[clientCar][indexCl + param_len_subseq + 2]
+                                else:
+                                    sequence1Right = 0
+
+                                if indexSos - 1 == 0:
+                                    sequence2Left = 0
+                                else:
+                                    sequence2Left = sequenceX2[sosedCar][indexSos - 2]
+                                if indexSos + param_len_subseq + 2 < len(sequenceX2):
+                                    sequence2Right = sequenceX2[sosedCar][indexSos + param_len_subseq + 2]
+                                else:
+                                    sequence2Right = 0
+
+                                file.write("Пред Слева от последовательности клиента " + str(sequence1Left) + "\n")
+                                file.write(
+                                    "После Справа от последовательности клиента " + str(sequence1Right) + "\n")
+                                file.write("Перд Слева от последовательности соседа " + str(sequence2Left) + "\n")
+                                file.write(
+                                    "После Справа от последовательности соседа " + str(sequence2Right) + "\n")
+
+                                buf1 = []
+                                # Отсекаем мусорные решения, если первые элементы подпоследовательностей
+                                # не содержатся ни в начале ни в конце
+                                if not IsContainskvaj(sequenceX2[sosedCar], subseq1[0], file, sequence2Left) \
+                                        and not IsContainskvaj(sequenceX2[sosedCar], subseq1[0], file,
+                                                               sequence2Right,
+                                                               'end') \
+                                        and not IsContainskvaj(sequenceX2[clientCar], subseq2[0], file,
+                                                               sequence1Left) \
+                                        and not IsContainskvaj(sequenceX2[clientCar], subseq2[0], file,
+                                                               sequence1Right,
+                                                               'end'):
+                                    file.write("Первые элементы подпоследовательностей "
+                                               "не содержатся ни в начале ни в конце\n")
+
+                                    for i in range(len(subseq1)):
+                                        if subseq1[-1] != 0:
+                                            buf1.append(subseq1[i])
+                                            buf2 = []
+                                            for j in range(len(subseq2)):
+                                                if subseq2[-1] != 0:
+                                                    buf2.append(subseq2[j])
+                                                    if ResultCoins():
+                                                        file.write("buf1 = " + str(buf1) + '\n')
+                                                        for p in range(len(buf1)):
+                                                            file.write(str(Ss[buf1[p]][clientCar]) + ' ')
+                                                        file.write('\n')
+
+                                                        file.write("buf2 = " + str(buf2) + '\n')
+                                                        for p in range(len(buf2)):
+                                                            file.write(str(Ss[buf2[p]][sosedCar]) + ' ')
+                                                        file.write('\n')
+
+                                                        x, y, s, a, target_function = OperatorJoinFromExchange(
+                                                            X, Y, Ss, A, TargetFunction, client,
+                                                            clientCar, buf1, sosed, sosedCar, buf2, iteration, file)
+                                                        file.write(
+                                                            "Число используемых машин " + str(
+                                                                AmountCarUsed(y)) + '\n')
+
+                                                        file.write("Выбираем минимальное решение" + '\n')
+                                                        minimum = min(TargetFunction, target_function)
+                                                        if minimum == target_function:
+                                                            file.write(
+                                                                "Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
+                                                            file.write(
+                                                                "Новая целевая функция равна " + str(
+                                                                    target_function) + '\n')
+
+                                                            SaveLocalSearch(x, y, s, a)
+                                                            TargetFunction = target_function
+                                                            fileflag = 1
+                                                        else:
+                                                            file.write(
+                                                                "Новое перемещение, хуже чем то что было, "
+                                                                "возвращаем наше старое решение" + '\n')
+                                                            file.write(
+                                                                "Старая целевая функция равна " + str(
+                                                                    TargetFunction) + '\n')
+                                                    else:
+                                                        file.write("Монетка сказала, не берем\n")
+                                                        file.write("buf1 = " + str(buf1) + '\n')
+                                                        file.write("buf2 = " + str(buf2) + '\n\n')
+                                else:
+                                    file.write("Отбросили мусорные решения\n")
+
+        file.write(
+            "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
+
+        if fileflag == 1:
+            x, y, s, a = ReadLocalSearchOfFile()
+            target_function = CalculationOfObjectiveFunction(x, shtrafFunction(s, a, iteration))
+            file.write(
+                "Целевая функция последнего минимального переставления = " + str(
+                    target_function) + '\n')
+            fileflag = 0
+        else:
+            target_function = -1
+        # TODO сравнивать по вероятностb
+        minimum2 = min(target_function_start, target_function)
+        if (minimum2 == target_function and target_function != -1) or (fileflag == 1 ):
+            file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
+            file.write("Новая целевая функция равна " + str(target_function) + '\n')
+
+            SaveStartLocalSearch(x, y, s, a)
+            target_function_start = target_function
+            TargetFunction = target_function
+        else:
+            file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
+            file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
+
+    file.write("While stop\n")
+    x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile()
+
+    # Time = time.time() - start
+    # timeLocal[0] += Time
+    # file.write("Время работы Exchange = " + str(Time) + 'seconds\n')
+
+    file.write("<-Exchange stop" + '\n')
+    file.close()
+
+    return x_start, y_start, s_start, a_start, target_function_start #timeLocal
+
+
+def OperatorJoinFromExchange(x, y, s, a, target_function, client, clientCar, subseq1,
+                             sosed, sosedCar, subseq2, iteration, file):
+    file.write("->OperatorJoinFromExchange start" + '\n')
+
+    TargetFunction = target_function
+    X, Y, Ss, A = ReadStartLocalSearchOfFile()
+
+    subseq1Left = SearchSosedLeftOrRight(X, Y, subseq1[0], "left", clientCar)  # левый сосед клиента
+    subseq1Right = SearchSosedLeftOrRight(X, Y, subseq1[-1], "right", clientCar)  # левый сосед клиента
+    subseq2Left = SearchSosedLeftOrRight(X, Y, subseq2[0], "left", sosedCar)  # правый сосед соседа
+    subseq2Right = SearchSosedLeftOrRight(X, Y, subseq2[-1], "right", sosedCar)  # правый сосед соседа
+
+    file.write("    Слева от последовательности клиента " + str(subseq1Left) + " Время работы = " + str(Ss[subseq1Left][clientCar]) + "\n")
+    file.write("    Справа от последовательности клиента " + str(subseq1Right) + " Время работы = " + str(Ss[subseq1Right][clientCar]) + "\n")
+    file.write("    Слева от последовательности соседа " + str(subseq2Left) + " Время работы = " + str(Ss[subseq2Left][sosedCar]) + "\n")
+    file.write("    Справа от последовательности соседа " + str(subseq2Right) + " Время работы = " + str(Ss[subseq2Right][sosedCar]) + "\n")
+
+    time1 = SaveTime(Ss, subseq1, clientCar, file)
+    time2 = SaveTime(Ss, subseq2, sosedCar, file)
+
+    X, Y, Ss, A = DeleteTail(X, Y, Ss, A, subseq1Left, subseq1, clientCar, file, subseq1Right)
+    X, Y, Ss, A = DeleteTail(X, Y, Ss, A, subseq2Left, subseq2, sosedCar, file, subseq2Right)
+
+    # Сценарий когда какие-нибудь края равны соседям другой последовательности
+    if subseq1[0] == subseq2Left or subseq1[-1] == subseq2Right or \
+            subseq2[0] == subseq1Left or subseq2[-1] == subseq1Right:
+        file.write("    Сценарий когда какие-нибудь края равны соседям другой последовательности\n")
+
+        if subseq1[0] == subseq2Left and subseq1[-1] != subseq2Right and \
+                subseq2[0] != subseq1Left and subseq2[-1] != subseq1Right:
+            file.write("    subseq1[0] == subseq2Left остальные не равны\n")
+
+            Ss[subseq1[0]][sosedCar] += time1[0]
+            X, Y, Ss, subseq2Left = AddSubSeqInPath(X, Y, Ss, subseq1, subseq2Left, sosedCar, time1, 1)
+            X[subseq2Left][subseq2Right][sosedCar] = 1
+
+            X, Y, Ss, subseq1Left = AddSubSeqInPath(X, Y, Ss, subseq2, subseq1Left, clientCar, time2, 0)
+            X[subseq1Left][subseq1Right][clientCar] = 1
+
+            A = TimeOfArrival(X, Y, Ss, file)
+
+        elif subseq1[0] != subseq2Left and subseq1[-1] == subseq2Right and \
+                subseq2[0] != subseq1Left and subseq2[-1] != subseq1Right:
+            file.write("    subseq1[-1] == subseq2Right остальные не равны\n")
+
+            X, Y, Ss, subseq2Left = AddSubSeqInPath(X, Y, Ss, subseq1, subseq2Left, sosedCar, time1, 0)
+            # Ss[subseq2Right][sosedCar] += time1[-1]
+
+            X, Y, Ss, subseq1Left = AddSubSeqInPath(X, Y, Ss, subseq2, subseq1Left, clientCar, time2, 0)
+            X[subseq1Left][subseq1Right][clientCar] = 1
+
+            A = TimeOfArrival(X, Y, Ss, file)
+
+        elif subseq1[0] == subseq2Left and subseq1[-1] == subseq2Right and \
+                subseq2[0] != subseq1Left and subseq2[-1] != subseq1Right:
+            file.write("    subseq1[0] == subseq2Left and subseq1[-1] == subseq2Right остальные не равны\n")
+
+            Ss[subseq1[0]][sosedCar] += time1[0]
+            X, Y, Ss, subseq2Left = AddSubSeqInPath(X, Y, Ss, subseq1, subseq2Left, sosedCar, time1, 1)
+            # Ss[subseq1[-1]][sosedCar] += time1[-1]
+
+            X, Y, Ss, subseq1Left = AddSubSeqInPath(X, Y, Ss, subseq2, subseq1Left, clientCar, time2, 0)
+            X[subseq1Left][subseq1Right][clientCar] = 1
+
+            A = TimeOfArrival(X, Y, Ss, file)
+
+        elif subseq1[0] == subseq2Left and subseq1[-1] != subseq2Right and \
+                subseq2[0] == subseq1Left and subseq2[-1] == subseq1Right:
+            file.write("    Только эти не равен subseq1[-1] != subseq2Right\n")
+
+            Ss[subseq1[0]][sosedCar] += time1[0]
+            X, Y, Ss, subseq2Left = AddSubSeqInPath(X, Y, Ss, subseq1, subseq2Left, sosedCar, time1, 1)
+            X[subseq2Left][subseq2Right][sosedCar] = 1
+
+            Ss[subseq2[0]][clientCar] += time2[0]
+            X, Y, Ss, subseq1Left = AddSubSeqInPath(X, Y, Ss, subseq2, subseq1Left, clientCar, time2, 1)
+            # Ss[subseq2[-1]][clientCar] += time2[-1]
+
+            A = TimeOfArrival(X, Y, Ss, file)
+
+        elif subseq1[0] != subseq2Left and subseq1[-1] == subseq2Right and \
+                subseq2[0] == subseq1Left and subseq2[-1] == subseq1Right:
+            file.write("    Только эти не равен subseq1[0] != subseq2Left\n")
+
+            X, Y, Ss, subseq2Left = AddSubSeqInPath(X, Y, Ss, subseq1, subseq2Left, sosedCar, time1, 0)
+            # Ss[subseq1[-1]][sosedCar] += time1[-1]
+
+            Ss[subseq2[0]][clientCar] += time2[0]
+            X, Y, Ss, subseq1Left = AddSubSeqInPath(X, Y, Ss, subseq2, subseq1Left, clientCar, time2, 1)
+            # Ss[subseq2[-1]][clientCar] += time2[-1]
+
+            A = TimeOfArrival(X, Y, Ss, file)
+
+        elif subseq1[0] == subseq2Left and subseq1[-1] == subseq2Right and \
+                subseq2[0] == subseq1Left and subseq2[-1] == subseq1Right:
+            file.write("    Все равны\n")
+
+            Ss[subseq1[0]][sosedCar] += time1[0]
+            X, Y, Ss, subseq2Left = AddSubSeqInPath(X, Y, Ss, subseq1, subseq2Left, sosedCar, time1, 1)
+            # Ss[subseq1[-1]][sosedCar] += time1[-1]
+
+            Ss[subseq2[0]][clientCar] += time2[0]
+            X, Y, Ss, subseq1Left = AddSubSeqInPath(X, Y, Ss, subseq2, subseq1Left, clientCar, time2, 1)
+            # Ss[subseq2[-1]][clientCar] += time2[-1]
+
+            A = TimeOfArrival(X, Y, Ss, file)
+
+        elif subseq1[0] == subseq2Left and subseq1[-1] != subseq2Right and \
+                subseq2[0] != subseq1Left and subseq2[-1] == subseq1Right:
+            file.write("    subseq1[0] == subseq2Left and subseq2[-1] == subseq1Right остальные не равны\n")
+
+            Ss[subseq1[0]][sosedCar] += time1[0]
+            X, Y, Ss, subseq2Left = AddSubSeqInPath(X, Y, Ss, subseq1, subseq2Left, sosedCar, time1, 1)
+            X[subseq2Left][subseq2Right][sosedCar] = 1
+
+            X, Y, Ss, subseq1Left = AddSubSeqInPath(X, Y, Ss, subseq2, subseq1Left, clientCar, time2, 0)
+            # Ss[subseq2[-1]][clientCar] += time2[-1]
+
+            A = TimeOfArrival(X, Y, Ss, file)
+
+        elif subseq1[0] != subseq2Left and subseq1[-1] == subseq2Right and \
+                subseq2[0] != subseq1Left and subseq2[-1] == subseq1Right:
+            file.write("    subseq1[-1] == subseq2Right and subseq2[-1] == subseq1Right остальные не равны\n")
+
+            X, Y, Ss, subseq2Left = AddSubSeqInPath(X, Y, Ss, subseq1, subseq2Left, sosedCar, time1, 0)
+            # Ss[subseq1[-1]][sosedCar] += time1[-1]
+
+            X, Y, Ss, subseq1Left = AddSubSeqInPath(X, Y, Ss, subseq2, subseq1Left, clientCar, time2, 0)
+            # Ss[subseq2[-1]][clientCar] += time2[-1]
+
+            A = TimeOfArrival(X, Y, Ss, file)
+
+        elif subseq1[0] == subseq2Left and subseq1[-1] == subseq2Right and \
+                subseq2[0] != subseq1Left and subseq2[-1] == subseq1Right:
+            file.write("    Только эти не равны subseq2[0] != subseq1Left\n")
+
+            Ss[subseq1[0]][sosedCar] += time1[0]
+            X, Y, Ss, subseq2Left = AddSubSeqInPath(X, Y, Ss, subseq1, subseq2Left, sosedCar, time1, 1)
+            # Ss[subseq1[-1]][sosedCar] += time1[-1]
+
+            X, Y, Ss, subseq1Left = AddSubSeqInPath(X, Y, Ss, subseq2, subseq1Left, clientCar, time2, 0)
+            # Ss[subseq2[-1]][clientCar] += time2[-1]
+
+            A = TimeOfArrival(X, Y, Ss, file)
+
+        elif subseq1[0] == subseq2Left and subseq1[-1] != subseq2Right and \
+                subseq2[0] == subseq1Left and subseq2[-1] != subseq1Right:
+            file.write("    subseq1[0] == subseq2Left and subseq2[0] == subseq1Left остальные не равны\n")
+
+            Ss[subseq1[0]][sosedCar] += time1[0]
+            X, Y, Ss, subseq2Left = AddSubSeqInPath(X, Y, Ss, subseq1, subseq2Left, sosedCar, time1, 1)
+            X[subseq2Left][subseq2Right][sosedCar] = 1
+
+            Ss[subseq2[0]][clientCar] += time2[0]
+            X, Y, Ss, subseq1Left = AddSubSeqInPath(X, Y, Ss, subseq2, subseq1Left, clientCar, time2, 1)
+            X[subseq1Left][subseq1Right][clientCar] = 1
+
+            A = TimeOfArrival(X, Y, Ss, file)
+
+        elif subseq1[0] != subseq2Left and subseq1[-1] == subseq2Right and \
+                subseq2[0] == subseq1Left and subseq2[-1] != subseq1Right:
+            file.write("    subseq2[0] == subseq1Left and subseq1[-1] == subseq2Right остальные не равны\n")
+
+            X, Y, Ss, subseq2Left = AddSubSeqInPath(X, Y, Ss, subseq1, subseq2Left, sosedCar, time1, 0)
+            # Ss[subseq1[-1]][sosedCar] += time1[-1]
+
+            Ss[subseq2[0]][clientCar] += time2[0]
+            X, Y, Ss, subseq1Left = AddSubSeqInPath(X, Y, Ss, subseq2, subseq1Left, clientCar, time2, 1)
+            X[subseq1Left][subseq1Right][clientCar] = 1
+
+            A = TimeOfArrival(X, Y, Ss, file)
+
+        elif subseq1[0] == subseq2Left and subseq1[-1] == subseq2Right and \
+                subseq2[0] == subseq1Left and subseq2[-1] != subseq1Right:
+            file.write("    Только этот не равен subseq2[-1] != subseq1Right\n")
+
+            Ss[subseq1[0]][sosedCar] += time1[0]
+            X, Y, Ss, subseq2Left = AddSubSeqInPath(X, Y, Ss, subseq1, subseq2Left, sosedCar, time1, 1)
+            # Ss[subseq1[-1]][sosedCar] += time1[-1]
+
+            Ss[subseq2[0]][clientCar] += time2[0]
+            X, Y, Ss, subseq1Left = AddSubSeqInPath(X, Y, Ss, subseq2, subseq1Left, clientCar, time2, 1)
+            X[subseq1Left][subseq1Right][clientCar] = 1
+
+            A = TimeOfArrival(X, Y, Ss, file)
+
+        elif subseq1[0] != subseq2Left and subseq1[-1] != subseq2Right and \
+                subseq2[0] == subseq1Left and subseq2[-1] == subseq1Right:
+            file.write("    subseq2[0] == subseq1Left and subseq2[-1] == subseq1Right\n")
+
+            X, Y, Ss, subseq2Left = AddSubSeqInPath(X, Y, Ss, subseq1, subseq2Left, sosedCar, time1, 0)
+            X[subseq2Left][subseq2Right][sosedCar] = 1
+
+            Ss[subseq2[0]][clientCar] += time2[0]
+            X, Y, Ss, subseq1Left = AddSubSeqInPath(X, Y, Ss, subseq2, subseq1Left, clientCar, time2, 1)
+            # Ss[subseq2[-1]][clientCar] += time2[-1]
+
+            A = TimeOfArrival(X, Y, Ss, file)
+
+        elif subseq1[0] != subseq2Left and subseq1[-1] != subseq2Right and \
+                subseq2[0] == subseq1Left and subseq2[-1] != subseq1Right:
+            file.write("    Только это равно subseq2[0] == subseq1Left\n")
+
+            X, Y, Ss, subseq2Left = AddSubSeqInPath(X, Y, Ss, subseq1, subseq2Left, sosedCar, time1, 0)
+            X[subseq2Left][subseq2Right][sosedCar] = 1
+
+            Ss[subseq2[0]][clientCar] += time2[0]
+            X, Y, Ss, subseq1Left = AddSubSeqInPath(X, Y, Ss, subseq2, subseq1Left, clientCar, time2, 1)
+            X[subseq1Left][subseq1Right][clientCar] = 1
+
+            A = TimeOfArrival(X, Y, Ss, file)
+
+        elif subseq1[0] != subseq2Left and subseq1[-1] != subseq2Right and \
+                subseq2[0] != subseq1Left and subseq2[-1] == subseq1Right:
+            file.write("    Только этот равен subseq2[-1] == subseq1Right\n")
+
+            X, Y, Ss, subseq2Left = AddSubSeqInPath(X, Y, Ss, subseq1, subseq2Left, sosedCar, time1, 0)
+            X[subseq2Left][subseq2Right][sosedCar] = 1
+
+            X, Y, Ss, subseq1Left = AddSubSeqInPath(X, Y, Ss, subseq2, subseq1Left, clientCar, time2, 0)
+            # Ss[subseq2[-1]][clientCar] += time2[-1]
+
+            A = TimeOfArrival(X, Y, Ss, file)
+
+        try:
+            X, Y, Ss, A, Target_Function, SizeK = Checker(X, Y, Ss, A, iteration, "Exchange", file)
+            PrintForCar(X, Ss, clientCar, file, sosedCar)
+            file.write("OperatorJoinFromExchange stop: <-\n")
+            return X, Y, Ss, A, Target_Function
+        except TypeError:
+            # for i in range(N):
+            #     file.write("Scl = " + str(Ss[i][clientCar]) + ' ')
+            # file.write('\n')
+            #
+            # for i in range(N):
+            #     file.write("Ssos = " + str(Ss[i][sosedCar]) + ' ')
+            # file.write('\n')
+
+            file.write("OperatorJoinFromExchange stop: <-\n")
+            return x, y, s, a, target_function
+
+    else:
+        file.write("    Сценарий когда никакие края не равны с соседями из другой последовательности\n")
+
+        X, Y, Ss, subseq2Left = AddSubSeqInPath(X, Y, Ss, subseq1, subseq2Left, sosedCar, time1, 0)
+        X[subseq2Left][subseq2Right][sosedCar] = 1
+
+        X, Y, Ss, subseq1Left = AddSubSeqInPath(X, Y, Ss, subseq2, subseq1Left, clientCar, time2, 0)
+        X[subseq1Left][subseq1Right][clientCar] = 1
+
+        A = TimeOfArrival(X, Y, Ss, file)
+
+        try:
+            X, Y, Ss, A, Target_Function = Checker(X, Y, Ss, A, iteration, "Exchange", file)
+            PrintForCar(X, Ss, clientCar, file, sosedCar)
+            file.write("OperatorJoinFromExchange stop: <-\n")
+            return X, Y, Ss, A, Target_Function
+        except TypeError:
+            file.write("OperatorJoinFromExchange stop: <-\n")
+            return x, y, s, a, target_function
+    # TODO надо рассмотреть свап, когда одна машина
+
+
 # Применяю операторы для решения: заполняю массив, сколько операторов, столько и форов
-def start_operator(local_x, local_y, local_s, local_a, local_arr, iterations):
+def start_operator(local_x, local_y, local_s, local_a, iterations):
     # сначала для оператора перемещения:
     SaveSolution(local_x, local_y, local_s, local_a, 'StartSolution.txt', 'w')
     target_function = 9999999999
 
     for i in range(NumberStartOper):
-        x_reloc, y_reloc, s_reloc, a_reloc, Target_function_reloc, arr_reloc = Relocate(local_x, local_y, local_s,
-                                                                             local_a, target_function,
-                                                                             local_arr, iterations)
+        x_reloc, y_reloc, s_reloc, a_reloc, Target_function_reloc = Relocate(local_x, local_y, local_s, local_a,
+                                                                             target_function, iterations)
         print("Target_function_reloc = ", Target_function_reloc)
 
         minimum = min(Target_function_reloc, target_function)
         if minimum == Target_function_reloc:
             SaveSolution(local_x, local_y, local_s, local_a, 'ResultOperator.txt', 'w')
             target_function = Target_function_reloc
-            print("min_target in reloc = ", target_function)
-            local_arr = arr_reloc
+            print("min_target this is Reloc = ", target_function)
+
+        x_exch, y_exch, s_exch, a_exch, Target_function_exch = Exchange(local_x, local_y, local_s, local_a,
+                                                                        target_function, iterations)
+        print("target in Exchange = ", Target_function_exch)
+        minimum = min(Target_function_exch, target_function)
+        if minimum == Target_function_exch:
+            SaveSolution(local_x, local_y, local_s, local_a, 'ResultOperator.txt', 'w')
+            target_function = Target_function_exch
+            print("min function this is Exchange = ", target_function)
+
 
         # x_opt, y_opt, s_opt, a_opt, Target_function_opt = Two_Opt(local_x, local_y, local_s,
         #                                                                      local_a, target_function,
@@ -669,7 +1126,7 @@ def start_operator(local_x, local_y, local_s, local_a, local_arr, iterations):
         #     print("target in 2-opt = ", target_function)
 
         local_x, local_y, local_s, local_a = ReadSolutionOfFile("ResultOperator.txt")
-        return target_function, local_x, local_y, local_s, local_a, local_arr
+        return target_function, local_x, local_y, local_s, local_a
 
     # x_reloc, y_reloc, s_reloc, a_reloc = ReadSolutionOfFile('ResultOperator.txt')
     #

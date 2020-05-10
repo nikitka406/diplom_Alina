@@ -212,7 +212,6 @@ def CalculationOfObjectiveFunction(x, shtrafFunction):
     for k in range(K):
         for i in range(N):
             for j in range(N):
-                # Если время окончания не совпадает с регламентом, то умножаем разницу во времени на коэффициент
                 target_function += d[i][j] * x[i][j][k]
 
     print("target_function в самой функции подсчета без штрафа = ", target_function)
@@ -466,12 +465,12 @@ def SaveHelp(local_x, local_y, local_s, local_a):
     file.close()
 
 
-# Проверка на содержание скважин тех же объектов car у soseda
-def IsContainskvaj(y, client, sosedCar):
-    for i in range(1, N):
-        if y[i][sosedCar] == 1 and i == client:
-            return True
-    return False
+# # Проверка на содержание скважин тех же объектов car у soseda
+# def IsContainskvaj(y, client, sosedCar):
+#     for i in range(1, N):
+#         if y[i][sosedCar] == 1 and i == client:
+#             return True
+#     return False
 
 
 def AddTwoCityInRoute(i, j, m, x, y, s, a, bufer):
@@ -1318,6 +1317,90 @@ def CreateSequence(X):
     sequenceX2 = GettingTheSequence(X)
     sequenceX1 = TransferX2toX1(sequenceX2, X)
     return sequenceX1
+
+
+##############Functions for Exchange##########
+
+# Добавляем подпоследовательности в маршрут в Exchange
+def AddSubSeqInPath(X, Y, Ss, subseq1, subseq2Left, car2, time1, start=0):
+    for i in range(start, len(subseq1)):
+        X[subseq2Left][subseq1[i]][car2] = 1
+        Y[subseq1[i]][car2] = 1
+        Ss[subseq1[i]][car2] += time1[i]
+        subseq2Left = subseq1[i]
+    return X, Y, Ss, subseq2Left
+
+# Проверка на содержание скважин тех же объектов car у soseda
+def IsContainskvaj(sequence, client, file, place='all', flag='start'):
+    file.write("IsContainskvaj start: ->\n")
+    if flag == 'start':
+        if place == 'all':
+            size = len(sequence)
+        else:
+            size = sequence.index(place)
+        for i in range(size+1):
+            file.write("    " + str(sequence[i]) + ' == ' + str(client) + '     ')
+            if sequence[i] == client:
+                file.write("\nIsContainskvaj stop: <-\n")
+
+                return True
+        file.write("\nIsContainskvaj stop: <-\n")
+        return False
+
+    elif flag == 'end':
+        start = sequence.index(place)
+        for i in range(start, len(sequence)):
+            file.write("    " + str(sequence[i]) + ' == ' + str(client) + '    ')
+            if sequence[i] == client:
+                file.write("\nIsContainskvaj stop: <-\n")
+                return True
+        file.write("\nIsContainskvaj stop: <-\n")
+        return False
+
+
+# Сохраняем время работы
+def SaveTime(s, tail, car, file):
+    file.write("    SaveTime start: ->" + '\n')
+    time = []
+    for i in range(len(tail)):
+        index = tail[i]
+        time.append(s[index][car])
+    file.write("        Время работы на каждом объекте хвоста = \n")
+    file.write("        " + str(time) + '\n')
+    file.write("    SaveTime stop: <-\n")
+    return time
+
+
+# Удаление хвоста
+def DeleteTail(x, y, s, a, sosed, tail, car,  file, tail0="def"):
+    file.write("    DeleteTail start: ->\n")
+    sos = sosed
+    for i in range(len(tail)):
+        x[sos][tail[i]][car] = 0
+        sos = tail[i]
+        y[tail[i]][car] = 0
+        s[tail[i]][car] = 0
+        a[tail[i]][car] = 0
+
+    if tail0 != 'def':
+        x[tail[-1]][tail0][car] = 0
+
+    file.write("    DeleteTail stop: <-\n")
+    return x, y, s, a
+
+
+# печать конкретного маршрута и время работы
+def PrintForCar(lokal_X, lokal_Ss, car1, file, car2):
+    sequenceX2 = GettingTheSequence(lokal_X)
+    file.write("car1 = " + str(sequenceX2[car1]) + '\n')
+    for i in range(N):
+        file.write(str(lokal_Ss[i][car1]) + ' ')
+    file.write("\n")
+
+    file.write("car2 = " + str(sequenceX2[car2]) + '\n')
+    for i in range(N):
+        file.write(str(lokal_Ss[i][car2]) + ' ')
+    file.write("\n")
 
 
 # Создаем хранилище решений для большего числа рещений

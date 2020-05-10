@@ -6,7 +6,7 @@ from math import *
 import time
 start = time.time()
 ClearFiles()
-iterations = 1
+iterations = 0
 
 # d = [[0 for j in range(N)] for i in range(N)]
 # for i in range(N):
@@ -270,9 +270,12 @@ x, y, s, a, target_function = Help(x, y, s, a, target_function, iterations)
 print("Target_function_Help = ", target_function)
 Target_Help1 = target_function
 
-Target_Tabu = [99999]
+Target_Tabu = []
+Sequence_Tabu = []
 Best_From_Tabu = []
 Best_From_Tabu.append(target_function)
+Spisok_TS = []
+itera = []
 
 
 # # увеличивает в маршруте количество объектов = кол-ву скважин
@@ -319,39 +322,45 @@ arr_Tabu = [0] # поставили 0, чтобы у стартового arr б
 
 
 for Q in range(kriteriy_ostanovki): # сколько раз я запускаю список запретов
-    Target_operator, x_operator, y_operator, s_operator, a_operator, arr_operator = start_operator(x, y, s, a, arr, iterations)
+    # o = open("TargAndIterat.txt", "a")
+    Target_operator, x_operator, y_operator, s_operator, a_operator = start_operator(x, y, s, a, iterations)
+    sequenceX2 = GettingTheSequence(x_operator)
+    sequenceX1 = TransferX2toX1(sequenceX2, x_operator)
+    print("sequenceX1 = ", sequenceX1)
     # если такого решения еще не было, то
-    if ProverKNaVstrechu(arr_Tabu, arr_operator) != 1:
+
+    if ProverKNaVstrechu(Sequence_Tabu, sequenceX1) != 1:
+        print("Прошло проверку на встречу")
+        Spisok_TS.append(Target_operator)
+        itera.append(iterations)
         if Target_operator <= min(Best_From_Tabu):
             print("Target_operator = ", Target_operator)
             Best_From_Tabu.append(Target_operator)
 
-
         print("Target_operator = ", Target_operator)
         SaveSolution(x_operator, y_operator, s_operator, a_operator, 'StartSolution.txt', 'w')
 
-
-        if len(arr_Tabu) < 15:
+        if len(Sequence_Tabu) < 10:
             print("Все хорошо, длина списка запретов < 10, сохраняем в список запретов")
-            arr_Tabu.append(arr_operator)
-            print("на этом шаге вставляем в arrTabu ", arr_operator)
+            Sequence_Tabu.append(sequenceX1)
+            print("на этом шаге вставляем в sequence_Tabu ", sequenceX1)
             Target_Tabu.append(Target_operator)
             print("на этом шаге вставляем в TargetTabu ", Target_operator)
             print("Target_Tabu = ", Target_Tabu)
-            print("arr_Tabu = ", arr_Tabu)
+            print("Sequence_Tabu = ", Sequence_Tabu)
 
         # если заполнился список запретов, то начинаем перезаписывать
-        elif len(arr_Tabu) == 15:
+        elif len(Sequence_Tabu) == 10:
             print("Начинаем потихоньку перезаписывать список запретов, потому что заполнился")
             print("\n")
-            deleteTabuArr = arr_Tabu.pop(0)
-            arr_Tabu.append(arr_operator)
-            print("на этом шаге вставляем в arrTabu ", arr_operator)
+            deleteSequence_Tabu = Sequence_Tabu.pop(0)
+            arr_Tabu.append(sequenceX1)
+            print("на этом шаге вставляем в Sequence_Tabu ", sequenceX1)
             deleteTabuTarget = Target_Tabu.pop(0)
             print("на этом шаге вставляем в TargetTabu ", Target_operator)
             Target_Tabu.append(Target_operator)
             print("Target_Tabu = ", Target_Tabu)
-            print("arr_Tabu = ", arr_Tabu)
+            print("Sequence_Tabu = ", Sequence_Tabu)
 
         else:
             x, y, s, a = ReadSolutionOfFile('StartSolution.txt')
@@ -369,7 +378,7 @@ for Q in range(kriteriy_ostanovki): # сколько раз я запускаю 
     else:
         print("в ProverknaVstrechu ушли в else")
         x, y, s, a = ReadSolutionOfFile('StartSolution.txt')
-        print("arr_operator =  ", arr_operator)
+        print("sequenceX1 =  ", sequenceX1)
         print("\n")
 
     iterations += 1
@@ -387,10 +396,13 @@ for Q in range(kriteriy_ostanovki): # сколько раз я запускаю 
 #
 print("Best_From_Tabu =  ", Best_From_Tabu)
 print("Target_Tabu = ", Target_Tabu)
-print("arr_Tabu = ", arr_Tabu)
+print("Sequence_Tabu = ", Sequence_Tabu)
 print("\n")
 print("target_function_start_solution = ", Targer_Start)
 print("target_function_Help1 = ", Target_Help1)
+print("\n")
+print("Spisok_TS = ", Spisok_TS)
+print("Itera = ", itera)
 
 
 # TheBestSolution = MinFromTarget(Target_Tabu)

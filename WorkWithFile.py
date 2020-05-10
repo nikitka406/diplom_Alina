@@ -445,7 +445,10 @@ def ReadLocalSearchOfFile():
     return local_x, local_y, local_s, local_a
 
 
+
 def ClearFiles():
+    file = open('log/exchlog.txt', 'w')
+    file.close()
     file = open("TabuSearch.txt", 'w')
     file.close()
     file = open("ResultOperator.txt", 'w')
