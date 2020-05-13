@@ -196,7 +196,7 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, iteratio
 
                 for sosedK in range(K):
                     for sosed in range(1, N):
-                        coins = ResultCoins()
+                        coins = ResultCoins() # coins_Reloc
                         if Y[sosed][sosedK] == 1 and coins == 1:  # если есть сосед в маршруте и выпала монетка
                             file.write(
                                 "Монетка сказала что рассматриваем эту окрестность coins = " + str(coins) + '\n')
@@ -658,7 +658,7 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, iteratio
     SaveStartLocalSearch(x_start, y_start, s_start, a_start)
     TargetFunction = target_function_start
     buf_targ = 0
-
+    SEQUENS = []
     fileflag = 0
     buf_targ = TargetFunction
     X, Y, Ss, A = ReadStartLocalSearchOfFile()
@@ -722,12 +722,12 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, iteratio
                                 else:
                                     sequence2Right = 0
 
-                                file.write("Пред Слева от последовательности клиента " + str(sequence1Left) + "\n")
-                                file.write(
-                                    "После Справа от последовательности клиента " + str(sequence1Right) + "\n")
-                                file.write("Перд Слева от последовательности соседа " + str(sequence2Left) + "\n")
-                                file.write(
-                                    "После Справа от последовательности соседа " + str(sequence2Right) + "\n")
+                                # file.write("Пред Слева от последовательности клиента " + str(sequence1Left) + "\n")
+                                # file.write(
+                                #     "После Справа от последовательности клиента " + str(sequence1Right) + "\n")
+                                # file.write("Перд Слева от последовательности соседа " + str(sequence2Left) + "\n")
+                                # file.write(
+                                #     "После Справа от последовательности соседа " + str(sequence2Right) + "\n")
 
                                 buf1 = []
                                 # Отсекаем мусорные решения, если первые элементы подпоследовательностей
@@ -751,7 +751,7 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, iteratio
                                             for j in range(len(subseq2)):
                                                 if subseq2[-1] != 0:
                                                     buf2.append(subseq2[j])
-                                                    if ResultCoins():
+                                                    if ResultCoins(): #coins_Exch
                                                         file.write("buf1 = " + str(buf1) + '\n')
                                                         for p in range(len(buf1)):
                                                             file.write(str(Ss[buf1[p]][clientCar]) + ' ')
@@ -798,30 +798,47 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, iteratio
         file.write(
             "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
 
-        if fileflag == 1:
-            x, y, s, a = ReadLocalSearchOfFile()
-            target_function = CalculationOfObjectiveFunction(x, shtrafFunction(s, a, iteration))
-            file.write(
-                "Целевая функция последнего минимального переставления = " + str(
-                    target_function) + '\n')
-            fileflag = 0
-        else:
-            target_function = -1
-        # TODO сравнивать по вероятностb
-        minimum2 = min(target_function_start, target_function)
-        if (minimum2 == target_function and target_function != -1) or (fileflag == 1 ):
-            file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
-            file.write("Новая целевая функция равна " + str(target_function) + '\n')
-
-            SaveStartLocalSearch(x, y, s, a)
-            target_function_start = target_function
-            TargetFunction = target_function
-        else:
-            file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
-            file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
+        # if fileflag == 1:
+        #     x, y, s, a = ReadLocalSearchOfFile()
+        #     target_function = CalculationOfObjectiveFunction(x, shtrafFunction(s, a, iteration))
+        #     file.write(
+        #         "Целевая функция последнего минимального переставления = " + str(
+        #             target_function) + '\n')
+        #     fileflag = 0
+        # else:
+        #     target_function = -1
+        # # TODO сравнивать по вероятностb
+        # minimum2 = min(target_function_start, target_function)
+        # if (minimum2 == target_function and target_function != -1) or (fileflag == 1 ):
+        #     file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
+        #     file.write("Новая целевая функция равна " + str(target_function) + '\n')
+        #
+        #     SaveStartLocalSearch(x, y, s, a)
+        #     target_function_start = target_function
+        #     TargetFunction = target_function
+        # else:
+        #     file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
+        #     file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
 
     file.write("While stop\n")
-    x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile()
+    if fileflag == 1:
+        x_start, y_start, s_start, a_start = ReadLocalSearchOfFile()
+        target_function = CalculationOfObjectiveFunction(x_start, shtrafFunction(s_start, a_start, iteration))
+        file.write(
+                "Целевая функция последнего минимального переставления = " + str(
+                    target_function) + '\n')
+        sequenceX2 = GettingTheSequence(x_start)
+        sequenceX1 = TransferX2toX1(sequenceX2, x_start)
+        print("sequenceX1 1= ", sequenceX1)
+    else:
+        x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile()
+        target_function = CalculationOfObjectiveFunction(x_start, shtrafFunction(s_start, a_start, iteration))
+        file.write(
+            "Целевая функция последнего минимального переставления = " + str(
+                target_function) + '\n')
+        sequenceX2 = GettingTheSequence(x_start)
+        sequenceX1 = TransferX2toX1(sequenceX2, x_start)
+        print("sequenceX1 1= ", sequenceX1)
 
     # Time = time.time() - start
     # timeLocal[0] += Time
@@ -830,7 +847,7 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, iteratio
     file.write("<-Exchange stop" + '\n')
     file.close()
 
-    return x_start, y_start, s_start, a_start, target_function_start #timeLocal
+    return x_start, y_start, s_start, a_start, target_function_start, SEQUENS #timeLocal
 
 
 def OperatorJoinFromExchange(x, y, s, a, target_function, client, clientCar, subseq1,
@@ -845,10 +862,10 @@ def OperatorJoinFromExchange(x, y, s, a, target_function, client, clientCar, sub
     subseq2Left = SearchSosedLeftOrRight(X, Y, subseq2[0], "left", sosedCar)  # правый сосед соседа
     subseq2Right = SearchSosedLeftOrRight(X, Y, subseq2[-1], "right", sosedCar)  # правый сосед соседа
 
-    file.write("    Слева от последовательности клиента " + str(subseq1Left) + " Время работы = " + str(Ss[subseq1Left][clientCar]) + "\n")
-    file.write("    Справа от последовательности клиента " + str(subseq1Right) + " Время работы = " + str(Ss[subseq1Right][clientCar]) + "\n")
-    file.write("    Слева от последовательности соседа " + str(subseq2Left) + " Время работы = " + str(Ss[subseq2Left][sosedCar]) + "\n")
-    file.write("    Справа от последовательности соседа " + str(subseq2Right) + " Время работы = " + str(Ss[subseq2Right][sosedCar]) + "\n")
+    # file.write("    Слева от последовательности клиента " + str(subseq1Left) + " Время работы = " + str(Ss[subseq1Left][clientCar]) + "\n")
+    # file.write("    Справа от последовательности клиента " + str(subseq1Right) + " Время работы = " + str(Ss[subseq1Right][clientCar]) + "\n")
+    # file.write("    Слева от последовательности соседа " + str(subseq2Left) + " Время работы = " + str(Ss[subseq2Left][sosedCar]) + "\n")
+    # file.write("    Справа от последовательности соседа " + str(subseq2Right) + " Время работы = " + str(Ss[subseq2Right][sosedCar]) + "\n")
 
     time1 = SaveTime(Ss, subseq1, clientCar, file)
     time2 = SaveTime(Ss, subseq2, sosedCar, file)
@@ -1096,35 +1113,58 @@ def OperatorJoinFromExchange(x, y, s, a, target_function, client, clientCar, sub
     # TODO надо рассмотреть свап, когда одна машина
 
 
-# Применяю операторы для решения: заполняю массив, сколько операторов, столько и форов
+# Применяю операторы для решения: заполняю массив
 def start_operator(local_x, local_y, local_s, local_a, iterations):
     # сначала для оператора перемещения:
     SaveSolution(local_x, local_y, local_s, local_a, 'StartSolution.txt', 'w')
     target_function = 9999999999
 
     for i in range(NumberStartOper):
+
+        local_x, local_y, local_s, local_a = ReadSolutionOfFile('StartSolution.txt')
+        sequenceX2 = GettingTheSequence(local_x)
+        sequenceX1 = TransferX2toX1(sequenceX2, local_x)
+        print("sequence перед применением операторов = ", sequenceX1)
+
         x_reloc, y_reloc, s_reloc, a_reloc, Target_function_reloc, SEQUENCE_reloc = Relocate(local_x, local_y, local_s, local_a,
                                                                                             target_function, iterations)
         print("Target_function_reloc = ", Target_function_reloc)
-        sequenceX2 = GettingTheSequence(local_x)
-        sequenceX1 = TransferX2toX1(sequenceX2, local_x)
-        print("sequenceX1 Reloc= ", sequenceX1)
+        sequenceRelocX2 = GettingTheSequence(x_reloc)
+        sequenceRelocX1 = TransferX2toX1(sequenceRelocX2, x_reloc)
 
         minimum = min(Target_function_reloc, target_function)
         if minimum == Target_function_reloc:
-            SaveSolution(local_x, local_y, local_s, local_a, 'ResultOperator.txt', 'w')
+            SaveSolution(x_reloc, y_reloc, s_reloc, a_reloc, 'ResultOperator.txt', 'w')
             target_function = Target_function_reloc
             local_SEQUENCE = SEQUENCE_reloc
             print("min_target this is Reloc = ", target_function)
+            print("sequenceX1 Reloc= ", sequenceRelocX1)
 
+        local_x, local_y, local_s, local_a = ReadSolutionOfFile('StartSolution.txt')
+        sequenceX2 = GettingTheSequence(local_x)
+        sequenceX1 = TransferX2toX1(sequenceX2, local_x)
+        print("sequence перед применением Exchange = ", sequenceX1)
         x_exch, y_exch, s_exch, a_exch, Target_function_exch, SEQUENCE_exch = Exchange(local_x, local_y, local_s, local_a,
                                                                         target_function, iterations)
         print("target in Exchange = ", Target_function_exch)
+        sequenceExchX2 = GettingTheSequence(x_exch)
+        sequenceExchX1 = TransferX2toX1(sequenceExchX2, x_exch)
+        print("sequence Exchange = ", sequenceExchX1)
+
         minimum = min(Target_function_exch, target_function)
+
         if minimum == Target_function_exch:
-            SaveSolution(local_x, local_y, local_s, local_a, 'ResultOperator.txt', 'w')
-            target_function = Target_function_exch
-            print("min function this is Exchange = ", target_function)
+            if Target_function_reloc == Target_function_exch:
+                print("Целевая reloc = целевой exch, значит берем решение из reloc")
+                target_function = Target_function_reloc
+                local_SEQUENCE = SEQUENCE_reloc
+            else:
+                print("Целевая exch < целевой reloca")
+                SaveSolution(x_exch, y_exch, s_exch, a_exch, 'ResultOperator.txt', 'w')
+                target_function = Target_function_exch
+                local_SEQUENCE = SEQUENCE_exch
+                print("min function this is Exchange = ", target_function)
+
 
 
         # x_opt, y_opt, s_opt, a_opt, Target_function_opt = Two_Opt(local_x, local_y, local_s,
@@ -1136,6 +1176,7 @@ def start_operator(local_x, local_y, local_s, local_a, iterations):
         #     target_function = Target_function_opt
         #     print("target in 2-opt = ", target_function)
 
+        print("local_SEQUENCE in start operator = ", local_SEQUENCE)
         local_x, local_y, local_s, local_a = ReadSolutionOfFile("ResultOperator.txt")
         return target_function, local_x, local_y, local_s, local_a, local_SEQUENCE
 

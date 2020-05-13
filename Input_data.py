@@ -4,13 +4,15 @@ import csv
 # # число объектов
 # N = 13
 #
-# #набор всех ТС
+#набор всех ТС
 # K = 3
 
-shtraf = 1.03
-prostoy = 0.5
-coins = [0, 1, 2, 3] #, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]  # Значение монетки, сколько значений такая вероятность
-param_len_subseq = 2  # максимальная длина подпоследовательности в exchange, если 2 - значит состоит из трех элементов
+shtraf = 0.05
+# prostoy = 0.5
+coins = [0, 1, 2, 3]
+# coins_Reloc = [0, 1, 2, 3] #, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]  # Значение монетки, сколько значений такая вероятность
+# coins_Exch = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+param_len_subseq = 1  # максимальная длина подпоследовательности в exchange, если 2 - значит состоит из трех элементов
 # param_local_search = 20 # сколько раз пересатвляем каждую скважину к каждому объекту
 # кратность повторений круга табу
 # M = 2
@@ -130,15 +132,15 @@ for i in range(N):
 
 for i in range(N):
     print(OX[i], " ", OY[i], " ", S[i], " ", skvaj[i], " ", E[i], " ", l[i])
-#
+
 print("K = ", K)
 print("N = ", N)
 
 # столько мест заполнилось в списке запретов
-kriteriy_ostanovki = 100
+kriteriy_ostanovki = 10
 
 # отвечает за то сколько раз вызываем операторы
-NumberStartOper = 150
+NumberStartOper = 3
 # NumberStartOper = 0
 # if N > 60:
 #     NumberStartOper = int(N * 20 / 100)
@@ -148,8 +150,8 @@ NumberStartOper = 150
 #     NumberStartOper = N
 
 
-relocate_param = 10
-TwoOpt_param = 30
+# relocate_param = 10
+# TwoOpt_param = 30
 
 # kolvoTabu = 10
 

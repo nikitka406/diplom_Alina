@@ -72,24 +72,8 @@ def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, ca
         elif A[sosed][car] < l_p and kyda == "left":
             print("ne podhodit dlya marchruta")
 
-
-        ############################
-        # if E[j] >= t[0][j]:
-        #     l_p = E[j] + S[j] + t[j][bufer[m][n]]  # мы не можем начать работать раньше, чем временное окно
-        # else:
-        #     l_p = t[0][j] + S[j] + t[j][bufer[m][n]]
-        ##############################
-
     else:
         print("введено неправильно right или left")
-
-
-    # if E[sosed] >= l_p and kyda == "left":
-    #     A[new_client][car] = t[0][new_client]
-    #     # A[new_client][car] = E[sosed] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
-    #
-    # elif E[sosed] < l_p and kyda == "left":
-    #     A[new_client][car] = E[new_client] - S[new_client] - t[new_client][bufer[car][nomer_sosed]]
 
     if VerificationOfBoundaryConditionsForStartSolution(X, Y, Ss, A) != 1:  # если сломались граничные условия, то не сохраняем
         X = x.copy()
@@ -103,31 +87,12 @@ def Add_vershiny_k_resheniu(bufer, flag, X, Y, Ss, A, x, y, s, a, new_client, ca
         s = Ss.copy()
         # flag[new_client] = 1
 
-
-# print("d[i][j] = ")
-# for i in range(N):
-#     for j in range(N):
-#         print(d[i][j], end=" ")
-#     print("\n")
-
-
 #километровый выигрыш
 km_win = [[0 for j in range(N)] for i in range(N)]
 for i in range(N):
     for j in range(N):
         if i != j:
             km_win[i][j] = d[0][i] + d[0][j] - d[i][j]
-
-# print('km_win = ')
-# for i in range(N):
-#     for j in range(N):
-#         print(km_win[i][j], end=" ")
-#     print("\n")
-
-# t = d
-# for i in range(N):
-#     for j in range(N):
-#         t[i][j] = (t[i][j])
 
 #Алгоритм:
 #ищем макс километровый выигрыш
@@ -145,19 +110,12 @@ a = [[0 for k in range(K)] for i in range(N)]  # время прибытия Т�
 
 
 i, j = searchMax(km_win)
-# print("i = ", i)
-# print("j = ", j)
 X = x.copy()
 Y = y.copy()
 A = a.copy()
 Ss = s.copy()
 print("начинается процедура: добавить 2 первых города в маршрут")
 AddTwoCityInRoute(i, j, 0, x, y, s, a, bufer)
-# for i in range(K):
-#     for j in range((N + 1) * 2):
-#         print(bufer[i][j], end=" ")
-#     print("\n")
-
 
 flag[0] = 1
 flag[i] = 1
@@ -231,40 +189,21 @@ while summa != N:
             else:
                 print("превысили количество доступных авто")
 
-            # for i in range(K):
-            #     for j in range((N + 1) * 2):
-            #         print(bufer[i][j], end=" ")
-            #     print("\n")
-
     for i in range(N):
         summa += flag[i]
-    # print("summa = ",summa )
 
-    # for i in range(K):
-    #     for j in range((N + 1) * 2):
-    #         print(bufer[i][j], end = " ")
-    #     print("\n")
-
-    # print("s[j][k] = ")
-    # for k in range(K):
-    #     for j in range(N):
-    #         print(s[j][k], end=" ")
-    #     print('\n')
-
-# BeautifulPrint(x, y, s, a)
 print("\n")
 for i in range(K):
     for j in range((N + 1) * 2):
         print(bufer[i][j], end=" ")
     print("\n")
 
-
-print(" \n")
 target_function = CalculationOfObjectiveFunction(x, shtrafFunction(s, a, iterations))
 print("target_function_start_solution = ", target_function)
 Targer_Start = target_function
 print(time.time() - start, "sec")
 print(" \n")
+SaveSolution(x, y, s, a, 'StartSolution.txt', 'w')
 
 # x, y, s, a, target_function = Help(x, y, s, a, target_function, iterations)
 # print("Target_function_Help = ", target_function)
@@ -278,50 +217,14 @@ Spisok_TS = []
 itera = []
 
 
-# # увеличивает в маршруте количество объектов = кол-ву скважин
-# def reproduction(buf, k):
-#     for i in range(1, N):
-#         for k in range(K):
-#             if buf[k].count(i) != 0:
-#                 j = buf[k].index(i)
-#                 for sk in range(int(skvaj[i]-1)):
-#                     j += 1
-#                     buf[k].insert(j, i)
-#
-#
-# reproduction(bufer, 0)
-#
-# for i in range(K):
-#     for j in range(len(bufer[i])):
-#          print(bufer[i][j], end = " ")
-#     print("\n")
-
-
-
-
-
-# массив, который сохраняет перемещение оператора с минимальной целевой функцией, где М - кратность повторений списка табу
-arr = [0 for i in range(8)]     # krat - отвечает на каком круге мы сейчас (кратность круга)
-# arr[][0] - клиент, ОТ которого перемещают
-# arr[][1] - клиент, КОТОРОГО перемещают
-# arr[][2] - машина перемещаемого клиента на которой он БЫЛ
-# arr[][3] - клиент, К которому перемещают
-# arr[][4] - клиент, который ТЕПЕРЬ СПРАВА от перемещаемого
-# arr[][5] - машина перемещаемого клиента на которой он ТЕПЕРЬ
-
-# Поиск с запретами
-# создан массив, который будет сохранять решения всех операторов, размера = кол-во операторов * заданное число в инпут дате
-# Todo поменять кол-во операторов, если увеличится (лучше через ctr+shift+R)
-# X_operator, Y_operator, Ss_operator, A_operator, Target_operator = SolutionStore # лучше через ctr+shift+R
-# создан массив поиска с запретами, размер = 10, заполняем
-# X_tabu, Y_tabu, Ss_tabu, A_tabu, Target_tabu = SolutionStore(10)
-
-
+'''Поиск с запретами'''
 for Q in range(kriteriy_ostanovki): # сколько раз я запускаю список запретов
-    Target_operator, x_operator, y_operator, s_operator, a_operator, SEQUENCE_operator = start_operator(x, y, s, a, iterations)
-    # sequenceX2 = GettingTheSequence(x_operator)
-    # sequenceX1 = TransferX2toX1(sequenceX2, x_operator)
-    # print("sequenceX1 1= ", sequenceX1)
+    x, y, s, a = ReadSolutionOfFile('StartSolution.txt')
+    Target_operator, x_operator, y_operator, s_operator, a_operator, SEQUENCE_operator = start_operator(x, y, s, a,
+                                                                                                        iterations)
+    sequenceX2 = GettingTheSequence(x_operator)
+    sequenceX1 = TransferX2toX1(sequenceX2, x_operator)
+    print("sequenceX1 1= ", sequenceX1)
 
     # x_operator, y_operator, s_operator, a_operator, Target_operator = Help(x_operator, y_operator, s_operator,
     #                                                                        a_operator, Target_operator, iterations)
@@ -333,19 +236,20 @@ for Q in range(kriteriy_ostanovki): # сколько раз я запускаю 
     #
     # print("sequenceX1 2= ", sequenceX1)
 
-
     # если такого решения еще не было, то
 
     if ProverKNaVstrechu(Sequence_Tabu, SEQUENCE_operator) != 1:
-        print("Прошло проверку на встречу")
+        print("Такое решение еще не встречалось")
         Spisok_TS.append(Target_operator)
         itera.append(iterations)
         if Target_operator <= min(Best_From_Tabu):
-            print("Target_operator = ", Target_operator)
             Best_From_Tabu.append(Target_operator)
 
         print("Target_operator = ", Target_operator)
         SaveSolution(x_operator, y_operator, s_operator, a_operator, 'StartSolution.txt', 'w')
+        sequenceSaveX2 = GettingTheSequence(x_operator)
+        sequenceSaveX1 = TransferX2toX1(sequenceSaveX2, x_operator)
+        print("sequence после сохранения = ", sequenceSaveX1)
 
         if len(Sequence_Tabu) < 7:
             print("Все хорошо, длина списка запретов < 10, сохраняем в список запретов")
@@ -380,18 +284,8 @@ for Q in range(kriteriy_ostanovki): # сколько раз я запускаю 
         print("\n")
 
     iterations += 1
-#
-#         # выбирает минимум из (кол-во операторов * NumberStartOper) элементов
-#         # min_in_target = MinFromTarget(Target_operator)
-#         # if min_in_target != -1:
-#         #     # print("\n")
-#         #     print("index = ", min_in_target)  # печатает индекс минимального
-#         #     # index = Target_operator.index(min_in_target)
-#         #     # print("index min_in_target = ", index)
-#         #     print("Target_operator = ", Target_operator)  # печатает список длины = NumberStartOper
-#         #     print("arr_min = ", arr[min_in_target])
-#         #     print("\n")
-#
+
+print("\n")
 print("Best_From_Tabu =  ", Best_From_Tabu)
 print("Target_Tabu = ", Target_Tabu)
 print("Sequence_Tabu = ", Sequence_Tabu)
@@ -404,15 +298,6 @@ print("\n")
 print("Spisok_TS = ", Spisok_TS)
 print("Itera = ", itera)
 
-
-# TheBestSolution = MinFromTarget(Target_Tabu)
-# print("target_function_start_solution = ", target_function)
-# print("TheBestindex = ", TheBestSolution )
-# print("TheBestTarget = ", Target_Tabu[TheBestSolution])
-#
-# if TheBestSolution != target_function:
-#     print("TheBestarr = ", arr_Tabu[TheBestSolution])
-#
 print("kol-vo iterations = ", iterations)
 
 ##############################################

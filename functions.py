@@ -72,10 +72,10 @@ def BeautifulPrint(X, Y, Ss, A):
         for i in range(N):
             print(Ss[i][k], end=' ')
         print("\n")
-    for i in range(N):
-        for k in range(N):
-            print(t[i][k], end=' ')
-        print('\n')
+    # for i in range(N):
+    #     for k in range(N):
+    #         print(t[i][k], end=' ')
+    #     print('\n')
 
     # for i in range(N):
     #     #     for k in range (N):
@@ -214,9 +214,9 @@ def CalculationOfObjectiveFunction(x, shtrafFunction):
             for j in range(N):
                 target_function += d[i][j] * x[i][j][k]
 
-    print("target_function в самой функции подсчета без штрафа = ", target_function)
+    # print("target_function в самой функции подсчета без штрафа = ", target_function)
     target_function += shtrafFunction
-    print("target_function в самой функции подсчета со штрафом = ", target_function)
+    # print("target_function в самой функции подсчета со штрафом = ", target_function)
     return target_function
 
 
@@ -298,8 +298,8 @@ def window_time_down(a, y, k, file='def'):
                 if file != 'def':
                     file.write(
                         "slomalos 5: нельзя начать работу раньше, чем приехал" + '\n')  # не работает это ограничение
-                else:
-                    print("slomalos 5: нельзя начать работу раньше, чем приехал" + '\n')
+                # else:
+                #     print("slomalos 5: нельзя начать работу раньше, чем приехал" + '\n')
                 return 0
     return 1
 
@@ -311,8 +311,8 @@ def window_time_up(a, s, y, k, file='def'):
             if a[i][k] + s[i][k] > l[i] and y[i][k] == 1:
                 if file != 'def':
                     file.write("slomalos 6: нельзя закончить работу позже, чем временное окно" + '\n')
-                else:
-                    print("slomalos 6: нельзя закончить работу позже, чем временное окно" + '\n')
+                # else:
+                #     print("slomalos 6: нельзя закончить работу позже, чем временное окно" + '\n')
                 return 0
     return 1
 
@@ -1298,7 +1298,7 @@ def AddOneCell(sequenceX1):
 # преобразует 2-мерную в 1-мерную послед-ть
 def TransferX2toX1(sequenceX2, X):
     sequenceX1 = [0]
-    for k in range(len(X[0][0])):
+    for k in range(K): #len(X[0][0])
         for i in range(1, N - 1):
             # случай когда находишься на цифре и следующая цифра
             if sequenceX2[k][i] != 0 and sequenceX2[k][i + 1] != 0:
