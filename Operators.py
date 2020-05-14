@@ -89,6 +89,7 @@ def OperatorJoinFromReloc(x, y, s, a, target_function_start, client, clientK, so
                 # новое время приезда и новое время работы, потом
                 # удалить старое решение, и только потом заполнять Х и У
                 Xl, Yl, Sl, Al = DeleteClientaFromPath(Xl, Yl, Sl, Al, client, clientK)
+
                 if sosedK == clientK:
                     Sl[client][sosedK] += buf
                 Xl[sosedLeft][sosed][sosedK] = 0
@@ -196,7 +197,7 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, iteratio
 
                 for sosedK in range(K):
                     for sosed in range(1, N):
-                        coins = ResultCoins() # coins_Reloc
+                        coins = ResultCoins(coins_Reloc)
                         if Y[sosed][sosedK] == 1 and coins == 1:  # если есть сосед в маршруте и выпала монетка
                             file.write(
                                 "Монетка сказала что рассматриваем эту окрестность coins = " + str(coins) + '\n')
@@ -398,6 +399,45 @@ def OperatorJoinFromHelp(x, y, s, a, client, clientCar, sosed, sosedCar, timeWor
         else:
             targetL = -1
 
+        if sosed == 0 and not CarIsWork(YR, sosedCar):
+            try:
+                file.write("    Вставляем скважину в новый маршрут" + '\n')
+                # машина соседа будет работать у клиента столько же
+                SR[client][sosedCar] += timeWork
+
+                # на случай если мы в итоге все скважины забрали, и эта была последняя
+                if flag == 'last':
+                    file.write("    Забрали с объекта все скважины, и эта оказаласть последняя, "
+                               "    значит надо удалить посещение этого объекта в старом маршруте" + '\n')
+                    XR, YR, SR, AR = DeleteClientaFromPath(XR, YR, SR, AR, client, clientCar)
+
+                XR[sosed][client][sosedCar] = 1
+                XR[client][sosed][sosedCar] = 1
+                YR[sosed][sosedCar] = 1
+                YR[client][sosedCar] = 1  # теперь машина соседа обслуживает клиента
+
+                # Подсчет времени приезда к клиенту от соседа
+                AR = TimeOfArrival(XR, YR, SR, file)
+
+            except IOError:
+                file.write("    Объект не удален" + '\n')
+
+                XR[sosed][sosedRight][sosedCar] = 1
+                XR[sosed][client][sosedCar] = 0
+                XR[client][sosedRight][sosedCar] = 0
+                YR[client][sosedCar] = 0  # тепреь машина соседа обслуживает клиента
+
+                # Подсчет времени приезда к клиенту от соседа
+                AR = TimeOfArrival(XR, YR, SR, file)
+
+            try:
+                XR, YR, SR, AR, targetR, sizeK = Checker(XR, YR, SR, AR, iterations, "Help", file)
+                file.write("OperatorJoinFromHelp stop: <-\n")
+                return XR, YR, SR, AR, targetR, sizeK
+            except TypeError:
+                file.write("OperatorJoinFromHelp stop: <-\n")
+                return x, y, s, a, target_function_start
+
         # Выбор минимума
         if sosedLeft != -1 or sosedRight != -1:
             file.write("    Теперь ищем минимум из двух целевых" + '\n')
@@ -410,7 +450,7 @@ def OperatorJoinFromHelp(x, y, s, a, client, clientCar, sosed, sosedCar, timeWor
                 # print("sequenceX1 in Reloc left= ", sequenceX1)
                 return Xl, Yl, Sl, Al, targetL
 
-            elif minimum == targetR and minimum != -1 and targetR != targetL:
+            elif minimum == targetR and minimum != -1:  #######and targetR != targetL:
                 file.write("    Выбрали правого у него целевая меньше" + '\n')
                 file.write("OperatorJoinFromHelp stop: <-\n")
                 # sequenceX2 = GettingTheSequence(XR)
@@ -430,7 +470,7 @@ def OperatorJoinFromHelp(x, y, s, a, client, clientCar, sosed, sosedCar, timeWor
 
 # Возможность приезжать нескольким машинам на одну локацию
 def Help(Xstart, Ystart, Sstart, Astart, target_function_start, iterations):
-    file = open("log/helog.txt", 'w')
+    file = open("log/helog.txt", 'a')
     file.write("Help START: ->" + '\n')
     print("Help START: ->")
     print("\n")
@@ -440,6 +480,7 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, iterations):
 
     file.write("Начинаем поиск объектов, которые в маршруте не успевают закончить работу\n")
     file_flag = 0
+    sequenceX1 = []
     for k in range(K):
         for client in range(1, N):
             if Ystart[client][k] == 1:
@@ -455,9 +496,9 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, iterations):
                         TargetFunction = target_function_start
 
                         flag = 0
-                        if proebSkv < skvaj[client]:
+                        if proebSkv < int(Ss[client][k] / S[client] / skvaj[client]):######## #skvaj[client]:
                             flag = 'not the last'
-                        elif proebSkv == skvaj[client]:
+                        elif proebSkv == int(Ss[client][k] / S[client] / skvaj[client]):####skvaj[client]:
                             flag = 'last'
                         else:
                             flag = 'end'
@@ -471,8 +512,8 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, iterations):
                                     file.write("Она не похожа на ту из которой взяли скважину\n")
 
                                     file.write("Начинаем цикл по объектам в этой машине\n")
-                                    for sosed in range(1, N):
-                                        if Y[sosed][sosedK] == 1:
+                                    for sosed in range(N):
+                                        if (Y[sosed][sosedK] == 1 and sosed != 0) or (sosed == 0 and not CarIsWork(Y, sosedK)):
                                             file.write("Рассматриваемый объект " + str(sosed) + "\n")
                                             file.write(
                                                 "Попробую одну скважину с объекта " + str(client) + " и машины " + str(
@@ -491,6 +532,7 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, iterations):
 
                                             file.write(
                                                 "Выбираем минимальное решение из стартового и измененного" + '\n')
+                                            file.write("Последняя целевая функция = " + str(TargetFunction) + '\n')
                                             minimum1 = min(TargetFunction, target_function)
                                             if minimum1 == target_function:
                                                 file.write(
@@ -512,16 +554,130 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, iterations):
 
                         # Xstart, Ystart, Sstart, Astart = ReadStartHelpOfFile()
                         # target_function_start = CalculationOfObjectiveFunction(Xstart, shtrafFunction(Sstart, Astart, 1))
+
+                            file.write(
+                                "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
+
+                            if file_flag == 1:
+                                x, y, s, a = ReadHelpOfFile()
+                                target_function = CalculationOfObjectiveFunction(x, shtrafFunction(s, a, iterations))
+                                file.write(
+                                    "Целевая функция последнего минимального переставления = " + str(
+                                        target_function) + '\n')
+                                file_flag = 0
+
+                            else:
+                                target_function = -1
+
+                            minimum2 = min(target_function_start, target_function)
+                            if minimum2 == target_function and target_function != -1:
+                                file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
+                                file.write("Новая целевая функция равна " + str(target_function) + '\n')
+
+                                SaveStartHelp(x, y, s, a)
+                                target_function_start = target_function
+                                sequenceX2 = GettingTheSequence(x)
+                                sequenceX1 = TransferX2toX1(sequenceX2, x)
+                                # print("sequenceX1 help 1= ", sequenceX1)
+
+                            else:
+                                file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
+                                file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
+                                # return Xstart, Ystart, Sstart, Astart, target_function_start
+                                howMuch = 'all'
+                                break
+
+                    if howMuch == 'all':
+                        file.write("\nПопробуем отдать несколько скважин\n")
+
+                        file.write("Пересчитываем проебанные скважины\n")
+                        contskvaj = CountskvajWithFane(Sstart, Astart, client, k)
+                        file.write("Всего не укладывается " + str(contskvaj) + " скважин\n")
+
+                        for proebSkv in range(2, contskvaj + 1):
+                            file.write("Отдаем " + str(proebSkv) + " скважин\n")
+                            X, Y, Ss, A = ReadStartHelpOfFile()
+                            TargetFunction = target_function_start
+
+                            flag = 0
+                            if proebSkv < int(Ss[client][k] / S[client] / skvaj[client]):   #####skvaj[client]:
+                                flag = 'not the last'
+                            elif proebSkv == int(Ss[client][k] / S[client] / skvaj[client]): ####skvaj[client]:
+                                flag = 'last'
+                            else:
+                                flag = 'end'
+
+                            if flag != 'end':
+                                file.write("Сейчас " + flag + " скважина\n")
+                                file.write("Начинаем цикл по присовыванию везде (по машинам)\n")
+                                for sosedK in range(K):
+                                    if sosedK != k:
+                                        file.write("Сейчас рассматриваем " + str(sosedK) + " машину\n")
+                                        file.write("Она не похожа на ту из которой взяли скважину\n")
+
+                                        file.write("Начинаем цикл по объектам в этой машине\n")
+                                        for sosed in range(1, N):
+                                            if (Y[sosed][sosedK] == 1 and sosed != 0) or (sosed == 0 and not CarIsWork(Y, sosedK)):
+                                                file.write("Рассматриваемый объект " + str(sosed) + "\n")
+                                                file.write(
+                                                    "Попробую одну скважину с объекта " + str(
+                                                        client) + " и машины " + str(
+                                                        k) + "\n")
+                                                file.write(" отдать машине " + str(
+                                                    sosedK) + " рядом с объектом " + str(
+                                                    sosed) + "\n")
+
+                                                timeWork = proebSkv * (S[client] / skvaj[client])
+                                                x, y, s, a, target_function = OperatorJoinFromHelp(X, Y, Ss, A,
+                                                                                                   client, k,
+                                                                                                   sosed,
+                                                                                                   sosedK,
+                                                                                                   timeWork,
+                                                                                                   TargetFunction,
+                                                                                                   iterations,
+                                                                                                   flag,
+                                                                                                   file)
+                                                file.write(
+                                                    "Число используемых машин теперь " + str(
+                                                        AmountCarUsed(y)) + '\n')
+
+                                                file.write(
+                                                    "Выбираем минимальное решение из стартового и измененного" + '\n')
+                                                file.write(
+                                                    "Последняя целевая функция = " + str(TargetFunction) + '\n')
+                                                minimum1 = min(TargetFunction, target_function)
+                                                if minimum1 == target_function:
+                                                    file.write(
+                                                        "Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
+                                                    file.write(
+                                                        "Новая целевая функция равна " + str(
+                                                            target_function) + '\n')
+
+                                                    SaveHelp(x, y, s, a)
+                                                    TargetFunction = target_function
+                                                    fileflag = 1
+                                                    sequence2 = GettingTheSequence(x)
+                                                    sequence1 = TransferX2toX1(sequence2, x)
+                                                    file.write("Новое решение " + str(sequence1) + '\n')
+                                                else:
+                                                    file.write(
+                                                        "Новое перемещение, хуже чем то что было, возвращаем наше "
+                                                        "старое решение" + '\n')
+                                                    file.write(
+                                                        "Старая целевая функция равна " + str(
+                                                            TargetFunction) + '\n')
+                                                file.write('\n')
+
                         file.write(
                             "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
 
-                        if file_flag == 1:
+                        if fileflag == 1:
                             x, y, s, a = ReadHelpOfFile()
                             target_function = CalculationOfObjectiveFunction(x, shtrafFunction(s, a, iterations))
                             file.write(
                                 "Целевая функция последнего минимального переставления = " + str(
                                     target_function) + '\n')
-                            file_flag = 0
+                            fileflag = 0
 
                         else:
                             target_function = -1
@@ -533,109 +689,18 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, iterations):
 
                             SaveStartHelp(x, y, s, a)
                             target_function_start = target_function
-
+                            sequenceX2 = GettingTheSequence(x)
+                            sequenceX1 = TransferX2toX1(sequenceX2, x)
+                            # print("sequenceX1 help 1= ", sequenceX1)
                         else:
                             file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
                             file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
-                            # return Xstart, Ystart, Sstart, Astart, target_function_start
-                            howMuch = 'all'
-                            break
-    if howMuch == 'all':
-        file.write("\nПопробуем отдать несколько скважин\n")
-
-        file.write("Пересчитываем проебанные скважины\n")
-        contskvaj = CountskvajWithFane(Sstart, Astart, client, k)
-        file.write("Всего не укладывается " + str(contskvaj) + " скважин\n")
-
-        for proebSkv in range(2, contskvaj + 1):
-            file.write("Отдаем " + str(proebSkv) + " скважин\n")
-            X, Y, Ss, A = ReadStartHelpOfFile()
-            TargetFunction = target_function_start
-
-            flag = 0
-            if proebSkv < skvaj[client]:
-                flag = 'not the last'
-            elif proebSkv == skvaj[client]:
-                flag = 'last'
-            else:
-                flag = 'end'
-
-            if flag != 'end':
-                file.write("Сейчас " + flag + " скважина\n")
-                file.write("Начинаем цикл по присовыванию везде (по машинам)\n")
-                for sosedK in range(1, K):
-                    if sosedK != k:
-                        file.write("Сейчас рассматриваем " + str(sosedK) + " машину\n")
-                        file.write("Она не похожа на ту из которой взяли скважину\n")
-
-                        file.write("Начинаем цикл по объектам в этой машине\n")
-                        for sosed in range(N):
-                            if Y[sosed][sosedK] == 1:
-                                file.write("Рассматриваемый объект " + str(sosed) + "\n")
-                                file.write(
-                                    "Попробую одну скважину с объекта " + str(
-                                        client) + " и машины " + str(
-                                        k) + "\n")
-                                file.write(" отдать машине " + str(sosedK) + " рядом с объектом " + str(
-                                    sosed) + "\n")
-
-                                timeWork = proebSkv * (S[client] / skvaj[client])
-                                x, y, s, a, target_function = OperatorJoinFromHelp(X, Y, Ss, A, client, k, sosed, sosedK, timeWork,
-                                                                                   TargetFunction, iterations, flag,
-                                                                                    file)
-                                file.write(
-                                    "Число используемых машин теперь " + str(AmountCarUsed(y)) + '\n')
-
-                                file.write(
-                                    "Выбираем минимальное решение из стартового и измененного" + '\n')
-                                file.write("Последняя целевая функция = " + str(TargetFunction) + '\n')
-                                minimum1 = min(TargetFunction, target_function)
-                                if minimum1 == target_function:
-                                    file.write(
-                                        "Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
-                                    file.write(
-                                        "Новая целевая функция равна " + str(target_function) + '\n')
-
-                                    SaveHelp(x, y, s, a)
-                                    TargetFunction = target_function
-                                    fileflag = 1
-                                    sequence2 = GettingTheSequence(x)
-                                    sequence1 = TransferX2toX1(sequence2, x)
-                                    file.write("Новое решение " + str(sequence1) + '\n')
-                                else:
-                                    file.write(
-                                        "Новое перемещение, хуже чем то что было, возвращаем наше "
-                                        "старое решение" + '\n')
-                                    file.write(
-                                        "Старая целевая функция равна " + str(TargetFunction) + '\n')
-                                file.write('\n')
-
-                            file.write(
-                                "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
-
-                            if fileflag == 1:
-                                x, y, s, a = ReadHelpOfFile()
-                                target_function = CalculationOfObjectiveFunction(x, shtrafFunction(s, a, iterations))
-                                file.write(
-                                    "Целевая функция последнего минимального переставления = " + str(
-                                        target_function) + '\n')
-                                fileflag = 0
-                            else:
-                                target_function = -1
-
-                            minimum2 = min(target_function_start, target_function)
-                            if minimum2 == target_function and target_function != -1:
-                                file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
-                                file.write("Новая целевая функция равна " + str(target_function) + '\n')
-
-                                SaveStartHelp(x, y, s, a)
-                                target_function_start = target_function
-                            else:
-                                file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
-                                file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
 
     file.write("По максимуму постарались поделиться скважинами" + '\n')
     Xstart, Ystart, Sstart, Astart = ReadStartHelpOfFile()
+    sequenceX2 = GettingTheSequence(Xstart)
+    sequenceX1 = TransferX2toX1(sequenceX2, Xstart)
+    # print("sequenceX1 help 2= ", sequenceX1)
 
     # Xstart, Ystart, Sstart, Astart = ReadStartHelpOfFile()
     file.write("<-Help STOP" + '\n')
@@ -643,7 +708,7 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, iterations):
     print("\n")
     file.close()
 
-    return Xstart, Ystart, Sstart, Astart, target_function_start
+    return Xstart, Ystart, Sstart, Astart, target_function_start, sequenceX1
 
 
 def Exchange(x_start, y_start, s_start, a_start, target_function_start, iteration): #timeLocal):
@@ -658,7 +723,7 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, iteratio
     SaveStartLocalSearch(x_start, y_start, s_start, a_start)
     TargetFunction = target_function_start
     buf_targ = 0
-    SEQUENS = []
+    sequenceX1 = []
     fileflag = 0
     buf_targ = TargetFunction
     X, Y, Ss, A = ReadStartLocalSearchOfFile()
@@ -751,7 +816,7 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, iteratio
                                             for j in range(len(subseq2)):
                                                 if subseq2[-1] != 0:
                                                     buf2.append(subseq2[j])
-                                                    if ResultCoins(): #coins_Exch
+                                                    if ResultCoins(coins_Exch):
                                                         file.write("buf1 = " + str(buf1) + '\n')
                                                         for p in range(len(buf1)):
                                                             file.write(str(Ss[buf1[p]][clientCar]) + ' ')
@@ -829,7 +894,7 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, iteratio
                     target_function) + '\n')
         sequenceX2 = GettingTheSequence(x_start)
         sequenceX1 = TransferX2toX1(sequenceX2, x_start)
-        print("sequenceX1 1= ", sequenceX1)
+        # print("sequenceX1 1= ", sequenceX1)
     else:
         x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile()
         target_function = CalculationOfObjectiveFunction(x_start, shtrafFunction(s_start, a_start, iteration))
@@ -838,7 +903,7 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, iteratio
                 target_function) + '\n')
         sequenceX2 = GettingTheSequence(x_start)
         sequenceX1 = TransferX2toX1(sequenceX2, x_start)
-        print("sequenceX1 1= ", sequenceX1)
+        # print("sequenceX1 1= ", sequenceX1)
 
     # Time = time.time() - start
     # timeLocal[0] += Time
@@ -847,7 +912,7 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, iteratio
     file.write("<-Exchange stop" + '\n')
     file.close()
 
-    return x_start, y_start, s_start, a_start, target_function_start, SEQUENS #timeLocal
+    return x_start, y_start, s_start, a_start, target_function_start, sequenceX1 #timeLocal
 
 
 def OperatorJoinFromExchange(x, y, s, a, target_function, client, clientCar, subseq1,
@@ -1075,7 +1140,7 @@ def OperatorJoinFromExchange(x, y, s, a, target_function, client, clientCar, sub
             A = TimeOfArrival(X, Y, Ss, file)
 
         try:
-            X, Y, Ss, A, Target_Function, SizeK = Checker(X, Y, Ss, A, iteration, "Exchange", file)
+            X, Y, Ss, A, Target_Function = Checker(X, Y, Ss, A, iteration, "Exchange", file)
             PrintForCar(X, Ss, clientCar, file, sosedCar)
             file.write("OperatorJoinFromExchange stop: <-\n")
             return X, Y, Ss, A, Target_Function
@@ -1124,6 +1189,8 @@ def start_operator(local_x, local_y, local_s, local_a, iterations):
         local_x, local_y, local_s, local_a = ReadSolutionOfFile('StartSolution.txt')
         sequenceX2 = GettingTheSequence(local_x)
         sequenceX1 = TransferX2toX1(sequenceX2, local_x)
+        print("\n")
+        print("\n")
         print("sequence перед применением операторов = ", sequenceX1)
 
         x_reloc, y_reloc, s_reloc, a_reloc, Target_function_reloc, SEQUENCE_reloc = Relocate(local_x, local_y, local_s, local_a,
@@ -1152,7 +1219,6 @@ def start_operator(local_x, local_y, local_s, local_a, iterations):
         print("sequence Exchange = ", sequenceExchX1)
 
         minimum = min(Target_function_exch, target_function)
-
         if minimum == Target_function_exch:
             if Target_function_reloc == Target_function_exch:
                 print("Целевая reloc = целевой exch, значит берем решение из reloc")

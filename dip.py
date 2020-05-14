@@ -218,27 +218,29 @@ itera = []
 
 
 '''Поиск с запретами'''
+target_function = 99999
 for Q in range(kriteriy_ostanovki): # сколько раз я запускаю список запретов
     x, y, s, a = ReadSolutionOfFile('StartSolution.txt')
     Target_operator, x_operator, y_operator, s_operator, a_operator, SEQUENCE_operator = start_operator(x, y, s, a,
                                                                                                         iterations)
-    sequenceX2 = GettingTheSequence(x_operator)
-    sequenceX1 = TransferX2toX1(sequenceX2, x_operator)
-    print("sequenceX1 1= ", sequenceX1)
+#     sequenceX2 = GettingTheSequence(x_operator)
+#     sequenceX1 = TransferX2toX1(sequenceX2, x_operator)
+#     print("sequenceX1 1= ", sequenceX1)
+#
+# Применение оператора Help
+    x_operator, y_operator, s_operator, a_operator, Target_operator, SEQUENCE_operator = Help(x_operator, y_operator,
+                                                                                              s_operator, a_operator,
+                                                                                              Target_operator, iterations)
+    print("SEQUENCE_operator Help = ", SEQUENCE_operator)
+    print("Target_function_Help = ", Target_operator)
+    Target_Help2 = Target_operator
 
-    # x_operator, y_operator, s_operator, a_operator, Target_operator = Help(x_operator, y_operator, s_operator,
-    #                                                                        a_operator, Target_operator, iterations)
-    # print("Target_function_Help = ", Target_operator)
-    # Target_Help2 = Target_operator
-    #
-    # sequenceX2 = GettingTheSequence(x_operator)
-    # sequenceX1 = TransferX2toX1(sequenceX2, x_operator)
-    #
-    # print("sequenceX1 2= ", sequenceX1)
+    sequenceHelpX2 = GettingTheSequence(x_operator)
+    sequenceHelpX1 = TransferX2toX1(sequenceHelpX2, x_operator)
+    print("sequence при Help = ", sequenceHelpX1)
 
     # если такого решения еще не было, то
-
-    if ProverKNaVstrechu(Sequence_Tabu, SEQUENCE_operator) != 1:
+    if ProverKNaVstrechu(Sequence_Tabu, sequenceHelpX1) != 1:
         print("Такое решение еще не встречалось")
         Spisok_TS.append(Target_operator)
         itera.append(iterations)
@@ -251,22 +253,22 @@ for Q in range(kriteriy_ostanovki): # сколько раз я запускаю 
         sequenceSaveX1 = TransferX2toX1(sequenceSaveX2, x_operator)
         print("sequence после сохранения = ", sequenceSaveX1)
 
-        if len(Sequence_Tabu) < 7:
+        if len(Sequence_Tabu) < 10:
             print("Все хорошо, длина списка запретов < 10, сохраняем в список запретов")
-            Sequence_Tabu.append(SEQUENCE_operator)
-            print("на этом шаге вставляем в sequence_Tabu ", SEQUENCE_operator)
+            Sequence_Tabu.append(sequenceHelpX1)
+            print("на этом шаге вставляем в sequence_Tabu ", sequenceHelpX1)
             Target_Tabu.append(Target_operator)
             print("на этом шаге вставляем в TargetTabu ", Target_operator)
             print("Target_Tabu = ", Target_Tabu)
             print("Sequence_Tabu = ", Sequence_Tabu)
 
         # если заполнился список запретов, то начинаем перезаписывать
-        elif len(Sequence_Tabu) == 7:
+        elif len(Sequence_Tabu) == 10:
             print("Начинаем потихоньку перезаписывать список запретов, потому что заполнился")
             print("\n")
             deleteSequence_Tabu = Sequence_Tabu.pop(0)
-            Sequence_Tabu.append(SEQUENCE_operator)
-            print("на этом шаге вставляем в Sequence_Tabu ", SEQUENCE_operator)
+            Sequence_Tabu.append(sequenceHelpX1)
+            print("на этом шаге вставляем в Sequence_Tabu ", sequenceHelpX1)
             deleteTabuTarget = Target_Tabu.pop(0)
             print("на этом шаге вставляем в TargetTabu ", Target_operator)
             Target_Tabu.append(Target_operator)
@@ -280,13 +282,13 @@ for Q in range(kriteriy_ostanovki): # сколько раз я запускаю 
     else:
         print("в ProverknaVstrechu ушли в else")
         x, y, s, a = ReadSolutionOfFile('StartSolution.txt')
-        print("sequenceX1 =  ", SEQUENCE_operator)
+        print("sequenceX1 =  ", sequenceHelpX1)
         print("\n")
 
     iterations += 1
 
 print("\n")
-print("Best_From_Tabu =  ", Best_From_Tabu)
+print("Best_From_Tabu =  ", min(Best_From_Tabu))
 print("Target_Tabu = ", Target_Tabu)
 print("Sequence_Tabu = ", Sequence_Tabu)
 print("\n")

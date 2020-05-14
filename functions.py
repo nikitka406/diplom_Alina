@@ -429,9 +429,13 @@ def TimeOfArrival(x, y, s, file="def"):
 
 # Возвращает число скважин которые не уложились во временное окно
 def CountskvajWithFane(s, a, i, k):
+    # Если приехали во временное окно
     if E[i] <= a[i][k] <= l[i]:
-        return ceil((a[i][k] + s[i][k] - l[i]) / 2)
+        # мах на случай если уложились
+        return max(0, ceil((a[i][k] + s[i][k] - l[i]) / 2))
+    # Если приехали позже окончания работ
     else:
+        # Возвращаем число скважин конкретно на этом объекте этой машиной
         return int(s[i][k] / (S[i] / skvaj[i]))
 
 
@@ -727,8 +731,12 @@ def DeleteClientaFromPath(x, y, s, a, client, k):
 
 
 # Подбрасываем монетку, берем эту окрестность или нет
-def ResultCoins():
-    return random.choice(coins)
+def ResultCoins(monetochka=coins_Reloc):
+    coins = random.choice(monetochka)
+    if coins == 1:
+        return True
+    else:
+        return False
 
 
 # удаляем клиента из выбранного маршрута без соединения соседних вершин для TwoOpt
