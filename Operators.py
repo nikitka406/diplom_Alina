@@ -5,19 +5,16 @@ from WorkWithFile import *
 
 # вклиниваем между
 def OperatorJoinFromReloc(x, y, s, a, target_function_start, client, clientK, sosed, sosedK, iterations, file):
-    Xl, Yl, Sl, Al = ReadStartLocalSearchOfFile()
-    XR, YR, SR, AR = ReadStartLocalSearchOfFile()
-    X, Y, Ss, A = ReadStartLocalSearchOfFile()
-    # arrR = arr.copy()
-    # arrL = arr.copy()
-    # arrC = arr.copy()
-    sosedLeft = SearchSosedLeftOrRight(Xl, Yl, sosed, "left", sosedK)  # левый сосед соседа
-    sosedRight = SearchSosedLeftOrRight(Xl, Yl, sosed, "right", sosedK)  # правый сосед соседа
-
-    clientLeft = SearchSosedLeftOrRight(Xl, Yl, client, "left", clientK)
-    clientRight = SearchSosedLeftOrRight(Xl, Yl, sosed, "right", sosedK)
-
     if client != sosed:
+        Xl, Yl, Sl, Al = ReadStartLocalSearchOfFile()
+        XR, YR, SR, AR = ReadStartLocalSearchOfFile()
+        X, Y, Ss, A = ReadStartLocalSearchOfFile()
+
+        sosedLeft = SearchSosedLeftOrRight(Xl, Yl, sosed, "left", sosedK)  # левый сосед соседа
+        sosedRight = SearchSosedLeftOrRight(Xl, Yl, sosed, "right", sosedK)  # правый сосед соседа
+
+        clientLeft = SearchSosedLeftOrRight(Xl, Yl, client, "left", clientK)
+        clientRight = SearchSosedLeftOrRight(Xl, Yl, sosed, "right", sosedK)
 
         file.write("sosed_left = " + str(sosedLeft) + '\n')
         file.write("sosed_right = " + str(sosedRight) + '\n')
@@ -29,10 +26,11 @@ def OperatorJoinFromReloc(x, y, s, a, target_function_start, client, clientK, so
 
         # Вставляем клиента справа от соседа и смотрим что время окончания работ последовательно
         # т.е. есди сосед справа не ноль то вставляем между кем-то, или просто вставляем справа
-        if sosedRight != -1:
+        if sosedRight != -1 and sosed != 0:
             try:
                 file.write("Вставляем клиента к соседу справа" + '\n')
                 # машина соседа будет работать у клиента столько же
+                buf = 0
                 if sosedK != clientK:
                     SR[client][sosedK] += SR[client][clientK]
                 else:
@@ -42,21 +40,15 @@ def OperatorJoinFromReloc(x, y, s, a, target_function_start, client, clientK, so
                 # новое время приезда и новое время работы, потом
                 # удалить старое решение, и только потом заполнять Х и У
                 XR, YR, SR, AR = DeleteClientaFromPath(XR, YR, SR, AR, client, clientK)
+                # print("Beautiful print R: ")
+                # BeautifulPrint(XR, YR, SR, AR)
+
                 if sosedK == clientK:
                     SR[client][sosedK] += buf
                 XR[sosed][sosedRight][sosedK] = 0
                 XR[sosed][client][sosedK] = 1
                 XR[client][sosedRight][sosedK] = 1
-                YR[client][sosedK] = 1  # тепреь машина соседа обслуживает клиента
-
-                # arrR[0] = clientLeft
-                # arrR[1] = client
-                # arrR[2] = clientRight
-                # arrR[3] = clientK
-                # arrR[4] = sosedLeft
-                # arrR[5] = sosed
-                # arrR[6] = sosedRight
-                # arrR[7] = sosedK
+                YR[client][sosedK] = 1  # теперь машина соседа обслуживает клиента
 
                 # Подсчет времени приезда к клиенту от соседа
                 AR = TimeOfArrival(XR, YR, SR, file)
@@ -76,10 +68,11 @@ def OperatorJoinFromReloc(x, y, s, a, target_function_start, client, clientK, so
             except TypeError:
                 targetR = -1
 
-        if sosedLeft != -1:
+        if sosedLeft != -1 and sosed != 0:
             try:
                 file.write("Вставляем клиента к соседу слева" + '\n')
                 # машина соседа будет работать у клиента столько же
+                buf = 0
                 if sosedK != clientK:
                     Sl[client][sosedK] += Sl[client][clientK]
                 else:
@@ -89,6 +82,8 @@ def OperatorJoinFromReloc(x, y, s, a, target_function_start, client, clientK, so
                 # новое время приезда и новое время работы, потом
                 # удалить старое решение, и только потом заполнять Х и У
                 Xl, Yl, Sl, Al = DeleteClientaFromPath(Xl, Yl, Sl, Al, client, clientK)
+                # print("Beautiful print L: ")
+                # BeautifulPrint(Xl, Yl, Sl, Al)
 
                 if sosedK == clientK:
                     Sl[client][sosedK] += buf
@@ -107,15 +102,6 @@ def OperatorJoinFromReloc(x, y, s, a, target_function_start, client, clientK, so
                 Xl[client][sosed][sosedK] = 0
                 Yl[client][sosedK] = 0  # теперь машина соседа обслуживает клиента
 
-                # arrL[0] = clientLeft
-                # arrL[1] = client
-                # arrL[2] = clientRight
-                # arrL[3] = clientK
-                # arrL[4] = sosedLeft
-                # arrL[5] = sosed
-                # arrL[6] = sosedRight
-                # arrL[7] = sosedK
-
                 # Подсчет времени приезда к клиенту от соседа
                 Al = TimeOfArrival(Xl, Yl, Sl, file)
 
@@ -123,6 +109,45 @@ def OperatorJoinFromReloc(x, y, s, a, target_function_start, client, clientK, so
                 Xl, Yl, Sl, Al, targetL = Checker(Xl, Yl, Sl, Al, iterations, "Relocate", file)
             except TypeError:
                 targetL = -1
+
+        else:
+            targetL = -1
+
+        if sosed == 0 and not CarIsWork(YR, sosedK):
+            try:
+                file.write("    Вставляем скважину в новый маршрут" + '\n')
+                # машина соседа будет работать у клиента столько же
+                SR[client][sosedK] += SR[client][clientK]
+
+                XR, YR, SR, AR = DeleteClientaFromPath(XR, YR, SR, AR, client, clientK)
+
+                XR[sosed][client][sosedK] = 1
+                XR[client][sosed][sosedK] = 1
+                YR[sosed][sosedK] = 1
+                YR[client][sosedK] = 1  # теперь машина соседа обслуживает клиента
+
+                # Подсчет времени приезда к клиенту от соседа
+                AR = TimeOfArrival(XR, YR, SR, file)
+
+            except IOError:
+                file.write("    Объект не удален" + '\n')
+
+                XR[sosed][sosedRight][sosedK] = 1
+                XR[sosed][client][sosedK] = 0
+                XR[client][sosedRight][sosedK] = 0
+                YR[client][sosedK] = 0  # тепреь машина соседа обслуживает клиента
+
+                # Подсчет времени приезда к клиенту от соседа
+                AR = TimeOfArrival(XR, YR, SR, file)
+
+            try:
+                XR, YR, SR, AR, targetR, sizeK = Checker(XR, YR, SR, AR, iterations, "Reloc", file)
+                file.write("OperatorJoinFromReloc stop: <-\n")
+                return XR, YR, SR, AR, targetR, sizeK
+            except TypeError:
+                file.write("OperatorJoinFromReloc stop: <-\n")
+                return x, y, s, a, target_function_start
+
 
         file.write("Теперь ищем минимум из двух целевых" + '\n')
         minimum = min(targetL, targetR)
@@ -140,19 +165,12 @@ def OperatorJoinFromReloc(x, y, s, a, target_function_start, client, clientK, so
 
 
     elif client == sosed and clientK != sosedK:
+        X, Y, Ss, A = ReadStartLocalSearchOfFile()
         try:
             file.write("Клиент и сосед равны, добавляем время работы\n")
             Ss[sosed][sosedK] += Ss[client][clientK]
             X, Y, Ss, A = DeleteClientaFromPath(X, Y, Ss, A, client, clientK)
             A = TimeOfArrival(X, Y, Ss, file)
-            # arrC[0] = clientLeft
-            # arrC[1] = client
-            # arrC[2] = clientRight
-            # arrC[3] = clientK
-            # arrC[4] = sosedLeft
-            # arrC[5] = sosed
-            # arrC[6] = sosedRight
-            # arrC[7] = sosedK
 
         except IOError:
             file.write("Объект не удален" + '\n')
@@ -196,38 +214,40 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, iteratio
                 file.write("С машины " + str(clientCar) + '\n')
 
                 for sosedK in range(K):
-                    for sosed in range(1, N):
-                        coins = ResultCoins(coins_Reloc)
-                        if Y[sosed][sosedK] == 1 and coins == 1:  # если есть сосед в маршруте и выпала монетка
+                    for sosed in range(N):
+                        if ResultCoins():
                             file.write(
-                                "Монетка сказала что рассматриваем эту окрестность coins = " + str(coins) + '\n')
+                                "Монетка сказала что рассматриваем эту окрестность " + '\n')
                             file.write("\n")
-                            file.write("К соседу " + str(sosed) + '\n')
-                            file.write("На машине " + str(sosedK) + '\n')
+                            # если есть сосед в маршруте и выпала монетка
+                            if (Y[sosed][sosedK] == 1 and sosed != 0) or (sosed == 0 and not CarIsWork(Y, sosedK)):
+                                file.write("К соседу " + str(sosed) + '\n')
+                                file.write("На машине " + str(sosedK) + '\n')
 
-                            x, y, s, a, target_function = OperatorJoinFromReloc(X, Y, Ss, A, target_function_start,
-                                                                                client, clientCar, sosed, sosedK,
-                                                                                iterations, file)
-                            file.write("Число используемых машин " + str(AmountCarUsed(y)) + '\n')
+                                x, y, s, a, target_function = OperatorJoinFromReloc(X, Y, Ss, A, target_function_start,
+                                                                                    client, clientCar, sosed, sosedK,
+                                                                                    iterations, file)
+                                file.write("Число используемых машин " + str(AmountCarUsed(y)) + '\n')
 
-                            file.write("Выбираем минимальное решение" + '\n')
-                            minimum = min(TargetFunction, target_function)
-                            if minimum == target_function:
-                                file.write("Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
-                                file.write("Новая целевая функция на этом шаге = " + str(target_function) + '\n')
-                                file.write("\n")
+                                file.write("Выбираем минимальное решение" + '\n')
+                                minimum = min(TargetFunction, target_function)
+                                if minimum == target_function:
+                                    file.write("Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
+                                    file.write("Новая целевая функция на этом шаге = " + str(target_function) + '\n')
+                                    file.write("\n")
 
-                                SaveLocalSearch(x, y, s, a)
-                                TargetFunction = target_function
-                                fileflag = 1
-                            else:
-                                file.write(
-                                    "Новое перемещение, хуже чем то что было, возвращаем наше старое решение" + '\n')
-                                file.write("А старая целевая функция была равна " + str(TargetFunction) + '\n')
-                                file.write("\n")
+                                    SaveLocalSearch(x, y, s, a)
+                                    TargetFunction = target_function
+                                    fileflag = 1
+                                else:
+                                    file.write(
+                                        "Новое перемещение, хуже чем то что было, возвращаем наше старое решение" + '\n')
+                                    file.write("А старая целевая функция была равна " + str(TargetFunction) + '\n')
+                                    file.write("\n")
+
                         else:
                             file.write(
-                                "Монетка сказала что не рассматриваем эту окрестность coins = " + str(coins) + '\n')
+                                "Монетка сказала что не рассматриваем эту окрестность " + '\n')
 
     file.write(
         "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
